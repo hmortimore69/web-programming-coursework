@@ -1,16 +1,18 @@
-import { readFile } from "fs/promises";
+import { readFile, watch } from "fs/promises";
+
+let races = {};
 
 async function loadRaces() {
     try {
         const data = await readFile("./sampleData.json", "utf-8");
 
-        return JSON.parse(data);
+        races =  JSON.parse(data);
     } catch (error) {
         console.error("Error loading races:", error.message);
     }
 }
 
-let races = await loadRaces();
+await loadRaces();
 
 export function getAllRaces() {
     return races;
