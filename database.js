@@ -20,7 +20,12 @@ export async function getAllRaces() {
         const raceData = await dbConn.all("SELECT * FROM races");
 
         for (const race of raceData) {
-            const participants = await dbConn.all(`SELECT * FROM participants WHERE race_id = ${race.race_id}`);
+            const participants = await dbConn.all(`
+                SELECT p.participant_id, p.first_name, p.last_name, pr.bib_number, pr.time_finished
+                FROM participants p
+                JOIN participants_races pr ON p.participant_id = pr.participant_id
+                WHERE pr.race_id = ${race.race_id}
+            `);
             const participantsArray = [];
             
             participants.forEach((participant) => {
@@ -49,13 +54,20 @@ export async function getRace(raceID) {
         const raceData = await dbConn.get(`SELECT * FROM races WHERE race_id = ${raceID}`);
         if (!raceData) return;
 
-        const participants = await dbConn.all(`SELECT * FROM participants WHERE race_id = ${raceID}`);
+        const participants = await dbConn.all(`
+            SELECT p.participant_id, p.first_name, p.last_name, pr.bib_number, pr.time_finished
+            FROM participants p
+            JOIN participants_races pr ON p.participant_id = pr.participant_id
+            WHERE pr.race_id = ${raceData.race_id}
+        `);
+
         let participantsArray = [];
 
         participants.forEach((participant) => {
             participantsArray.push({
                 "ID": participant.participant_id,
                 "Name": `${participant.first_name} ${participant.last_name}`,
+                "Bib Number": participant.bib_number,
                 "Time Finished": participant.time_finished,
             });
         });
