@@ -1,7 +1,7 @@
 * {
     box-sizing: border-box;
 }
-  
+
 body {
     font-family: Arial, Helvetica, sans-serif;
     background-color: #ffffff;
@@ -10,17 +10,31 @@ body {
     color: #1b1b1b;
 }
 
-.live-indicator {
-    border-left: 0.2em solid red;
+#race-history {
+    display: flex;
+    flex-direction: column;
+    text-align: center;
 }
 
-#race-list {
+.live-indicator {
+    color: white;
+    background-color: red;
+    padding: 2px 5px;
+    border-radius: 5px;
+    font-size: 12px;
+    display: inline-block;
+    line-height: normal;
+}
+
+#race-history-table-container {
     width: 100%;
     overflow-x: auto;
     margin: 0 auto;
 }
 
 #race-history-table {
+    width: 100%;
+    vertical-align: middle;
     border: 1px solid #ddd;
     border-collapse: collapse;
 }

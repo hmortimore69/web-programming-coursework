@@ -40,15 +40,16 @@ function createRaceRow(raceID, race) {
 
     const row = document.createElement("tr");
     
-    if (Finished === null) {
+    let liveIndicator = ""
+    if (Finished * 1000 >= Date.now() && Started * 1000 <= Date.now()) {
         row.style.backgroundColor = "#ffcccc";
         row.style.color = "#900";
         row.style.fontWeight = "bold";
-        row.classList.add("live-indicator");
+        liveIndicator = `<span class="live-indicator">LIVE</span>`;
     }
 
     row.innerHTML = `
-        <td>${raceID}</td>
+        <td>${raceID} ${liveIndicator}</td>
         <td>${formatTime(Started)}</td>
         <td>${formatTime(Finished)}</td>
         <td>${participantList.length}</td>
