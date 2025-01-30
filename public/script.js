@@ -1,4 +1,3 @@
-// Helper function to fetch races from the server
 async function fetchRaces() {
     try {
         const response = await fetch("/races");
@@ -14,8 +13,10 @@ async function fetchRaces() {
     }
 }
 
-// Code taken and added onto from geeksforgeeks
-// https://www.geeksforgeeks.org/how-to-convert-seconds-to-time-string-format-hhmmss-using-javascript/#approach-2-calculating-the-hours-minutes-and-seconds-individually
+/*
+Code taken and added onto from geeksforgeeks
+https://www.geeksforgeeks.org/how-to-convert-seconds-to-time-string-format-hhmmss-using-javascript/#approach-2-calculating-the-hours-minutes-and-seconds-individually
+*/
 function formatDuration(seconds) {
     if (seconds === null) return "--";
     
@@ -59,11 +60,16 @@ function createRaceRow(raceID, race) {
 
 function populateRaceTable(races) {
     const tableBody = document.querySelector("#race-history-table tbody");
-    tableBody.innerHTML = "";
 
-    Object.entries(races).forEach(([raceID, race]) => {
-        tableBody.appendChild(createRaceRow(raceID, race));
-    });
+    if (races && Object.keys(races).length > 0) {
+        tableBody.innerHTML = "";
+
+        Object.entries(races).forEach(([raceID, race]) => {
+            tableBody.appendChild(createRaceRow(raceID, race));
+        });
+    } else {
+        tableBody.innerHTML = `<td style="cursor: auto;" colspan=5>No race data to display.</td>`;
+    }
 }
 
 document.addEventListener("DOMContentLoaded", async function () {
