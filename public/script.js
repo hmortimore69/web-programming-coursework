@@ -14,7 +14,11 @@ async function fetchRaces() {
     }
 }
 
+// Code taken and added onto from geeksforgeeks
+// https://www.geeksforgeeks.org/how-to-convert-seconds-to-time-string-format-hhmmss-using-javascript/#approach-2-calculating-the-hours-minutes-and-seconds-individually
 function formatDuration(seconds) {
+    if (seconds === null) return "--";
+    
     const h = Math.floor(seconds / 3600).toString().padStart(2, "0");
     const m = Math.floor((seconds % 3600) / 60).toString().padStart(2, "0");
     const s = (seconds % 60).toString().padStart(2, "0");
@@ -34,12 +38,20 @@ function createRaceRow(raceID, race) {
     const fastestDuration = fastestFinish ? fastestFinish - Started : null;
 
     const row = document.createElement("tr");
+    
+    if (Finished === null) {
+        row.style.backgroundColor = "#ffcccc";
+        row.style.color = "#900";
+        row.style.fontWeight = "bold";
+        row.classList.add("live-indicator");
+    }
+
     row.innerHTML = `
         <td>${raceID}</td>
         <td>${formatTime(Started)}</td>
         <td>${formatTime(Finished)}</td>
-        <td>${fastestDuration !== null ? formatDuration(fastestDuration) : "--"}</td>
         <td>${participantList.length}</td>
+        <td>${formatDuration(fastestDuration)}</td>
     `;
 
     return row;

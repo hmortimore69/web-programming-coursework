@@ -14,18 +14,27 @@
         <h1>PJC Race Tracker</h1>
 
         <div id="race-list">
+            <h3>Race History</h3>
             <table id="race-history-table">
                 <thead>
                     <th>Race</th>
                     <th>Started</th>
                     <th>Finished</th>
-                    <th>Fastest Time</th>
                     <th>Participants</th>
+                    <th>Fastest Time</th>
                 </thead>
                 <tbody>
                     
                 </tbody>
             </table>
+        </div>
+
+        <div id="race-details" style="display: none; margin-top: 20px;">
+            <h2>Race Details</h2>
+            <p><strong>Started:</strong> <span id="race-started"></span></p>
+            <p><strong>Finished:</strong> <span id="race-finished"></span></p>
+            <h3>Participants</h3>
+            <ul id="participants-list"></ul>
         </div>
 
         <script src="script.js"></script>

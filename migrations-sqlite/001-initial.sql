@@ -24,5 +24,5 @@ INSERT INTO participants (participant_id, race_id, first_name, last_name, time_f
 (1, 1, "Jane", "Smith", 1738168000),
 (33, 2, "Alice", "Johnson", 1739018000),
 (24, 2, "Bob", "Brown", 1739020000),
-(33, 3, "Alice", "Johnson", 1739018000),
-(24, 3, "Bob", "Brown", 1739017999);
+(33, 3, "Alice", "Johnson", null),
+(24, 3, "Bob", "Brown", null);
