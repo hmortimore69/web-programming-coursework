@@ -14,13 +14,13 @@ async function init() {
 const dbConn = await init();
 
 export async function getAllRaces() {
-    let races = {};
-
     try {
+        let races = {};
+
         const raceData = await dbConn.all("SELECT * FROM races");
 
         for (const race of raceData) {
-            const participants = await dbConn.all("SELECT * FROM participants WHERE race_id = ?", [race.race_id]);
+            const participants = await dbConn.all(`SELECT * FROM participants WHERE race_id = ${race.race_id}`);
             const participantsObject = {};
             
             participants.forEach((participant) => {
@@ -37,9 +37,8 @@ export async function getAllRaces() {
             };
         }
 
+        return races;
     } catch (error) {
         console.error("Error fetching races:", error.message);
     }
-
-    return races;
 }
