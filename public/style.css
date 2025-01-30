@@ -18,5 +18,8 @@ body {
 #race-history-table th, #race-history-table td {
     padding: 8px;
     text-align: left;
-    border: 1px solid #ddd;
+}
+
+#race-history-table tbody tr:nth-child(odd) {
+    background-color: rgb(236, 236, 236);
 }

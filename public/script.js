@@ -22,7 +22,7 @@ function formatDuration(seconds) {
 }
 
 function formatTime(timestamp) {
-    return timestamp ? new Date(timestamp * 1000).toLocaleString() : "N/A";
+    return timestamp ? new Date(timestamp * 1000).toLocaleString() : "--";
 }
 
 function createRaceRow(raceID, race) {
@@ -38,7 +38,7 @@ function createRaceRow(raceID, race) {
         <td>${raceID}</td>
         <td>${formatTime(Started)}</td>
         <td>${formatTime(Finished)}</td>
-        <td>${fastestDuration !== null ? formatDuration(fastestDuration) : "N/A"}</td>
+        <td>${fastestDuration !== null ? formatDuration(fastestDuration) : "--"}</td>
         <td>${participantList.length}</td>
     `;
 
