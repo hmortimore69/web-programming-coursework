@@ -1,6 +1,6 @@
 async function fetchRaces() {
     try {
-        const response = await fetch("/races");
+        const response = await fetch("/api/races");
 
         if (!response.ok) {
             throw new Error(`Response Status: ${response.status}`);
@@ -39,7 +39,8 @@ function createRaceRow(raceID, race) {
     const fastestDuration = fastestFinish ? fastestFinish - Started : null;
 
     const row = document.createElement("tr");
-    
+    row.dataset.raceidentifier = raceID;
+
     let liveIndicator = ""
     if (Finished * 1000 >= Date.now() && Started * 1000 <= Date.now()) {
         row.style.backgroundColor = "#ffcccc";
@@ -73,7 +74,27 @@ function populateRaceTable(races) {
     }
 }
 
-document.addEventListener("DOMContentLoaded", async function () {
+async function registerServiceWorker() {
+    if (navigator.serviceWorker) {
+        await navigator.serviceWorker.register('sw.js');
+    }
+}
+
+window.addEventListener('load', registerServiceWorker);
+
+document.addEventListener("DOMContentLoaded", async function() {
+    const raceTable = document.querySelector("#race-history-table tbody");
+    
     const races = await fetchRaces();
     populateRaceTable(races);
+
+    raceTable.addEventListener("click", function(e) {
+        let row = e.target.closest("tr");
+
+        console.log(row, row.dataset.raceidentifier);
+        if (row && row.dataset.raceidentifier) {
+            let raceId = row.dataset.raceidentifier;
+            window.location.href = `/race/${raceId}`;
+        }
+    });
 });

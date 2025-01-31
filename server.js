@@ -1,8 +1,12 @@
 import express from "express";
-import * as db from './database.js';
+import { fileURLToPath } from "url";
+import { dirname, join } from "path";
+import * as db from "./database.js"
 
 const app = express();
 const port = 8080;
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 async function getRaces(req, res) {
     res.json(await db.getAllRaces());
@@ -18,10 +22,14 @@ async function getRace(req, res) {
     }
 }
 
-app.use(express.static("public"));
+app.use(express.static("public", { extensions: ['html'] }));
 
-app.get('/races', getRaces);
-app.get('/races/:id', getRace);
+app.get('/api/races', getRaces);
+app.get('/api/races/:id', getRace);
+
+app.get('/race/:raceid', (req, res) => {
+    res.sendFile(join(__dirname, "public", "race", "race.html"));
+})
 
 app.listen(port, () => {
     console.log(`App listening on port ${port}`);
