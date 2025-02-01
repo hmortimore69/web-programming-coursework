@@ -23,7 +23,7 @@ body {
     border-radius: 5px;
     font-size: 12px;
     display: inline-block;
-    line-height: normal;
+    vertical-align: middle;
 }
 
 .race-table-container {

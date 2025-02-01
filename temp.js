@@ -31,14 +31,6 @@ function renderRaceTable(raceData) {
         <div class="race-table-container" id="race-container"></div>
     `;
 
-    let liveIndicator = "";
-    if (raceData.time_finished * 1000 >= Date.now() && raceData.time_started * 1000 <= Date.now()) {
-        console.log("LIVE");
-        liveIndicator = `<span class="live-indicator">LIVE</span>`;
-    }
-
-    document.getElementById("race-tracker-header").innerHTML = `PJC Race Tracker ${liveIndicator}`;
-
     const container = document.getElementById("race-container");
     container.innerHTML = generateRaceTable(raceData);
 }
@@ -74,13 +66,7 @@ function generateParticipantRow(participant, raceStart, checkpoints) {
             <td>${participant.attended ? 'Y' : 'N'}</td>
             ${checkpoints.map(checkpoint => {
                 const cpTime = participant.checkpoints.find(cp => cp.checkpoint_id === checkpoint.checkpoint_id);
-                const formattedTime = formatCheckpointTime(cpTime, previousTime, raceStart);
-
-                if (cpTime && cpTime.time_finished !== null) {
-                    previousTime = cpTime.time_finished;
-                }
-
-                return `<td>${formattedTime}</td>`;
+                return `<td>${formatCheckpointTime(cpTime, previousTime, raceStart)}</td>`;
             }).join("")}
             <td>${participant.time_finished ? formatCheckpointTime(participant, previousTime, raceStart) : "—"}</td>
         </tr>`;
@@ -88,8 +74,10 @@ function generateParticipantRow(participant, raceStart, checkpoints) {
 
 function formatCheckpointTime(cpTime, previousTime, raceStart) {
     if (!cpTime || cpTime.time_finished === null) return "—";
+    console.log(cpTime.time_finished, previousTime, raceStart);
     const timeDiffInSeconds = cpTime.time_finished - raceStart;
     const timefromPrevCheckpoint = cpTime.time_finished - previousTime;
+    previousTime = cpTime.time_finished;
     return `+${formatTime(timefromPrevCheckpoint)} (${formatTime(timeDiffInSeconds)})`;
 }
 
@@ -104,7 +92,6 @@ function getUniqueSortedCheckpoints(participants) {
     });
     return uniqueCheckpoints.sort((a, b) => a.order - b.order);
 }
-
 
 function formatDate(timestamp, defaultText = "Unknown") {
     return timestamp ? new Date(timestamp * 1000).toLocaleString() : defaultText;

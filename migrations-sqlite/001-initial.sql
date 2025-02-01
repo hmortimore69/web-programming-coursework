@@ -1,8 +1,8 @@
 /* CREATE TABLES */
 CREATE TABLE IF NOT EXISTS races (
     race_id INTEGER PRIMARY KEY AUTOINCREMENT,
-    started INTEGER NOT NULL,
-    finished INTEGER,
+    time_started INTEGER NOT NULL,
+    time_finished INTEGER,
     participants_finished INTEGER DEFAULT 0
 );
 
@@ -60,14 +60,14 @@ CREATE TRIGGER IF NOT EXISTS set_race_finished_24hr
 AFTER INSERT ON races
 BEGIN
     UPDATE races
-    SET finished = started + 86400
+    SET time_finished = time_started + 86400
     WHERE race_id = NEW.race_id;
 END;
 
 
 /* SAMPLE INSERTS */
-INSERT INTO races (started, finished) VALUES 
-(1677657600, NULL);
+INSERT INTO races (time_started, time_finished) VALUES 
+(1738452579, NULL);
 
 INSERT INTO participants (first_name, last_name) VALUES 
 ('Grace', 'Anderson'),
@@ -82,13 +82,13 @@ INSERT INTO participants (first_name, last_name) VALUES
 ('Daniel', 'Clark');
 
 INSERT INTO participants_races (participant_id, race_id, bib_number, attended, time_finished) VALUES
-(1, 1, 501, TRUE, 1677657600 + 600),
-(2, 1, 502, TRUE, 1677657600 + 1200),
-(3, 1, 503, TRUE, 1677657600 + 1800),
-(4, 1, 504, TRUE, 1677657600 + 2400),
-(5, 1, 505, TRUE, 1677657600 + 3000),
-(6, 1, 506, TRUE, 1677657600 + 3600),
-(7, 1, 507, TRUE, 1677657600 + 4200),
+(1, 1, 501, TRUE, 1738452579 + 1600),
+(2, 1, 502, TRUE, 1738452579 + 2000),
+(3, 1, 503, TRUE, 1738452579 + 2200),
+(4, 1, 504, TRUE, 1738452579 + 2600),
+(5, 1, 505, TRUE, 1738452579 + 2600),
+(6, 1, 506, TRUE, 1738452579 + 3600),
+(7, 1, 507, TRUE, 1738452579 + 4200),
 (8, 1, 508, FALSE, NULL),
 (9, 1, 509, FALSE, NULL),
 (10, 1, 510, FALSE, NULL);
@@ -110,22 +110,23 @@ INSERT INTO checkpoints (race_id, checkpoint_name, checkpoint_order) VALUES
 (1, 'Checkpoint 2', 2),
 (1, 'Checkpoint 3', 3);
 
+
 INSERT INTO checkpoints_times (checkpoint_id, participant_id, time_finished) VALUES
-(1, 1, 1677657600 + 300),
-(2, 1, 1677657600 + 600),
-(3, 1, 1677657600 + 1200),
-(1, 2, 1677657600 + 600),
-(2, 2, 1677657600 + 900),
-(3, 2, 1677657600 + 1800),
-(1, 3, 1677657600 + 900),
-(2, 3, 1677657600 + 1200),
-(3, 3, 1677657600 + 1800),
-(1, 4, 1677657600 + 1200),
-(2, 4, 1677657600 + 1800),
-(3, 4, 1677657600 + 2400),
-(1, 5, 1677657600 + 1500),
-(2, 5, 1677657600 + 1800),
-(3, 5, 1677657600 + 2400),
-(1, 6, 1677657600 + 1800),
-(2, 6, 1677657600 + 2400),
-(3, 6, 1677657600 + 3000);
+(1, 1, 1738452579 + 300),
+(2, 1, 1738452579 + 600),
+(3, 1, 1738452579 + 1200),
+(1, 2, 1738452579 + 600),
+(2, 2, 1738452579 + 900),
+(3, 2, 1738452579 + 1800),
+(1, 3, 1738452579 + 900),
+(2, 3, 1738452579 + 1200),
+(3, 3, 1738452579 + 1800),
+(1, 4, 1738452579 + 1200),
+(2, 4, 1738452579 + 1800),
+(3, 4, 1738452579 + 2400),
+(1, 5, 1738452579 + 1500),
+(2, 5, 1738452579 + 1800),
+(3, 5, 1738452579 + 2400),
+(1, 6, 1738452579 + 1800),
+(2, 6, 1738452579 + 2400),
+(3, 6, 1738452579 + 3000);

@@ -9,7 +9,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 async function getRaces(req, res) {
-    res.json(await db.getAllRaces());
+    res.json(await db.getLastTenRaces());
 }
 
 async function getRace(req, res) {

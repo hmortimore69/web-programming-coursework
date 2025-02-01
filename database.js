@@ -13,11 +13,11 @@ async function init() {
 
 const dbConn = await init();
 
-export async function getAllRaces() {
+export async function getLastTenRaces() {
     try {
         let races = {};
 
-        const raceData = await dbConn.all("SELECT * FROM races");
+        const raceData = await dbConn.all("SELECT * FROM races ORDER BY time_started DESC LIMIT 10");
 
         for (const race of raceData) {
             const participants = await dbConn.all(`
@@ -37,8 +37,8 @@ export async function getAllRaces() {
             });
 
             races[race.race_id] = {
-                Started: race.started,
-                Finished: race.finished,
+                time_started: race.time_started,
+                Finished: race.time_finished,
                 Participants: participantsArray,
             };
         }
@@ -53,14 +53,14 @@ export async function getRace(raceID) {
     try {
         const raceData = await dbConn.all(`
             SELECT
-                r.started,
-                r.finished,
+                r.time_started,
+                r.time_finished,
                 p.participant_id, 
                 p.first_name AS participant_first_name, 
                 p.last_name AS participant_last_name, 
                 pr.bib_number,
                 pr.attended,
-                pr.time_finished, 
+                pr.time_finished AS participant_time_finished, 
                 m.marshall_id, 
                 m.first_name AS marshall_first_name, 
                 m.last_name AS marshall_last_name, 
@@ -83,8 +83,8 @@ export async function getRace(raceID) {
 
         const formattedRaceData = {
             race_id: raceID,
-            started: "",
-            finished: "",
+            time_started: "",
+            time_finished: "",
             marshalls: [],
             participants: []
         };
@@ -93,8 +93,8 @@ export async function getRace(raceID) {
         const participantsMap = new Map();
 
         raceData.forEach(row => {
-            formattedRaceData.started = row.started;
-            formattedRaceData.finished = row.finished;
+            formattedRaceData.time_started = row.time_started;
+            formattedRaceData.time_finished = row.time_finished;
 
             // Add marshalls to the set to avoid duplicates
             if (row.marshall_id && !marshallSet.has(row.marshall_id)) {
@@ -108,18 +108,18 @@ export async function getRace(raceID) {
             // Check if participant exists, if not, create them
             if (!participantsMap.has(row.participant_id)) {
                 participantsMap.set(row.participant_id, {
-                    ID: row.participant_id,
-                    Name: `${row.participant_first_name} ${row.participant_last_name}`,
-                    "Bib Number": row.bib_number,
-                    Attended: row.attended,
-                    "Time Finished": row.time_finished,
-                    Checkpoints: []
+                    id: row.participant_id,
+                    name: `${row.participant_first_name} ${row.participant_last_name}`,
+                    bib: row.bib_number,
+                    attended: row.attended,
+                    time_finished: row.participant_time_finished,
+                    checkpoints: []
                 });
             }
 
             // Add checkpoint data if it's not null
             if (row.checkpoint_id) {
-                participantsMap.get(row.participant_id).Checkpoints.push({
+                participantsMap.get(row.participant_id).checkpoints.push({
                     checkpoint_id: row.checkpoint_id,
                     name: row.checkpoint_name,
                     order: row.checkpoint_order,

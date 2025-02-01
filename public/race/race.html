@@ -1,23 +1,25 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width,initial-scale=1">
-        <meta name="description" content="">
-        <link rel="stylesheet" type="text/css" href="../style.css">
-        <link rel="icon" href="favicon.png">
-        <link rel="manifest" href="manifest.json">
-
-        <title>PJC Race Tracker</title>
-    </head>
-    <body>
-        <h1 style="text-align: center">PJC Race Tracker</h1>
-        
-        <main>
-            <section id="race-info-section">
-            </section>
-        </main>
-
-        <script src="race.js" type="module"></script>
-    </body>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Track real-time race progress with PJC Race Tracker">
+    <link rel="stylesheet" href="../style.css">
+    <link rel="icon" href="favicon.png">
+    <link rel="manifest" href="manifest.json">
+    <title>PJC Race Tracker</title>
+</head>
+<body>
+    <header>
+        <h1 id="race-tracker-header">PJC Race Tracker</h1>
+    </header>
+    
+    <main>
+        <section id="race-info-section" aria-live="polite">
+            <p>Loading race details...</p>
+        </section>
+    </main>
+    
+    <script src="race.js" type="module"></script>
+</body>
 </html>
