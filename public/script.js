@@ -31,6 +31,7 @@ function formatTime(timestamp) {
 }
 
 function createRaceRow(raceID, race) {
+    console.log(race);
     const { Started, Finished, Participants } = race;
     const participantList = Object.values(Participants);
 
@@ -86,6 +87,7 @@ document.addEventListener("DOMContentLoaded", async function() {
     const raceTable = document.querySelector("#race-history-table tbody");
     
     const races = await fetchRaces();
+    console.log(races);
     populateRaceTable(races);
 
     raceTable.addEventListener("click", function(e) {

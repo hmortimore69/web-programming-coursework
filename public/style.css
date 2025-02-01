@@ -26,28 +26,34 @@ body {
     line-height: normal;
 }
 
-#race-history-table-container {
+.race-table-container {
     width: 100%;
     overflow-x: auto;
     margin: 0 auto;
 }
 
-#race-history-table {
+.race-table {
     width: 100%;
     vertical-align: middle;
     border: 1px solid #ddd;
     border-collapse: collapse;
 }
 
-#race-history-table th, #race-history-table td {
+.race-table th, .race-table td {
     padding: 8px;
     text-align: center;
 }
 
-#race-history-table tbody tr:nth-child(odd) {
+.race-table tbody tr:nth-child(odd) {
     background-color: rgb(236, 236, 236);
 }
 
-#race-history-table tbody tr:hover {
+.race-table tbody tr:hover {
+    background-color: #ffaeae;
+    transition: background-color 0.2s ease;
+}
+
+.race-table:not(#race-info-table) tbody tr:hover {
     cursor: pointer;
 }
+
