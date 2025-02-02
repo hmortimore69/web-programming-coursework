@@ -10,6 +10,26 @@ body {
     color: #1b1b1b;
 }
 
+h1 {
+    padding: 0px;
+    margin: 0;
+}
+
+#refresh-stats-btn {
+    background-color: #28af98;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    font-size: 14px;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background-color 0.2s ease;
+}
+
+#refresh-stats-btn:hover {
+    background-color: #1e8171;
+}
+
 #race-history {
     display: flex;
     flex-direction: column;
@@ -28,18 +48,42 @@ body {
 
 .race-table-container {
     width: 100%;
+    min-width: 90%;
     overflow-x: auto;
     margin: 0 auto;
 }
 
-.race-table {
-    width: 100%;
-    vertical-align: middle;
-    border: 1px solid #ddd;
-    border-collapse: collapse;
+.race-table-wrapper {
+    display: block;
+    max-height: 50vh;
+    overflow-y: auto;
 }
 
-.race-table th, .race-table td {
+.race-table {
+    width: 100%;
+    min-width: 60em; 
+    table-layout: fixed;
+    border: 1px solid #bbb;
+    border-collapse: collapse;
+
+}
+
+.race-table thead,
+.race-table tbody tr {
+    display: table;
+    width: 100%;
+    table-layout: fixed;
+}
+
+.race-table tbody {
+    display: block;
+    width: 100%;
+    max-height: 50vh;
+    overflow-y: auto;
+}
+
+.race-table th, 
+.race-table td {
     padding: 8px;
     text-align: center;
 }
@@ -56,4 +100,3 @@ body {
 .race-table:not(#race-info-table) tbody tr:hover {
     cursor: pointer;
 }
-

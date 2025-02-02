@@ -56,9 +56,11 @@ function generateRaceTable(raceData) {
                     <th>Finish</th>
                 </tr>
             </thead>
-            <tbody>
-                ${raceData.participants.map(p => generateParticipantRow(p, raceData.time_started, checkpoints)).join("")}
-            </tbody>
+            <div class="race-table-wrapper">
+                <tbody>
+                    ${raceData.participants.map(p => generateParticipantRow(p, raceData.time_started, checkpoints)).join("")}
+                </tbody>
+            </div>
         </table>`;
 
     return tableHTML;
@@ -125,5 +127,9 @@ function formatTime(timeDiffInSeconds) {
 
 document.addEventListener("DOMContentLoaded", () => {
     fetchRaceData();
-    setInterval(fetchRaceData, 10000);
+});
+
+document.getElementById("refresh-stats-btn").addEventListener("click", function() {
+    console.log("Refreshing Stats");
+    fetchRaceData();
 });
