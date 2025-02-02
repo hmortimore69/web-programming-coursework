@@ -1,13 +1,12 @@
-document.addEventListener("DOMContentLoaded", () => {
-    fetchRaceData();
-});
-
 async function fetchRaceData() {
     try {
         const raceID = getRaceID();
         const response = await fetch(`/api/races/${raceID}`);
+
         if (!response.ok) throw new Error(`Response Status: ${response.status}`);
+
         const raceData = await response.json();
+
         renderRaceTable(raceData);
     } catch (error) {
         console.error("Error fetching race data:", error);
@@ -17,12 +16,14 @@ async function fetchRaceData() {
 function getRaceID() {
     const url = new URL(window.location.href);
     const args = url.pathname.split("/").filter(Boolean);
+
     return args[args.length - 1];
 }
 
 function renderRaceTable(raceData) {
-    console.log(raceData)
     const section = document.getElementById("race-info-section");
+    let liveIndicator = "";
+
     section.innerHTML = `
         <h2>Race Details</h2>
         <p><strong>Start Time:</strong> ${formatDate(raceData.time_started)}</p>
@@ -31,9 +32,7 @@ function renderRaceTable(raceData) {
         <div class="race-table-container" id="race-container"></div>
     `;
 
-    let liveIndicator = "";
     if (raceData.time_finished * 1000 >= Date.now() && raceData.time_started * 1000 <= Date.now()) {
-        console.log("LIVE");
         liveIndicator = `<span class="live-indicator">LIVE</span>`;
     }
 
@@ -61,11 +60,13 @@ function generateRaceTable(raceData) {
                 ${raceData.participants.map(p => generateParticipantRow(p, raceData.time_started, checkpoints)).join("")}
             </tbody>
         </table>`;
+
     return tableHTML;
 }
 
 function generateParticipantRow(participant, raceStart, checkpoints) {
     let previousTime = raceStart;
+
     return `
         <tr>
             <td>${participant.id}</td>
@@ -88,13 +89,16 @@ function generateParticipantRow(participant, raceStart, checkpoints) {
 
 function formatCheckpointTime(cpTime, previousTime, raceStart) {
     if (!cpTime || cpTime.time_finished === null) return "—";
+
     const timeDiffInSeconds = cpTime.time_finished - raceStart;
     const timefromPrevCheckpoint = cpTime.time_finished - previousTime;
+
     return `+${formatTime(timefromPrevCheckpoint)} (${formatTime(timeDiffInSeconds)})`;
 }
 
 function getUniqueSortedCheckpoints(participants) {
     const uniqueCheckpoints = [];
+
     participants.forEach(({ checkpoints }) => {
         checkpoints.forEach(cp => {
             if (!uniqueCheckpoints.some(c => c.checkpoint_id === cp.checkpoint_id)) {
@@ -102,6 +106,7 @@ function getUniqueSortedCheckpoints(participants) {
             }
         });
     });
+
     return uniqueCheckpoints.sort((a, b) => a.order - b.order);
 }
 
@@ -114,5 +119,11 @@ function formatTime(timeDiffInSeconds) {
     const hours = Math.floor(timeDiffInSeconds / 3600);
     const minutes = Math.floor((timeDiffInSeconds % 3600) / 60);
     const seconds = timeDiffInSeconds % 60;
+
     return `${hours > 0 ? hours + ':' : ''}${minutes < 10 && hours > 0 ? '0' + minutes : minutes}:${seconds < 10 ? '0' + seconds : seconds}`;
 }
+
+document.addEventListener("DOMContentLoaded", () => {
+    fetchRaceData();
+    setInterval(fetchRaceData, 10000);
+});

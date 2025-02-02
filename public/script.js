@@ -32,18 +32,18 @@ function formatTime(timestamp) {
 
 function createRaceRow(raceID, race) {
     console.log(race);
-    const { Started, Finished, Participants } = race;
-    const participantList = Object.values(Participants);
+    const { time_started, time_finished, participants } = race;
+    const participantList = Object.values(participants);
 
-    const finishTimes = participantList.map(p => p["Time Finished"]).filter(Boolean);
+    const finishTimes = participantList.map(p => p.time_finished).filter(Boolean);
     const fastestFinish = finishTimes.length ? Math.min(...finishTimes) : null;
-    const fastestDuration = fastestFinish ? fastestFinish - Started : null;
+    const fastestDuration = fastestFinish ? fastestFinish - time_started : null;
 
     const row = document.createElement("tr");
     row.dataset.raceidentifier = raceID;
 
     let liveIndicator = ""
-    if (Finished * 1000 >= Date.now() && Started * 1000 <= Date.now()) {
+    if (time_finished * 1000 >= Date.now() && time_started * 1000 <= Date.now()) {
         row.style.backgroundColor = "#ffcccc";
         row.style.color = "#900";
         row.style.fontWeight = "bold";
@@ -52,8 +52,8 @@ function createRaceRow(raceID, race) {
 
     row.innerHTML = `
         <td>${raceID} ${liveIndicator}</td>
-        <td>${formatTime(Started)}</td>
-        <td>${formatTime(Finished)}</td>
+        <td>${formatTime(time_started)}</td>
+        <td>${formatTime(time_finished)}</td>
         <td>${participantList.length}</td>
         <td>${formatDuration(fastestDuration)}</td>
     `;
