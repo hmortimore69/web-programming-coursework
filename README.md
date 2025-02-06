@@ -9,13 +9,14 @@ You can also visit a race by typing /race/{raceid} of which raceid is an increme
 In the display of this table, a database query is ran to retrieve all the data related to this race. It is then formatted into JSON, passed back to the frontend, and displayed in the table.
 
 The table, by default, has ID, Name, Bib Number, Attended, and Finish. This is because all races have these features no matter what.
-If, and only if, the race has checkpoints then the database query picks up on this and the front-end JS will generate as many columns as needed to display this.
+If, and only if, the race has checkpoints then the database query picks up on this and the front-end JS will generate as many columns as needed to display this. The values for attended are stored as booleans, so displaying them I used the ternary operator to display Y/N correspondingly.
 
 Furthermore, when displaying checkpoint time, I had originally used timestamps, converting them using Date(). This, whilst it worked, felt illogical - and less readable.
 To improve this, I used a function that took each checkpoint, and calculated the time differential from the previous checkpoint (or start), and the total elapsed time from the race start. This is then displayed as: "+XX:XX (XX:XX)". The brackets contain the total elapsed time, and the time after the + is the differential.
 
 To also help readability, I added mouse hovering for the table. Hovering over a row will change the background colour to a <span style="color:#ffaeae">a pale red</span>.
 
+To refresh data for this table, I intended to use either a button to manually refresh statistics, or automatically retrieve them every 10 seconds using `setInterval();`. I ended up using the former option over the latter, as it allowed the user to choose when to update, and wouldn't flood the server with database queries. When updating the table, it clears and rewrites. If you were reading the table, and it updated - you would be sent back to the top of the table; annoying right? To solve this, I added in a variable to capture the scrolling position during the table. This would then allow me to restore the scroll position in the table after a fetch request.
 
 ### Key Another Feature Name/Description.
 Tell us briefly how to find & use it.

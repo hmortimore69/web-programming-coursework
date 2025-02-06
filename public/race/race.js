@@ -21,7 +21,7 @@ function getRaceID() {
 }
 
 function renderRaceTable(raceData) {
-    const section = document.getElementById("race-info-section");
+    const section = document.querySelector("#race-info-section");
     let liveIndicator = "";
 
     section.innerHTML = `
@@ -36,9 +36,9 @@ function renderRaceTable(raceData) {
         liveIndicator = `<span class="live-indicator">LIVE</span>`;
     }
 
-    document.getElementById("race-tracker-header").innerHTML = `PJC Race Tracker ${liveIndicator}`;
+    document.querySelector("#race-tracker-header").innerHTML = `PJC Race Tracker ${liveIndicator}`;
 
-    const container = document.getElementById("race-container");
+    const container = document.querySelector("#race-container");
     container.innerHTML = generateRaceTable(raceData);
 }
 
@@ -129,7 +129,7 @@ document.addEventListener("DOMContentLoaded", () => {
     fetchRaceData();
 });
 
-document.getElementById("refresh-stats-btn").addEventListener("click", function() {
+document.querySelector("#refresh-stats-btn").addEventListener("click", function() {
     console.log("Refreshing Stats");
     fetchRaceData();
 });

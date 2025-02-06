@@ -36,9 +36,6 @@ app.use(express.static("public", { extensions: ['html'] }));
 // API Requests
 app.get('/api/races', getRaces);
 app.get('/api/races/:id', getRace);
-
-
-
 app.get('/race/:raceid', (req, res) => {
     res.sendFile(join(__dirname, "public", "race", "race.html"));
 });
