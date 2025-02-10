@@ -31,7 +31,6 @@ function formatTime(timestamp) {
 }
 
 function createRaceRow(raceID, race) {
-    console.log(race);
     const { time_started, time_finished, participants } = race;
     const participantList = Object.values(participants);
 
@@ -75,25 +74,23 @@ function populateRaceTable(races) {
     }
 }
 
-async function registerServiceWorker() {
-    if (navigator.serviceWorker) {
-        await navigator.serviceWorker.register('sw.js');
-    }
-}
+// async function registerServiceWorker() {
+//     if (navigator.serviceWorker) {
+//         await navigator.serviceWorker.register('sw.js');
+//     }
+// }
 
-window.addEventListener('load', registerServiceWorker);
+// window.addEventListener('load', registerServiceWorker);
 
 document.addEventListener("DOMContentLoaded", async function() {
     const raceTable = document.querySelector("#race-history-table tbody");
-    
     const races = await fetchRaces();
-    console.log(races);
+
     populateRaceTable(races);
 
     raceTable.addEventListener("click", function(e) {
         let row = e.target.closest("tr");
 
-        console.log(row, row.dataset.raceidentifier);
         if (row && row.dataset.raceidentifier) {
             let raceId = row.dataset.raceidentifier;
             window.location.href = `/race/${raceId}`;

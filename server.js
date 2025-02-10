@@ -31,9 +31,10 @@ app.get('/home', (req, res) => {
     res.sendFile(join(__dirname, "public", "index.html"));
 });
 
-app.use(express.static("public", { extensions: ['html'] }));
+// Static
+app.use(express.static("public"));
 
-// API Requests
+// Endpoints
 app.get('/api/races', getRaces);
 app.get('/api/races/:id', getRace);
 app.get('/race/:raceid', (req, res) => {

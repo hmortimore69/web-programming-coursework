@@ -48,10 +48,8 @@ function generateRaceTable(raceData) {
         <table class="race-table" id="race-info-table" border="1">
             <thead>
                 <tr>
-                    <th>ID</th>
                     <th>Name</th>
-                    <th>Bib Number</th>
-                    <th>Attended</th>
+                    <th>Bib</th>
                     ${checkpoints.map(cp => `<th>${cp.name}</th>`).join("")}
                     <th>Finish</th>
                 </tr>
@@ -67,14 +65,14 @@ function generateRaceTable(raceData) {
 }
 
 function generateParticipantRow(participant, raceStart, checkpoints) {
+if (!participant.attended) return;
+
     let previousTime = raceStart;
 
     return `
         <tr>
-            <td>${participant.id}</td>
             <td>${participant.name}</td>
             <td>${participant.bib}</td>
-            <td>${participant.attended ? 'Y' : 'N'}</td>
             ${checkpoints.map(checkpoint => {
                 const cpTime = participant.checkpoints.find(cp => cp.checkpoint_id === checkpoint.checkpoint_id);
                 const formattedTime = formatCheckpointTime(cpTime, previousTime, raceStart);

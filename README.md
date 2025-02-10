@@ -5,7 +5,7 @@ Replace this text with an introduction to your key features.
 
 ### Race URL Display Table
 In the race history table located at the root, visit a race by clicking on a row in the table.
-You can also visit a race by typing /race/{raceid} of which raceid is an incremental number assigned to each race.
+You can also visit a race by visiting `/race/{raceid}` - of which raceid is an incremental number assigned to each race.
 In the display of this table, a database query is ran to retrieve all the data related to this race. It is then formatted into JSON, passed back to the frontend, and displayed in the table.
 
 The table, by default, has ID, Name, Bib Number, Attended, and Finish. This is because all races have these features no matter what.
