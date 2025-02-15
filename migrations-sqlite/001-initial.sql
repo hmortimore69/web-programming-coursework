@@ -2,7 +2,7 @@
 CREATE TABLE IF NOT EXISTS races (
     race_id INTEGER PRIMARY KEY AUTOINCREMENT,
     time_started INTEGER NOT NULL,
-    time_finished INTEGER,
+    time_finished INTEGER NOT NULL,
     participants_finished INTEGER DEFAULT 0
 );
 
@@ -54,20 +54,9 @@ CREATE TABLE IF NOT EXISTS marshalls_checkpoints(
     PRIMARY KEY (marshall_id, checkpoint_id)
 );
 
-/* TRIGGERS */
--- Set finish time to 24 hours after race start time
-CREATE TRIGGER IF NOT EXISTS set_race_finished_24hr
-AFTER INSERT ON races
-BEGIN
-    UPDATE races
-    SET time_finished = time_started + 86400
-    WHERE race_id = NEW.race_id;
-END;
-
-
 /* SAMPLE INSERTS */
 INSERT INTO races (time_started, time_finished) VALUES 
-(1738452579, NULL);
+(1738452579, 1738452579 + 86400); -- 24 hours
 
 INSERT INTO participants (first_name, last_name) VALUES 
 ('Grace', 'Anderson'),

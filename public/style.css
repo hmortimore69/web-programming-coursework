@@ -53,7 +53,7 @@ h1 {
     margin: 0 auto;
 }
 
-.race-table-wrapper {
+.race-table-body-wrapper {
     max-height: 30em;
     overflow-y: auto;
 }
@@ -63,18 +63,15 @@ h1 {
     min-width: 60em;
     table-layout: fixed;
     border: 1px solid #ddd; 
-    border-collapse: collapse; 
+    font-size: 0.8rem;
 }
 
 .race-table thead,
 .race-table tbody tr {
-    display: table;
-    width: 100%;
     table-layout: fixed;
 }
 
 .race-table tbody {
-    width: 100%;
     max-height: 30em;
     overflow-y: auto;
 }
@@ -96,9 +93,7 @@ h1 {
 
 .race-table tbody tr:hover {
     background-color: #ffaeae;
-    transition: background-color 0.2s ease;
-}
-
-.race-table:not(#race-info-table) tbody tr:hover {
+    transition: background-color 0.15s ease;
     cursor: pointer;
+    
 }

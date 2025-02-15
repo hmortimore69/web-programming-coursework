@@ -5,8 +5,7 @@ import * as db from "./database.js";
 
 const app = express();
 const port = 8080;
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 async function getRaces(req, res) {
     res.json(await db.getLastTenRaces());
@@ -24,12 +23,13 @@ async function getRace(req, res) {
 
 // Default to /home
 app.get('/', (req, res) => {
-    res.redirect(302, '/home');
+    res.redirect('/home');
 });
 
 app.get('/home', (req, res) => {
     res.sendFile(join(__dirname, "public", "index.html"));
 });
+
 
 // Static
 app.use(express.static("public"));
@@ -40,6 +40,10 @@ app.get('/api/races/:id', getRace);
 app.get('/race/:raceid', (req, res) => {
     res.sendFile(join(__dirname, "public", "race", "race.html"));
 });
+app.get('/admin', (req, res) => {
+    res.sendFile(join(__dirname, "public", "admin", "admin.html"));
+})
+
 
 app.listen(port, () => {
     console.log(`App listening on port ${port}`);

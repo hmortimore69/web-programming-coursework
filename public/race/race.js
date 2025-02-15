@@ -21,16 +21,12 @@ function getRaceID() {
 }
 
 function renderRaceTable(raceData) {
-    const section = document.querySelector("#race-info-section");
+    const raceStartTimeElement = document.querySelector("#race-start-time");
+    const raceFinishTimeElement = document.querySelector("#race-finish-time");
     let liveIndicator = "";
 
-    section.innerHTML = `
-        <h2>Race Details</h2>
-        <p><strong>Start Time:</strong> ${formatDate(raceData.time_started)}</p>
-        <p><strong>Finish Time:</strong> ${formatDate(raceData.time_finished, "Ongoing")}</p>
-        <h3>Participants</h3>
-        <div class="race-table-container" id="race-container"></div>
-    `;
+    raceStartTimeElement.textContent = `${formatDate(raceData.time_finished)}`;
+    raceFinishTimeElement.textContent = `${formatDate(raceData.time_finished, "Ongoing")}`;
 
     if (raceData.time_finished * 1000 >= Date.now() && raceData.time_started * 1000 <= Date.now()) {
         liveIndicator = `<span class="live-indicator">LIVE</span>`;
@@ -38,57 +34,59 @@ function renderRaceTable(raceData) {
 
     document.querySelector("#race-tracker-header").innerHTML = `PJC Race Tracker ${liveIndicator}`;
 
-    const container = document.querySelector("#race-container");
-    container.innerHTML = generateRaceTable(raceData);
+    generateTableBody(raceData);
 }
 
-function generateRaceTable(raceData) {
+/*
+ * Input: raceData: JSON
+ * Return: None
+ * This function generates the tbody's rows for each participant that took part in the race.
+ */
+function generateTableBody(raceData) {
     const checkpoints = getUniqueSortedCheckpoints(raceData.participants);
-    let tableHTML = `
-        <table class="race-table" id="race-info-table" border="1">
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Bib</th>
-                    ${checkpoints.map(cp => `<th>${cp.name}</th>`).join("")}
-                    <th>Finish</th>
-                </tr>
-            </thead>
-            <div class="race-table-wrapper">
-                <tbody>
-                    ${raceData.participants.map(p => generateParticipantRow(p, raceData.time_started, checkpoints)).join("")}
-                </tbody>
-            </div>
-        </table>`;
-
-    return tableHTML;
+    const tableBody = document.querySelector(".race-table-container tbody");
+    tableBody.innerHTML = `${raceData.participants.map(p => 
+        fillParticipantRow(p, raceData.time_started, checkpoints)
+    ).join("")}`;
 }
 
-function generateParticipantRow(participant, raceStart, checkpoints) {
-if (!participant.attended) return;
+/*
+ * Input: participant: JSON Object, raceStart: Integer, checkpoints: JSON Object
+ * Return: HTML element
+ * This function generates the content for each row made in generateTableBody. It fills the details for each participant.
+ */
+function fillParticipantRow(participant, raceStart, checkpoints) {
+    if (!participant.attended) return;
 
     let previousTime = raceStart;
 
-    return `
+    const tableRow = `
         <tr>
             <td>${participant.name}</td>
             <td>${participant.bib}</td>
-            ${checkpoints.map(checkpoint => {
-                const cpTime = participant.checkpoints.find(cp => cp.checkpoint_id === checkpoint.checkpoint_id);
-                const formattedTime = formatCheckpointTime(cpTime, previousTime, raceStart);
-
-                if (cpTime && cpTime.time_finished !== null) {
-                    previousTime = cpTime.time_finished;
-                }
-
-                return `<td>${formattedTime}</td>`;
-            }).join("")}
             <td>${participant.time_finished ? formatCheckpointTime(participant, previousTime, raceStart) : "—"}</td>
         </tr>`;
+
+    return tableRow;
 }
 
+/* GRAVEYARD
+ * =======================
+ * 
+ *  ${checkpoints.map(checkpoint => {
+ *      const cpTime = participant.checkpoints.find(cp => cp.checkpoint_id === checkpoint.checkpoint_id);
+ *      const formattedTime = formatCheckpointTime(cpTime, previousTime, raceStart);
+ *
+ *      if (cpTime && cpTime.time_finished !== null) {
+ *          previousTime = cpTime.time_finished;
+ *      }
+ *
+ *      return `<td>${formattedTime}</td>`;
+ *  }).join("")}
+ */
+
 function formatCheckpointTime(cpTime, previousTime, raceStart) {
-    if (!cpTime || cpTime.time_finished === null) return "—";
+    if (!cpTime || cpTime.time_finished === null) return "--";
 
     const timeDiffInSeconds = cpTime.time_finished - raceStart;
     const timefromPrevCheckpoint = cpTime.time_finished - previousTime;
