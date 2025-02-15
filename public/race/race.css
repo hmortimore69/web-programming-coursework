@@ -1,0 +1,76 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: #ffffff;
+    padding: 10px;
+    margin: 0;
+    color: #1b1b1b;
+}
+
+.race-table {
+    width: 100%;
+    table-layout: fixed;
+    border: 1px solid #ddd; 
+    font-size: 0.8rem;
+}
+
+.race-table thead,
+.race-table tbody tr {
+    table-layout: fixed;
+}
+
+.race-table tbody {
+    max-height: 30em;
+    overflow-y: auto;
+}
+
+.race-table th, 
+.race-table td {
+    padding: 8px;
+    text-align: center;
+    border: none; 
+}
+
+.race-table th {
+    border-bottom: 1px solid;
+    position: sticky;
+}
+
+.race-table details {
+    display: block;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    border-left: 4px solid #ffaeae;
+    transition: background-color 0.15s ease;
+    cursor: pointer;
+}
+
+/* only do hover effect when theres *actually* a mouse hovering and not a screen tap */
+@media (hover: hover) {
+    .race-table details:hover {
+        background-color: #ffaeae;
+    }
+}
+
+.race-table details summary {
+    font-weight: bold;
+    list-style: none;
+    display: flex;
+}
+
+.inner-participant-table {
+    width: 100%;
+    table-layout: fixed;
+}
+
+.inner-checkpoint-table {
+    width: 100%;
+    table-layout: fixed;
+    border-top: 1px solid black;
+    border-bottom: 1px solid black;
+
+}

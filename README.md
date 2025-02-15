@@ -8,7 +8,7 @@ In the race history table located at the root, visit a race by clicking on a row
 You can also visit a race by visiting `/race/{raceid}` - of which raceid is an incremental number assigned to each race.
 In the display of this table, a database query is ran to retrieve all the data related to this race. It is then formatted into JSON, passed back to the frontend, and displayed in the table.
 
-The table, by default, has ID, Name, Bib Number, Attended, and Finish. This is because all races have these features no matter what.
+The table, by default, Name, Bib Number, and Finish. This is because all races have these features no matter what.
 If, and only if, the race has checkpoints then the database query picks up on this and the front-end JS will generate as many columns as needed to display this. The values for attended are stored as booleans, so displaying them I used the ternary operator to display Y/N correspondingly.
 
 Furthermore, when displaying checkpoint time, I had originally used timestamps, converting them using Date(). This, whilst it worked, felt illogical - and less readable.
@@ -32,17 +32,11 @@ Same for each feature… you get the idea :-)
 ## AI
 Replace this with DETAIL about your use of AI, listing of the prompts you used, and whether the results formed or inspired part of your final submission and where we can see this (and if not, why not?). You may wish to group prompts into headings/sections - use markdown in any way that it helps you communicate your use of AI.  Tell us about what went right,  what went horribly wrong and what you learned from it.
 
-### Prompts to develop XYZ (example)
+### Prompts to develop race details table
 A sequence of prompts helped me develop this feature:
 
->  this is an example prompt given to a chatbot
-The response was proved useless because the prompt wasn't specific enough about XYZ, so:
-
->  this is an example prompt given to a chatbot detailing XYZ
-The response was better so I could specifically ask about QRST
-
->  how can I integrate QRST here?
-The suggestion worked with minor modification.
+>  How can I turn a table row in a tbody into a details tag?
+I asked this because `<details>` elements can't be direct children of `<tbody>` elements to preserve structure. The response recommended wrapping the `<details>` element inside of a `<td>` element. This helped create the inner details sections, however it meant I had to nest tables to properly display it.
 
 ### Prompts to develop GHIJ (example)
 For the GHIJ feature I ...

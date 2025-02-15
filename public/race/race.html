@@ -1,43 +1,45 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="Track real-time race progress with PJC Race Tracker">
-    <link rel="stylesheet" href="../style.css">
-    <link rel="icon" href="favicon.png">
-    <title>PJC | Race Viewer</title>
-</head>
-<body>
-    <header>
-        <h1 id="race-tracker-header">PJC Race Tracker</h1>
-        <button id="refresh-stats-btn">Refresh Stats</button>
-    </header>
-    
-    <main>
-        <section id="race-info-section" aria-live="polite">
-            <h2>Race Details</h2>
-            <p><strong>Start Time: </strong><span id="race-start-time">N/A</span></p>
-            <p><strong>Finish Time: </strong><span id="race-finish-time">N/A</span></p>
-            <h3>Participants</h3>
-            <div class="race-table-container" id="race-container">
-                <table class="race-table" id="race-info-table">
-                    <thead>
-                        <tr>
-                            <th>Name</th>
-                            <th>Bib</th>
-                            <th>Finish</th>
-                        </tr>
-                    </thead>
-                    <div class="race-table-body-container">
-                        <tbody>
-                        </tbody>
-                    </div>
-                </table>
-            </div>
-        </section>
-    </main>
-    
-    <script src="race.js" type="module"></script>
-</body>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="description" content="Track real-time race progress with PJC Race Tracker">
+        <link rel="stylesheet" href="race.css">
+        <link rel="icon" href="favicon.png">
+
+        <title>PJC | Race Viewer</title>
+    </head>
+    <body>
+        <header>
+            <h1 id="race-tracker-header">PJC Race Tracker</h1>
+            <button id="refresh-stats-btn">Refresh Stats</button>
+        </header>
+        
+        <main>
+            <section id="race-info-section" aria-live="polite">
+                <h2>Race Details</h2>
+                <p><strong>Start Time: </strong><span id="race-start-time">N/A</span></p>
+                <p><strong>Finish Time: </strong><span id="race-finish-time">N/A</span></p>
+                <p><strong>Checkpoints: </strong><span id="race-checkpoint-counter">N/A</span></p>
+                <h3>Participants</h3>
+                <div class="race-table-container" id="race-container">
+                    <table class="race-table" id="race-info-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Bib</th>
+                                <th>Finish</th>
+                            </tr>
+                        </thead>
+                        <div class="race-table-body-container">
+                            <tbody>
+                            </tbody>
+                        </div>
+                    </table>
+                </div>
+            </section>
+        </main>
+        
+        <script src="race.js"></script>
+    </body>
 </html>
