@@ -3,17 +3,18 @@
 }
 
 body {
-    font-family: Arial, Helvetica, sans-serif;
-    background-color: #ffffff;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    background-color: #292e32;
     padding: 10px;
     margin: 0;
-    color: #1b1b1b;
+    color: white;
 }
 
 .race-table {
+    border-radius: 4px;
+    background-color: #40474f;
     width: 100%;
     table-layout: fixed;
-    border: 1px solid #ddd; 
     font-size: 0.8rem;
 }
 
@@ -42,17 +43,29 @@ body {
 .race-table details {
     display: block;
     padding: 8px;
-    border: 1px solid #ddd;
+    border: 1px solid #5b6167;
     border-radius: 4px;
-    border-left: 4px solid #ffaeae;
+    border-left: 4px solid #28af98;
     transition: background-color 0.15s ease;
     cursor: pointer;
+}
+
+.race-table tr:nth-of-type(1) details {
+    border-left: 4px solid #d4af37;
+}
+
+.race-table tr:nth-of-type(2) details {
+    border-left: 4px solid #a5a5a5;
+}
+
+.race-table tr:nth-of-type(3) details {
+    border-left: 4px solid #cd7f32;
 }
 
 /* only do hover effect when theres *actually* a mouse hovering and not a screen tap */
 @media (hover: hover) {
     .race-table details:hover {
-        background-color: #ffaeae;
+        background-color: #535C65;
     }
 }
 
@@ -70,7 +83,6 @@ body {
 .inner-checkpoint-table {
     width: 100%;
     table-layout: fixed;
-    border-top: 1px solid black;
-    border-bottom: 1px solid black;
-
+    border-top: 1px solid;
+    border-bottom: 1px solid;
 }
