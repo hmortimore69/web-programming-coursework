@@ -26,7 +26,7 @@ function renderRaceTable(raceData) {
 
     let liveIndicator = "";
 
-    raceStartTimeElement.textContent = `${formatDate(raceData.time_finished)}`;
+    raceStartTimeElement.textContent = `${formatDate(raceData.time_started)}`;
     raceFinishTimeElement.textContent = `${formatDate(raceData.time_finished, "Ongoing")}`;
 
     if (raceData.time_finished * 1000 >= Date.now() && raceData.time_started * 1000 <= Date.now()) {

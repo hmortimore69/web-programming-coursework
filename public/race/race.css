@@ -13,7 +13,7 @@ body {
 .race-table {
     border-radius: 4px;
     background-color: #40474f;
-    width: 100%;
+    width: 33vw;
     table-layout: fixed;
     font-size: 0.8rem;
 }
