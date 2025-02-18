@@ -7,7 +7,7 @@ async function fetchRaces() {
         }
 
         return await response.json();
-    } catch (error) { 
+    } catch (error) {
         console.error("Failed to fetch races:", error.message);
         return {};
     }

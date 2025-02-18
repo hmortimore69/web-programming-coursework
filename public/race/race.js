@@ -107,16 +107,21 @@ function fillParticipantRow(participant, raceStart, checkpoints) {
     return tableRow;
 }
 
+/*
+ *  INPUT: participants: Array
+ *  RETURN: uniqueCheckpoints: Array
+ *  This function returns each unique checkpoint and sorts them in order.
+ */
 function getUniqueSortedCheckpoints(participants) {
     const uniqueCheckpoints = [];
 
-    participants.forEach(({ checkpoints }) => {
-        checkpoints.forEach(cp => {
+    for (const participant of participants) {
+        for (const cp of participant.checkpoints) {
             if (!uniqueCheckpoints.some(c => c.checkpoint_id === cp.checkpoint_id)) {
                 uniqueCheckpoints.push(cp);
             }
-        });
-    });
+        }
+    }
 
     return uniqueCheckpoints.sort((a, b) => a.order - b.order);
 }
