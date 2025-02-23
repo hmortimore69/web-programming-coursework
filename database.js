@@ -49,92 +49,67 @@ export async function getLastTenRaces() {
     }
 }
 
-export async function getRace(raceID) {
+export async function getRace(raceID, page = 1, pageSize = 10) {
     try {
-        const raceData = await dbConn.all(`
-            SELECT
+        const offset = (page - 1) * pageSize;
+
+        const raceData = await dbConn.get(
+            `SELECT
+                r.race_id,
                 r.time_started,
-                r.time_finished,
-                p.participant_id, 
-                p.first_name AS participant_first_name, 
-                p.last_name AS participant_last_name, 
+                r.time_finished
+            FROM races r;`
+        );
+
+        const participants = await dbConn.all(`
+            SELECT
+                p.participant_id,
+                p.first_name,
+                p.last_name,
                 pr.bib_number,
                 pr.attended,
-                pr.time_finished AS participant_time_finished, 
-                m.marshall_id, 
-                m.first_name AS marshall_first_name, 
-                m.last_name AS marshall_last_name, 
-                c.checkpoint_id, 
-                c.checkpoint_name, 
-                c.checkpoint_order, 
-                ct.time_finished AS checkpoint_time_finished
-            FROM races r
-            LEFT JOIN participants_races pr ON r.race_id = pr.race_id
-            LEFT JOIN participants p ON pr.participant_id = p.participant_id
-            LEFT JOIN marshalls_races mr ON r.race_id = mr.race_id
-            LEFT JOIN marshalls m ON mr.marshall_id = m.marshall_id
-            LEFT JOIN checkpoints c ON r.race_id = c.race_id
-            LEFT JOIN checkpoints_times ct ON c.checkpoint_id = ct.checkpoint_id AND ct.participant_id = p.participant_id
-            WHERE r.race_id = ${raceID}
-            ORDER BY p.participant_id, c.checkpoint_order;
-        `);
+                pr.time_finished AS participant_time_finished
+            FROM participants_races pr
+            JOIN participants p ON pr.participant_id = p.participant_id
+            WHERE pr.race_id = ?
+            ORDER BY p.participant_id
+            LIMIT ? OFFSET ?;
+        `, [raceID, pageSize, offset]);
 
-        if (!raceData) return;
+        const totalParticipants = await dbConn.get(`
+            SELECT COUNT(*) as total
+            FROM participants_races
+            WHERE race_id = ?;
+        `, [raceID]);
 
-        const formattedRaceData = {
+        for (const participant of participants) {
+            participant.checkpoints = await dbConn.all(`
+                SELECT
+                    c.checkpoint_id,
+                    c.checkpoint_name,
+                    c.checkpoint_order,
+                    ct.time_finished AS checkpoint_time_finished
+                FROM checkpoints_times ct
+                JOIN checkpoints c ON ct.checkpoint_id = c.checkpoint_id
+                WHERE ct.participant_id = ?
+                ORDER BY c.checkpoint_order;
+            `, [participant.participant_id]);
+        }
+
+        return {
             race_id: raceID,
-            time_started: "",
-            time_finished: "",
-            marshalls: [],
-            participants: []
+            time_started: raceData.time_started, 
+            time_finished: raceData.time_finished,
+            participants,
+            pagination: {
+                page,
+                pageSize,
+                total: totalParticipants.total,
+                totalPages: Math.ceil(totalParticipants.total / pageSize)
+            }
         };
-
-        const marshallSet = new Set();
-        const participantsMap = new Map();
-
-        raceData.forEach(row => {
-            formattedRaceData.time_started = row.time_started;
-            formattedRaceData.time_finished = row.time_finished;
-
-            // Add marshalls to the set to avoid duplicates
-            if (row.marshall_id && !marshallSet.has(row.marshall_id)) {
-                formattedRaceData.marshalls.push({
-                    marshall_id: row.marshall_id,
-                    name: `${row.marshall_first_name} ${row.marshall_last_name}`
-                });
-                marshallSet.add(row.marshall_id);
-            }
-
-            // Check if participant exists, if not, create them
-            if (!participantsMap.has(row.participant_id)) {
-                participantsMap.set(row.participant_id, {
-                    id: row.participant_id,
-                    name: `${row.participant_first_name} ${row.participant_last_name}`,
-                    bib: row.bib_number,
-                    attended: row.attended,
-                    time_finished: row.participant_time_finished,
-                    checkpoints: []
-                });
-            }
-
-            // Add checkpoint data if it's not null
-            if (row.checkpoint_id) {
-                participantsMap.get(row.participant_id).checkpoints.push({
-                    checkpoint_id: row.checkpoint_id,
-                    name: row.checkpoint_name,
-                    order: row.checkpoint_order,
-                    time_finished: row.checkpoint_time_finished
-                });
-            }
-        });
-
-        // Convert the participants map to an array
-        formattedRaceData.participants = Array.from(participantsMap.values());
-
-        const race = formattedRaceData;
-
-        return race;
-    } catch(error) {
-        console.error("Error fetching race:", error.message);
+    } catch (error) {
+        console.error("Error fetching race data:", error);
+        throw error;
     }
 }

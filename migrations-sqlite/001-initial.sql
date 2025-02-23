@@ -2,8 +2,7 @@
 CREATE TABLE IF NOT EXISTS races (
     race_id INTEGER PRIMARY KEY AUTOINCREMENT,
     time_started INTEGER NOT NULL,
-    time_finished INTEGER NOT NULL,
-    participants_finished INTEGER DEFAULT 0
+    time_finished INTEGER NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS participants (
@@ -120,3 +119,150 @@ INSERT INTO checkpoints_times (checkpoint_id, participant_id, time_finished) VAL
 (2, 6, 1738452579 + 2400),
 (3, 6, 1738452579 + 3000),
 (1, 7, 1738452579 + 1200);
+
+INSERT INTO participants (first_name, last_name) VALUES 
+('Liam', 'Martinez'),
+('Emma', 'Garcia'),
+('Noah', 'Rodriguez'),
+('Olivia', 'Wilson'),
+('William', 'Anderson'),
+('Ava', 'Thomas'),
+('James', 'Hernandez'),
+('Isabella', 'Moore'),
+('Oliver', 'Martin'),
+('Sophia', 'Jackson'),
+('Benjamin', 'Thompson'),
+('Mia', 'White'),
+('Elijah', 'Lopez'),
+('Charlotte', 'Lee'),
+('Lucas', 'Gonzalez'),
+('Amelia', 'Harris'),
+('Mason', 'Clark'),
+('Harper', 'Lewis'),
+('Logan', 'Robinson'),
+('Evelyn', 'Walker');
+
+/* Insert their participation in race_id = 1 */
+INSERT INTO participants_races (participant_id, race_id, bib_number, attended, time_finished) VALUES
+(11, 1, 511, TRUE, 1738452579 + 1600),  -- Liam Martinez
+(12, 1, 512, TRUE, 1738452579 + 2000),  -- Emma Garcia
+(13, 1, 513, TRUE, 1738452579 + 2200),  -- Noah Rodriguez
+(14, 1, 514, TRUE, 1738452579 + 2600),  -- Olivia Wilson
+(15, 1, 515, TRUE, 1738452579 + 2600),  -- William Anderson
+(16, 1, 516, TRUE, 1738452579 + 3600),  -- Ava Thomas
+(17, 1, 517, TRUE, 1738452579 + 4200),  -- James Hernandez
+(18, 1, 518, TRUE, 1738452579 + 4800),  -- Isabella Moore
+(19, 1, 519, TRUE, 1738452579 + 5400),  -- Oliver Martin
+(20, 1, 520, TRUE, 1738452579 + 6000),  -- Sophia Jackson
+(21, 1, 521, TRUE, 1738452579 + 6600),  -- Benjamin Thompson
+(22, 1, 522, TRUE, 1738452579 + 7200),  -- Mia White
+(23, 1, 523, TRUE, 1738452579 + 7800),  -- Elijah Lopez
+(24, 1, 524, TRUE, 1738452579 + 8400),  -- Charlotte Lee
+(25, 1, 525, TRUE, 1738452579 + 9000),  -- Lucas Gonzalez
+(26, 1, 526, TRUE, 1738452579 + 9600),  -- Amelia Harris
+(27, 1, 527, TRUE, 1738452579 + 10200), -- Mason Clark
+(28, 1, 528, TRUE, 1738452579 + 10800), -- Harper Lewis
+(29, 1, 529, TRUE, 1738452579 + 11400), -- Logan Robinson
+(30, 1, 530, TRUE, 1738452579 + 12000); -- Evelyn Walker
+
+/* Insert checkpoint times for the new participants */
+INSERT INTO checkpoints_times (checkpoint_id, participant_id, time_finished) VALUES
+-- Liam Martinez (participant_id = 11)
+(1, 11, 1738452579 + 300),
+(2, 11, 1738452579 + 600),
+(3, 11, 1738452579 + 1200),
+
+-- Emma Garcia (participant_id = 12)
+(1, 12, 1738452579 + 600),
+(2, 12, 1738452579 + 900),
+(3, 12, 1738452579 + 1800),
+
+-- Noah Rodriguez (participant_id = 13)
+(1, 13, 1738452579 + 900),
+(2, 13, 1738452579 + 1200),
+(3, 13, 1738452579 + 1800),
+
+-- Olivia Wilson (participant_id = 14)
+(1, 14, 1738452579 + 1200),
+(2, 14, 1738452579 + 1800),
+(3, 14, 1738452579 + 2400),
+
+-- William Anderson (participant_id = 15)
+(1, 15, 1738452579 + 1500),
+(2, 15, 1738452579 + 1800),
+(3, 15, 1738452579 + 2400),
+
+-- Ava Thomas (participant_id = 16)
+(1, 16, 1738452579 + 1800),
+(2, 16, 1738452579 + 2400),
+(3, 16, 1738452579 + 3000),
+
+-- James Hernandez (participant_id = 17)
+(1, 17, 1738452579 + 1200),
+(2, 17, 1738452579 + 1800),
+(3, 17, 1738452579 + 2400),
+
+-- Isabella Moore (participant_id = 18)
+(1, 18, 1738452579 + 1500),
+(2, 18, 1738452579 + 2100),
+(3, 18, 1738452579 + 2700),
+
+-- Oliver Martin (participant_id = 19)
+(1, 19, 1738452579 + 1800),
+(2, 19, 1738452579 + 2400),
+(3, 19, 1738452579 + 3000),
+
+-- Sophia Jackson (participant_id = 20)
+(1, 20, 1738452579 + 2100),
+(2, 20, 1738452579 + 2700),
+(3, 20, 1738452579 + 3300),
+
+-- Benjamin Thompson (participant_id = 21)
+(1, 21, 1738452579 + 2400),
+(2, 21, 1738452579 + 3000),
+(3, 21, 1738452579 + 3600),
+
+-- Mia White (participant_id = 22)
+(1, 22, 1738452579 + 2700),
+(2, 22, 1738452579 + 3300),
+(3, 22, 1738452579 + 3900),
+
+-- Elijah Lopez (participant_id = 23)
+(1, 23, 1738452579 + 3000),
+(2, 23, 1738452579 + 3600),
+(3, 23, 1738452579 + 4200),
+
+-- Charlotte Lee (participant_id = 24)
+(1, 24, 1738452579 + 3300),
+(2, 24, 1738452579 + 3900),
+(3, 24, 1738452579 + 4500),
+
+-- Lucas Gonzalez (participant_id = 25)
+(1, 25, 1738452579 + 3600),
+(2, 25, 1738452579 + 4200),
+(3, 25, 1738452579 + 4800),
+
+-- Amelia Harris (participant_id = 26)
+(1, 26, 1738452579 + 3900),
+(2, 26, 1738452579 + 4500),
+(3, 26, 1738452579 + 5100),
+
+-- Mason Clark (participant_id = 27)
+(1, 27, 1738452579 + 4200),
+(2, 27, 1738452579 + 4800),
+(3, 27, 1738452579 + 5400),
+
+-- Harper Lewis (participant_id = 28)
+(1, 28, 1738452579 + 4500),
+(2, 28, 1738452579 + 5100),
+(3, 28, 1738452579 + 5700),
+
+-- Logan Robinson (participant_id = 29)
+(1, 29, 1738452579 + 4800),
+(2, 29, 1738452579 + 5400),
+(3, 29, 1738452579 + 6000),
+
+-- Evelyn Walker (participant_id = 30)
+(1, 30, 1738452579 + 5100),
+(2, 30, 1738452579 + 5700),
+(3, 30, 1738452579 + 6300);

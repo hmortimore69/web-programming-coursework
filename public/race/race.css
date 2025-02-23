@@ -86,3 +86,25 @@ body {
     border-top: 1px solid;
     border-bottom: 1px solid;
 }
+
+.pagination-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.pagination-controls button {
+    background-color: #28af98;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.pagination-controls button:disabled {
+    background-color: #535C65;
+    cursor: not-allowed;
+}

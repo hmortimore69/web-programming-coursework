@@ -38,6 +38,8 @@ A sequence of prompts helped me develop this feature:
 >  How can I turn a table row in a tbody into a details tag?
 I asked this because `<details>` elements can't be direct children of `<tbody>` elements to preserve structure. The response recommended wrapping the `<details>` element inside of a `<td>` element. This helped create the inner details sections, however it meant I had to nest tables to properly display it.
 
+> How can an implementation of pagination be implemented without global variables?
+
 ### Prompts to develop GHIJ (example)
 For the GHIJ feature I ...
 

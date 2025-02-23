@@ -1,13 +1,19 @@
-async function fetchRaceData() {
+// pagination global, <--- figure out how to not use global variable
+let currentPage = 1;
+
+async function fetchRaceData(page = 1) {
+    let pageSize = 10;
+    
     try {
         const raceID = getRaceID();
-        const response = await fetch(`/api/races/${raceID}`);
+        const response = await fetch(`/api/races/${raceID}?page=${page}&pageSize=${pageSize}`);
 
         if (!response.ok) throw new Error(`Response Status: ${response.status}`);
 
         const raceData = await response.json();
-
+        console.log(raceData);
         renderRaceTable(raceData);
+        updatePaginationControls(raceData.pagination);
     } catch (error) {
         console.error("Error fetching race data:", error);
     }
@@ -21,90 +27,14 @@ function getRaceID() {
 }
 
 function renderRaceTable(raceData) {
-    const raceStartTimeElement = document.querySelector("#race-start-time");
-    const raceFinishTimeElement = document.querySelector("#race-finish-time");
+    const tableBody = document.querySelector(".race-table tbody");
 
-    let liveIndicator = "";
-
-    raceStartTimeElement.textContent = `${formatDate(raceData.time_started)}`;
-    raceFinishTimeElement.textContent = `${formatDate(raceData.time_finished, "Ongoing")}`;
-
-    if (raceData.time_finished * 1000 >= Date.now() && raceData.time_started * 1000 <= Date.now()) {
-        liveIndicator = `<span class="live-indicator">LIVE</span>`;
-    }
-
-    document.querySelector("#race-tracker-header").innerHTML = `PJC Race Tracker ${liveIndicator}`;
-
-    generateTableBody(raceData);
-}
-
-/*
- * Input: raceData: JSON
- * Return: None
- * This function generates the tbody's rows for each participant that took part in the race.
- */
-function generateTableBody(raceData) {
-    const raceCheckpointCounterElement = document.querySelector("#race-checkpoint-counter");
-    const checkpoints = getUniqueSortedCheckpoints(raceData.participants);
-    const tableBody = document.querySelector(".race-table-container tbody");
-
-    raceCheckpointCounterElement.textContent = `${checkpoints.length}`
-
-    tableBody.innerHTML = `${raceData.participants.map(p => 
-        fillParticipantRow(p, raceData.time_started, checkpoints)
-    ).join("")}`;
-}
-
-/*
- * Input: participant: JSON Object, raceStart: Integer, checkpoints: JSON Object
- * Return: HTML element
- * This function generates the content for each row made in generateTableBody. It fills the details for each participant.
- */
-function fillParticipantRow(participant, raceStart, checkpoints) {
-    if (!participant.attended) return "";
-
-    let previousTime = raceStart;
-
-    const tableRow = `
+    tableBody.innerHTML = raceData.participants.map(participant => `
         <tr>
-            <td colspan="3">
-                <details>
-                    <summary>
-                        <table class="inner-participant-table">
-                            <tr class="inner-participant-table">
-                                <td>${participant.name}</td>
-                                <td>${participant.bib}</td>
-                                <td>${participant.time_finished ? formatTime(participant.time_finished - raceStart) : "--"}</td>
-                            </tr>
-                        </table>
-                    </summary>
-                    <div class="details-contents-wrapper">
-                        <table class="inner-checkpoint-table">
-                            <tr>
-                                <th>Checkpoint</th>
-                                <th>Time</th>
-                            </tr>
-                            ${checkpoints.map(checkpoint => {
-                                const cpTime = participant.checkpoints.find(cp => cp.checkpoint_id === checkpoint.checkpoint_id);
-                                const formattedTime = formatCheckpointTime(cpTime, previousTime, raceStart);
-                                
-                                if (cpTime && cpTime.time_finished !== null) {
-                                    previousTime = cpTime.time_finished;
-                                }
-
-                                return `
-                                    <tr>
-                                        <td>${checkpoint.name}</td>
-                                        <td>${formattedTime}</td>
-                                    </tr>`;
-                            }).join("")}
-                        </table>
-                    </div>
-                </details>
-            </td>
-        </tr>`;
-
-    return tableRow;
+            <td>${participant.bib_number}</td>
+            <td>${participant.first_name} ${participant.last_name}</td>
+            <td>${formatTime(participant.participant_time_finished - raceData.time_started) || "--"}</td>
+        </tr>`).join("");
 }
 
 /*
@@ -126,26 +56,43 @@ function getUniqueSortedCheckpoints(participants) {
     return uniqueCheckpoints.sort((a, b) => a.order - b.order);
 }
 
-function formatCheckpointTime(participant, previousTime, raceStart) {
-    if (!participant || participant.time_finished === null) return "--";
-
-    const timeDiffInSeconds = participant.time_finished - raceStart;
-    const timefromPrevCheckpoint = participant.time_finished - previousTime;
-
-    return `+${formatTime(timefromPrevCheckpoint)} (${formatTime(timeDiffInSeconds)})`;
-}
-
 function formatDate(timestamp, defaultText = "Unknown") {
     return timestamp ? new Date(timestamp * 1000).toLocaleString() : defaultText;
 }
 
 function formatTime(timeDiffInSeconds) {
+    if (timeDiffInSeconds < 0) return null;
+
     const hours = Math.floor(timeDiffInSeconds / 3600);
     const minutes = Math.floor((timeDiffInSeconds % 3600) / 60);
     const seconds = timeDiffInSeconds % 60;
 
     return `${hours > 0 ? hours + ':' : ''}${minutes < 10 && hours > 0 ? '0' + minutes : minutes}:${seconds < 10 ? '0' + seconds : seconds}`;
 }
+
+function updatePaginationControls(pagination) {
+    const prevButton = document.querySelector("#prev-page");
+    const nextButton = document.querySelector("#next-page");
+    const pageInfo = document.querySelector("#page-info");
+
+    pageInfo.textContent = `Page ${pagination.page} of ${pagination.totalPages}`;
+
+    prevButton.disabled = pagination.page === 1;
+    nextButton.disabled = pagination.page === pagination.totalPages;
+}
+
+document.querySelector("#prev-page").addEventListener("click", () => {
+    if (currentPage > 1) {
+        currentPage--;
+        fetchRaceData(currentPage);
+    }
+});
+
+document.querySelector("#next-page").addEventListener("click", () => {
+    currentPage++;
+    fetchRaceData(currentPage);
+});
+
 
 document.addEventListener("DOMContentLoaded", () => {
     fetchRaceData();
@@ -155,3 +102,31 @@ document.querySelector("#refresh-stats-btn").addEventListener("click", function(
     console.log("Refreshing Stats");
     fetchRaceData();
 });
+
+/*  ===============
+ *     GRAVEYARD
+ *  ===============
+ * 
+ *  ${checkpoints.map(checkpoint => {
+ *      const cpTime = participant.checkpoints.find(cp => cp.checkpoint_id === checkpoint.checkpoint_id);
+ *      const formattedTime = formatCheckpointTime(cpTime, previousTime, raceStart);
+ *      
+ *      if (cpTime && cpTime.time_finished !== null) {
+ *          previousTime = cpTime.time_finished;
+ *  
+ *      return `
+ *          <tr>
+ *              <td>${checkpoint.name}</td>
+ *              <td>${formattedTime}</td>
+ *          </tr>`;
+ *  }).join("")}
+ * 
+ *  function formatCheckpointTime(participant, previousTime, raceStart) {
+ *      if (!participant || participant.time_finished === null) return "--";
+ *
+ *      const timeDiffInSeconds = participant.time_finished - raceStart;
+ *      const timefromPrevCheckpoint = participant.time_finished - previousTime;
+ *
+ *      return `+${formatTime(timefromPrevCheckpoint)} (${formatTime(timeDiffInSeconds)})`;
+ *  }
+ */

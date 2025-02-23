@@ -12,8 +12,9 @@ async function getRaces(req, res) {
 }
 
 async function getRace(req, res) {
-    const result = await db.getRace(req.params.id);
-
+    const { page = 1, pageSize = 10 } = req.query;
+    const result = await db.getRace(req.params.id, parseInt(page), parseInt(pageSize));
+    
     if (result) {
         res.json(result);
     } else {
