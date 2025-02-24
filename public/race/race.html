@@ -9,10 +9,10 @@
         <title>PJC | Race Viewer</title>
     </head>
     <body>
-        <header>
-            <h1 id="race-tracker-header">PJC Race Tracker</h1>
-            <button id="refresh-stats-btn">Refresh Stats</button>
-        </header>
+        <nav>
+            <a href="/" id="logo-home">PJC Race Tracker</a>
+            <button id="refresh-stats-button">Refresh Stats</button>
+        </nav>
         
         <main>
             <section id="race-info-section" aria-live="polite">
@@ -20,7 +20,6 @@
                 <p><strong>Start Time: </strong><span id="race-start-time">N/A</span></p>
                 <p><strong>Finish Time: </strong><span id="race-finish-time">N/A</span></p>
                 <p><strong>Checkpoints: </strong><span id="race-checkpoint-counter">N/A</span></p>
-                <h3>Participants</h3>
                 <div class="race-table-container" id="race-container">
                     <table class="race-table" id="race-info-table">
                         <thead>

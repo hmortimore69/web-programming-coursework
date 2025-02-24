@@ -12,6 +12,7 @@ async function fetchRaceData(page = 1) {
 
         const raceData = await response.json();
         console.log(raceData);
+
         renderRaceTable(raceData);
         updatePaginationControls(raceData.pagination);
     } catch (error) {
@@ -28,6 +29,13 @@ function getRaceID() {
 
 function renderRaceTable(raceData) {
     const tableBody = document.querySelector(".race-table tbody");
+    const raceStartTimeElement = document.querySelector("#race-start-time");
+    const raceFinishTimeElement = document.querySelector("#race-finish-time");
+    const checkpointCountElement = document.querySelector("#race-checkpoint-counter");
+
+    raceStartTimeElement.textContent = formatDate(raceData.time_started);
+    raceFinishTimeElement.textContent = formatDate(raceData.time_finished);
+    checkpointCountElement.textContent = raceData.total_checkpoints;
 
     tableBody.innerHTML = raceData.participants.map(participant => `
         <tr>
@@ -98,7 +106,7 @@ document.addEventListener("DOMContentLoaded", () => {
     fetchRaceData();
 });
 
-document.querySelector("#refresh-stats-btn").addEventListener("click", function() {
+document.querySelector("#refresh-stats-button").addEventListener("click", function() {
     console.log("Refreshing Stats");
     fetchRaceData();
 });

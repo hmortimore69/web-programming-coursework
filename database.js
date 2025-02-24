@@ -71,16 +71,16 @@ export async function getRace(raceID, page = 1, pageSize = 10) {
                 pr.time_finished AS participant_time_finished
             FROM participants_races pr
             JOIN participants p ON pr.participant_id = p.participant_id
-            WHERE pr.race_id = ?
+            WHERE pr.race_id = ${raceID}
             ORDER BY p.participant_id
-            LIMIT ? OFFSET ?;
-        `, [raceID, pageSize, offset]);
+            LIMIT ${pageSize} OFFSET ${offset};
+        `);
 
         const totalParticipants = await dbConn.get(`
             SELECT COUNT(*) as total
             FROM participants_races
-            WHERE race_id = ?;
-        `, [raceID]);
+            WHERE race_id = ${raceID};
+        `);
 
         for (const participant of participants) {
             participant.checkpoints = await dbConn.all(`
@@ -91,15 +91,22 @@ export async function getRace(raceID, page = 1, pageSize = 10) {
                     ct.time_finished AS checkpoint_time_finished
                 FROM checkpoints_times ct
                 JOIN checkpoints c ON ct.checkpoint_id = c.checkpoint_id
-                WHERE ct.participant_id = ?
+                WHERE ct.participant_id = ${participant.participant_id}
                 ORDER BY c.checkpoint_order;
-            `, [participant.participant_id]);
+            `);
         }
+
+        const checkpoint_count = await dbConn.get(`
+            SELECT COUNT(*) as total
+            FROM checkpoints
+            WHERE race_id = ${raceID}  
+        `);
 
         return {
             race_id: raceID,
             time_started: raceData.time_started, 
             time_finished: raceData.time_finished,
+            total_checkpoints: checkpoint_count.total,
             participants,
             pagination: {
                 page,
