@@ -28,14 +28,20 @@ function getRaceID() {
 }
 
 function renderRaceTable(raceData) {
-    const tableBody = document.querySelector(".race-table tbody");
     const raceStartTimeElement = document.querySelector("#race-start-time");
     const raceFinishTimeElement = document.querySelector("#race-finish-time");
     const checkpointCountElement = document.querySelector("#race-checkpoint-counter");
-
+    const tableBody = document.querySelector(".race-table tbody");
+    
     raceStartTimeElement.textContent = formatDate(raceData.time_started);
     raceFinishTimeElement.textContent = formatDate(raceData.time_finished);
     checkpointCountElement.textContent = raceData.total_checkpoints;
+
+    let liveIndicator = "";
+    if (raceData.time_finished * 1000 >= Date.now() && raceData.time_started * 1000 <= Date.now()) {
+        liveIndicator = `<span class="live-indicator">LIVE</span>`;
+        document.querySelector("#race-tracker-header").innerHTML = `PJC Race Tracker ${liveIndicator}`;
+    }
 
     tableBody.innerHTML = raceData.participants.map(participant => `
         <tr>

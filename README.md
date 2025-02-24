@@ -38,7 +38,8 @@ A sequence of prompts helped me develop this feature:
 >  How can I turn a table row in a tbody into a details tag?
 I asked this because `<details>` elements can't be direct children of `<tbody>` elements to preserve structure. The response recommended wrapping the `<details>` element inside of a `<td>` element. This helped create the inner details sections, however it meant I had to nest tables to properly display it.
 
-> How can an implementation of pagination be implemented without global variables?
+> How does pagination work?
+I asked this to help discover a way to introduce pagination. I already had an idea of how to implement this, however I came into roadblocks regarding the structure of how to do it without it being clustered and unreadable. It introduced me to the idea of offset regarding database queries, and passing an object to track pagination between the front and backend.
 
 ### Prompts to develop GHIJ (example)
 For the GHIJ feature I ...

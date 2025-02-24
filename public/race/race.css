@@ -47,12 +47,16 @@ nav {
     border-radius: 5px; 
 }
 
+.race-details-container h2 {
+    margin: 10px 0px;
+}
+
 .race-table {
     border-radius: 4px;
     background-color: #40474f;
     width: 100%;
     table-layout: fixed;
-    font-size: 0.8rem;
+    font-size: 0.9rem;
 }
 
 .race-table thead,
@@ -144,4 +148,14 @@ nav {
 .pagination-controls button:disabled {
     background-color: #535C65;
     cursor: not-allowed;
+}
+
+.live-indicator {
+    color: white;
+    background-color: red;
+    padding: 2px 5px;
+    border-radius: 5px;
+    font-size: 12px;
+    display: inline-block;
+    vertical-align: middle;
 }

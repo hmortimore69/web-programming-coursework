@@ -11,22 +11,24 @@
     <body>
         <nav>
             <a href="/" id="logo-home">PJC Race Tracker</a>
-            <button id="refresh-stats-button">Refresh Stats</button>
+            <button id="refresh-stats-button">Refresh</button>
         </nav>
         
         <main>
             <section id="race-info-section" aria-live="polite">
-                <h2>Race Details</h2>
-                <p><strong>Start Time: </strong><span id="race-start-time">N/A</span></p>
-                <p><strong>Finish Time: </strong><span id="race-finish-time">N/A</span></p>
-                <p><strong>Checkpoints: </strong><span id="race-checkpoint-counter">N/A</span></p>
+                <div class="race-details-container">
+                    <h2 id="race-tracker-header">Race Details</h2>
+                    <p><strong>Start Time: </strong><span id="race-start-time">N/A</span></p>
+                    <p><strong>Finish Time: </strong><span id="race-finish-time">N/A</span></p>
+                    <p><strong>Checkpoints: </strong><span id="race-checkpoint-counter">N/A</span></p>
+                </div>
                 <div class="race-table-container" id="race-container">
                     <table class="race-table" id="race-info-table">
                         <thead>
                             <tr>
-                                <th>BIB</th>
-                                <th>NAME</th>
-                                <th>FINISH</th>
+                                <th style="width: 10vw">BIB</th>
+                                <th style="width: 60vw">NAME</th>
+                                <th style="width: 20vw">FINISH</th>
                             </tr>
                         </thead>
                         <div class="race-table-body-container">
