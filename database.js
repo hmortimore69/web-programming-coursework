@@ -20,26 +20,17 @@ export async function getLastTenRaces() {
         const raceData = await dbConn.all("SELECT * FROM races ORDER BY time_started DESC LIMIT 10");
 
         for (const race of raceData) {
-            const participants = await dbConn.all(`
-                SELECT p.participant_id, p.first_name, p.last_name, pr.bib_number, pr.time_finished AS participant_time_finished
+            const participant_total = await dbConn.get(`
+                SELECT COUNT(*) as total
                 FROM participants p
                 JOIN participants_races pr ON p.participant_id = pr.participant_id
                 WHERE pr.race_id = ${race.race_id}
             `);
-            const participantsArray = [];
-            
-            participants.forEach((participant) => {
-                participantsArray.push({
-                    id: participant.participant_id,
-                    name: `${participant.first_name} ${participant.last_name}`,
-                    time_finished: participant.participant_time_finished,
-                });
-            });
 
             races[race.race_id] = {
                 time_started: race.time_started,
                 time_finished: race.time_finished,
-                participants: participantsArray,
+                participants: participant_total.total,
             };
         }
 

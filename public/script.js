@@ -13,31 +13,8 @@ async function fetchRaces() {
     }
 }
 
-/*
-Code taken and added onto from geeksforgeeks
-https://www.geeksforgeeks.org/how-to-convert-seconds-to-time-string-format-hhmmss-using-javascript/#approach-2-calculating-the-hours-minutes-and-seconds-individually
-*/
-function formatDuration(seconds) {
-    if (seconds === null) return "--";
-    
-    const h = Math.floor(seconds / 3600).toString().padStart(2, "0");
-    const m = Math.floor((seconds % 3600) / 60).toString().padStart(2, "0");
-    const s = (seconds % 60).toString().padStart(2, "0");
-    return `${h}:${m}:${s}`;
-}
-
-function formatTime(timestamp) {
-    return timestamp ? new Date(timestamp * 1000).toLocaleString() : "--";
-}
-
 function createRaceRow(raceID, race) {
     const { time_started, time_finished, participants } = race;
-    const participantList = Object.values(participants);
-
-    const finishTimes = participantList.map(p => p.time_finished).filter(Boolean);
-    const fastestFinish = finishTimes.length ? Math.min(...finishTimes) : null;
-    const fastestDuration = fastestFinish ? fastestFinish - time_started : null;
-
     const row = document.createElement("tr");
     row.dataset.raceidentifier = raceID;
 
@@ -50,11 +27,9 @@ function createRaceRow(raceID, race) {
     }
 
     row.innerHTML = `
-        <td>${raceID} ${liveIndicator}</td>
-        <td>${formatTime(time_started)}</td>
-        <td>${formatTime(time_finished)}</td>
-        <td>${participantList.length}</td>
-        <td>${formatDuration(fastestDuration)}</td>
+        <td>${formatUnixTimestamp(time_started)} ${liveIndicator}</td>
+        <td>${formatUnixTimestamp(time_finished)}</td>
+        <td>${participants}</td>
     `;
 
     return row;
@@ -72,6 +47,19 @@ function populateRaceTable(races) {
     } else {
         tableBody.innerHTML = `<td style="cursor: auto;" colspan=5>No race data to display.</td>`;
     }
+}
+
+// 
+function formatUnixTimestamp(unixTimestamp) {
+    const date = new Date(unixTimestamp * 1000);
+    const day = date.getDate();
+    const suffix = (day % 10 === 1 && day !== 11) ? 'st' :
+                   (day % 10 === 2 && day !== 12) ? 'nd' :
+                   (day % 10 === 3 && day !== 13) ? 'rd' : 'th';
+    const formattedDate = date.toLocaleDateString('en-UK', { weekday: 'long' }) + ' ' + day + suffix;
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    return `${formattedDate} ${hours}:${minutes}`;
 }
 
 // async function registerServiceWorker() {

@@ -40,7 +40,7 @@ function renderRaceTable(raceData) {
     let liveIndicator = "";
     if (raceData.time_finished * 1000 >= Date.now() && raceData.time_started * 1000 <= Date.now()) {
         liveIndicator = `<span class="live-indicator">LIVE</span>`;
-        document.querySelector("#race-tracker-header").innerHTML = `PJC Race Tracker ${liveIndicator}`;
+        document.querySelector("#race-tracker-header").innerHTML = `Race Dsetails ${liveIndicator}`;
     }
 
     tableBody.innerHTML = raceData.participants.map(participant => `
