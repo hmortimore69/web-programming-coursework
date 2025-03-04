@@ -35,10 +35,6 @@ nav {
     transition: color 0.3s ease;
 }
 
-#logo-home:hover {
-    color: #1abc9c;
-}
-
 #refresh-stats-button {
     background-color: #1abc9c;
     padding: 10px;

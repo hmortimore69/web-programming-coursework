@@ -33,21 +33,21 @@ function renderRaceTable(raceData) {
     const checkpointCountElement = document.querySelector("#race-checkpoint-counter");
     const tableBody = document.querySelector(".race-table tbody");
     
-    raceStartTimeElement.textContent = formatDate(raceData.time_started);
-    raceFinishTimeElement.textContent = formatDate(raceData.time_finished);
-    checkpointCountElement.textContent = raceData.total_checkpoints;
+    raceStartTimeElement.textContent = formatDate(raceData.timeStarted);
+    raceFinishTimeElement.textContent = formatDate(raceData.timeFinished);
+    checkpointCountElement.textContent = raceData.totalCheckpoints;
 
     let liveIndicator = "";
-    if (raceData.time_finished * 1000 >= Date.now() && raceData.time_started * 1000 <= Date.now()) {
+    if (raceData.timeFinished * 1000 >= Date.now() && raceData.timeStarted * 1000 <= Date.now()) {
         liveIndicator = `<span class="live-indicator">LIVE</span>`;
         document.querySelector("#race-tracker-header").innerHTML = `Race Dsetails ${liveIndicator}`;
     }
 
     tableBody.innerHTML = raceData.participants.map(participant => `
         <tr>
-            <td>${participant.bib_number}</td>
-            <td>${participant.first_name} ${participant.last_name}</td>
-            <td>${formatTime(participant.participant_time_finished - raceData.time_started) || "--"}</td>
+            <td>${participant.bibNumber}</td>
+            <td>${participant.firstName} ${participant.lastName}</td>
+            <td>${formatTime(participant.timeFinished - raceData.timeStarted) || "--"}</td>
         </tr>`).join("");
 }
 
@@ -61,7 +61,7 @@ function getUniqueSortedCheckpoints(participants) {
 
     for (const participant of participants) {
         for (const cp of participant.checkpoints) {
-            if (!uniqueCheckpoints.some(c => c.checkpoint_id === cp.checkpoint_id)) {
+            if (!uniqueCheckpoints.some(c => c.checkpointId === cp.checkpointId)) {
                 uniqueCheckpoints.push(cp);
             }
         }
@@ -122,11 +122,11 @@ document.querySelector("#refresh-stats-button").addEventListener("click", functi
  *  ===============
  * 
  *  ${checkpoints.map(checkpoint => {
- *      const cpTime = participant.checkpoints.find(cp => cp.checkpoint_id === checkpoint.checkpoint_id);
+ *      const cpTime = participant.checkpoints.find(cp => cp.checkpointId === checkpoint.checkpointId);
  *      const formattedTime = formatCheckpointTime(cpTime, previousTime, raceStart);
  *      
- *      if (cpTime && cpTime.time_finished !== null) {
- *          previousTime = cpTime.time_finished;
+ *      if (cpTime && cpTime.timeFinished !== null) {
+ *          previousTime = cpTime.timeFinished;
  *  
  *      return `
  *          <tr>
@@ -136,10 +136,10 @@ document.querySelector("#refresh-stats-button").addEventListener("click", functi
  *  }).join("")}
  * 
  *  function formatCheckpointTime(participant, previousTime, raceStart) {
- *      if (!participant || participant.time_finished === null) return "--";
+ *      if (!participant || participant.timeFinished === null) return "--";
  *
- *      const timeDiffInSeconds = participant.time_finished - raceStart;
- *      const timefromPrevCheckpoint = participant.time_finished - previousTime;
+ *      const timeDiffInSeconds = participant.timeFinished - raceStart;
+ *      const timefromPrevCheckpoint = participant.timeFinished - previousTime;
  *
  *      return `+${formatTime(timefromPrevCheckpoint)} (${formatTime(timeDiffInSeconds)})`;
  *  }

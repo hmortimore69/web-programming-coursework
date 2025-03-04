@@ -22,30 +22,33 @@ async function getRace(req, res) {
     }
 }
 
-// Default to /home
-app.get('/', (req, res) => {
-    res.redirect('/home');
-});
-
-app.get('/home', (req, res) => {
-    res.sendFile(join(__dirname, "public", "index.html"));
-});
-
+// API Endpoints
+app.get('/api/races', getRaces);
+app.get('/api/races/:id', getRace);
 
 // Static
 app.use(express.static("public"));
 
 // Endpoints
-app.get('/api/races', getRaces);
-app.get('/api/races/:id', getRace);
+app.get('/', (req, res) => {
+    res.redirect('/home');
+});
+app.get('/home', (req, res) => {
+    res.sendFile(join(__dirname, "public", "index.html"));
+}); 
 app.get('/race/:raceid', (req, res) => {
     res.sendFile(join(__dirname, "public", "race", "race.html"));
 });
+
+// Admin User Endpoints
 app.get('/admin', (req, res) => {
     res.sendFile(join(__dirname, "public", "admin", "admin.html"));
+})
+app.get('/admin/new-race', (req, res) => {
+    res.sendFile(join(__dirname, "public", "admin", "newRace", "newRace.html"));
 })
 
 
 app.listen(port, () => {
-    console.log(`App listening on port ${port}`);
+    console.log(`Server running on http://localhost:${port}`);
 });

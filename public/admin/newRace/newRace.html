@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="admin.css" />
+
+    <title>PJC | Admin</title>
+  </head>
+  <body>
+    <nav>
+      <a href="/" id="logo-home">PJC Race Tracker</a>
+      <div id="crud-buttons">
+        <button id="new-race-button">NEW RACE</button>
+      </div>
+    </nav>
+    
+    <main>
+      <h1>Race Setup</h1>
+      
+      <div class="new-race-setup">
+        <label for="race-name">Race Name:</label>
+        <input id="race-name-input" type="text" name="race-name" placeholder="My new race" />
+        <br>
+        <label for="checkpoint-checkbox">Checkpoints:</label>
+        <input id="checkpoint-checkbox" type="checkbox" name="checkpoint-checkbox" >
+        <br>
+        <button id="page-1-continue" type="submit">Continue</button>
+      </div>
+    </main>
+    <script src="/admin/newRace/newRace.js"></script>
+  </body>
+</html>
