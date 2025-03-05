@@ -22,9 +22,14 @@ async function getRace(req, res) {
     }
 }
 
+async function createRace(req, res) {
+    res.status(200).send("Race created");
+}
+
 // API Endpoints
 app.get('/api/races', getRaces);
 app.get('/api/races/:id', getRace);
+app.post('/api/admin/new-race', createRace);
 
 // Static
 app.use(express.static("public"));

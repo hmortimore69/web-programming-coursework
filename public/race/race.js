@@ -1,8 +1,8 @@
-// pagination global, <--- figure out how to not use global variable
+// pagination global <--- figure out how to not use global variable
 let currentPage = 1;
 
 async function fetchRaceData(page = 1) {
-    let pageSize = 10;
+    const pageSize = 10;
     
     try {
         const raceID = getRaceID();
@@ -43,6 +43,7 @@ function renderRaceTable(raceData) {
         document.querySelector("#race-tracker-header").innerHTML = `Race Dsetails ${liveIndicator}`;
     }
 
+    // CHANGE TO TEMPLATES
     tableBody.innerHTML = raceData.participants.map(participant => `
         <tr>
             <td>${participant.bibNumber}</td>
@@ -56,19 +57,7 @@ function renderRaceTable(raceData) {
  *  RETURN: uniqueCheckpoints: Array
  *  This function returns each unique checkpoint and sorts them in order.
  */
-function getUniqueSortedCheckpoints(participants) {
-    const uniqueCheckpoints = [];
 
-    for (const participant of participants) {
-        for (const cp of participant.checkpoints) {
-            if (!uniqueCheckpoints.some(c => c.checkpointId === cp.checkpointId)) {
-                uniqueCheckpoints.push(cp);
-            }
-        }
-    }
-
-    return uniqueCheckpoints.sort((a, b) => a.order - b.order);
-}
 
 function formatDate(timestamp, defaultText = "Unknown") {
     return timestamp ? new Date(timestamp * 1000).toLocaleString() : defaultText;
@@ -110,10 +99,10 @@ document.querySelector("#next-page").addEventListener("click", () => {
 
 document.addEventListener("DOMContentLoaded", () => {
     fetchRaceData();
+    setInterval(fetchRaceData, 10000);
 });
 
 document.querySelector("#refresh-stats-button").addEventListener("click", function() {
-    console.log("Refreshing Stats");
     fetchRaceData();
 });
 
@@ -142,5 +131,19 @@ document.querySelector("#refresh-stats-button").addEventListener("click", functi
  *      const timefromPrevCheckpoint = participant.timeFinished - previousTime;
  *
  *      return `+${formatTime(timefromPrevCheckpoint)} (${formatTime(timeDiffInSeconds)})`;
+ *  }
+ * 
+ *  function getUniqueSortedCheckpoints(participants) {
+ *      const uniqueCheckpoints = [];
+ *
+ *      for (const participant of participants) {
+ *          for (const cp of participant.checkpoints) {
+ *              if (!uniqueCheckpoints.some(c => c.checkpointId === cp.checkpointId)) {
+ *                  uniqueCheckpoints.push(cp);
+ *              }
+ *           }
+ *      }
+ *
+ *      return uniqueCheckpoints.sort((a, b) => a.order - b.order);
  *  }
  */

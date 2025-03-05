@@ -18,16 +18,21 @@
     <main>
       <h1>Race Setup</h1>
       
-      <div class="new-race-setup">
+      <label for="form-progress-bar">Progress</label> 
+      <progress name="form-progress-bar" max="3" value="1">(Step 1 of circa 3)</progress>
+      <br>
+
+      <div class="new-race-form-container">
         <label for="race-name">Race Name:</label>
         <input id="race-name-input" type="text" name="race-name" placeholder="My new race" />
         <br>
         <label for="checkpoint-checkbox">Checkpoints:</label>
         <input id="checkpoint-checkbox" type="checkbox" name="checkpoint-checkbox" >
         <br>
-        <button id="page-1-continue" type="submit">Continue</button>
+
+        <button id="page-continue" type="submit">Continue</button>
       </div>
     </main>
-    <script src="/admin/newRace/newRace.js"></script>
+    <script src="newRace/newRace.js"></script>
   </body>
 </html>
