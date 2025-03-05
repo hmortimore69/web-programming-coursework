@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="stylesheet" href="admin.css" />
+    <link rel="stylesheet" href="/admin/newRace/newRace.css" />
 
     <title>PJC | Admin</title>
   </head>
@@ -17,20 +18,47 @@
     
     <main>
       <h1>Race Setup</h1>
-      
-      <label for="form-progress-bar">Progress</label> 
-      <progress name="form-progress-bar" max="3" value="1">(Step 1 of circa 3)</progress>
-      <br>
+      <div class="progress-bar">
+        <div class="progress" id="progress"></div>
+      </div>
+      <div class="new-race-form-flow">
+        <div class="race-details-step">
+          <label for="form-progress-bar">Step 1 of 3 - Race Details: </label> 
+          <progress name="form-progress-bar" max="3" value="1">(Step 1 of 3)</progress><br>    
 
-      <div class="new-race-form-container">
-        <label for="race-name">Race Name:</label>
-        <input id="race-name-input" type="text" name="race-name" placeholder="My new race" />
-        <br>
-        <label for="checkpoint-checkbox">Checkpoints:</label>
-        <input id="checkpoint-checkbox" type="checkbox" name="checkpoint-checkbox" >
-        <br>
+          <label for="race-name">Race Name:</label>
+          <input id="race-name-input" type="text" name="race-name" placeholder="My new race" /><br>
 
-        <button id="page-continue" type="submit">Continue</button>
+          <label for="race-start-date">Start Date:</label>
+          <input id="race-start-date" type="date" name="race-start-date" /><br>
+
+          <label for="race-start-time">Start Time:</label>
+          <input id="race-start-time" type="time" name="race-start-time" /><br>
+
+          <label for="checkpoint-checkbox">Checkpoints:</label>
+          <input id="checkpoint-checkbox" type="checkbox" name="checkpoint-checkbox" /><br>
+          
+          <p class="requirement-message" hidden>* Please enter all required information.</p>
+          <button type="button" class="next-step">NEXT</button>
+        </div>
+
+        <div class="race-details-step">
+          <label for="form-progress-bar">Step 2 of 3 - Checkpoint Setup: </label>
+          <progress name="form-progress-bar" max="3" value="2">(Step 2 of 3)</progress><br>
+          
+          <p class="requirement-message" hidden>* Please enter all required information.</p>
+          <button type="button" class="prev-step">PREVIOUS</button>
+          <button type="button" class="next-step">NEXT</button>
+        </div>
+
+        <div class="race-details-step">
+          <label for="form-progress-bar">Step 3 of 3 - Participant: </label>
+          <progress name="form-progress-bar" max="3" value="3">(Step 3 of 3)</progress><br>
+
+          <p class="requirement-message" hidden>* Please enter all required information.</p>
+          <button type="button" class="prev-step">PREVIOUS</button>
+          <button type="button" id="submitBtn">SUBMIT</button>
+        </div>
       </div>
     </main>
     <script src="newRace/newRace.js"></script>
