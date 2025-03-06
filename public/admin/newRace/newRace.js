@@ -12,9 +12,9 @@ document.addEventListener('DOMContentLoaded', function () {
    * Only the active step will be visible.
    */
   function updateSteps() {
-    steps.forEach((step, index) => {
+    for (const [index, step] of steps.entries()) {
       step.classList.toggle('active', index === currentStep);
-    });
+    }
   }
 
   /**

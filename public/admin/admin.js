@@ -10,8 +10,8 @@ function registerButtons() {
   editRaceButton.addEventListener('click', editRace);
 }
 
-function newRace(e) {
+function newRace() {
   window.location.href = "/admin/new-race"
 }
 
-function editRace(e) {}
+function editRace() {}

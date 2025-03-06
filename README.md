@@ -14,13 +14,16 @@ If, and only if, the race has checkpoints then the database query picks up on th
 Furthermore, when displaying checkpoint time, I had originally used timestamps, converting them using Date(). This, whilst it worked, felt illogical - and less readable.
 To improve this, I used a function that took each checkpoint, and calculated the time differential from the previous checkpoint (or start), and the total elapsed time from the race start. This is then displayed as: "+XX:XX (XX:XX)". The brackets contain the total elapsed time, and the time after the + is the differential.
 
-To also help readability, I added mouse hovering for the table. Hovering over a row will change the background colour to a <span style="color:#ffaeae">a pale red</span>.
+To also help readability, I added mouse hovering for the table. Hovering over a row will change the background colour to a lighter colour.
 
 To refresh data for this table, I intended to use either a button to manually refresh statistics, or automatically retrieve them every 10 seconds using `setInterval();`. I ended up using the former option over the latter, as it allowed the user to choose when to update, and wouldn't flood the server with database queries. When updating the table, it clears and rewrites. If you were reading the table, and it updated - you would be sent back to the top of the table; annoying right? To solve this, I added in a variable to capture the scrolling position during the table. This would then allow me to restore the scroll position in the table after a fetch request.
 
-### Key Another Feature Name/Description.
-Tell us briefly how to find & use it.
-Describe the thinking behind the design of this feature features.  
+### Race Creation
+Visiting `/admin` will show a `NEW RACE` button in the navbar. Pressing this button will direct you to a flow designed to setup a new race with ease, whilst being usability-friendly. It incorporates a progress bar with encompassed text in the event you run it on an old browser.
+
+When I designed the flow for creating a race originally, I intended for it to be divvied up into sections on the page for each major part of the race setup. This felt too clunky for what I wanted, and didn't at all achieve my desired intention. I therefore did some research and chose to go with a multi-page form. I wanted to use the form tag for this, however I ultimately didn't. I used a custom formData object to store the inputs as the user navigated the flow, ensuring validation was handled, and that progress was updated as you stepped. 
+
+Whilst developing the form, I made sure to also read the w3 standard for when forms are multiple pages loacted [here](https://www.w3.org/WAI/tutorials/forms/multi-page/). This outlined that I: (a) repeat overall instructions on every page; (b) split the form up according to logical groups; (c) make it easy to recognise and skip optional stages; and (d) not to set a time limit (I mean why would I for this?).
 
 .
 .
@@ -37,6 +40,8 @@ A sequence of prompts helped me develop this feature:
 
 >  How can I turn a table row in a tbody into a details tag?
 I asked this because `<details>` elements can't be direct children of `<tbody>` elements to preserve structure. The response recommended wrapping the `<details>` element inside of a `<td>` element. This helped create the inner details sections, however it meant I had to nest tables to properly display it.
+
+*The above was removed after further revisions.*
 
 > How does pagination work?
 I asked this to help discover a way to introduce pagination. I already had an idea of how to implement this, however I came into roadblocks regarding the structure of how to do it without it being clustered and unreadable. It introduced me to the idea of offset regarding database queries, and passing an object to track pagination between the front and backend.
