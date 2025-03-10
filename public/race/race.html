@@ -1,62 +1,69 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link rel="stylesheet" href="race.css">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="race.css" />
+    <link rel="stylesheet" type="text/css" href="../static/nav.css" />
 
-        <title>PJC | Race Viewer</title>
-    </head>
-    <body>
-        <nav>
-            <a href="/" id="logo-home">PJC Race Tracker</a>
-            <button id="refresh-stats-button">Refresh</button>
-        </nav>
-        
-        <main>
-            <section id="race-info-section" aria-live="polite">
-                <div class="race-details-container">
-                    <h2 id="race-tracker-header">Race Details</h2>
-                    <p><strong>Start Time: </strong><span id="race-start-time">N/A</span></p>
-                    <p><strong>Finish Time: </strong><span id="race-finish-time">N/A</span></p>
-                    <p><strong>Checkpoints: </strong><span id="race-checkpoint-counter">N/A</span></p>
-                </div>
-                <div class="race-table-container" id="race-container">
-                    <table class="race-table" id="race-info-table">
-                        <thead>
-                            <tr>
-                                <th style="width: 10vw">BIB</th>
-                                <th style="width: 60vw">NAME</th>
-                                <th style="width: 20vw">FINISH</th>
-                            </tr>
-                        </thead>
-                        <div class="race-table-body-container">
-                            <tbody>
-                            </tbody>
-                        </div>
-                    </table>
+    <title>PJC | Race Viewer</title>
+  </head>
+  <body>
+    <nav>
+      <a href="/" id="logo-home">PJC Race Tracker</a>
+      <button id="refresh-stats-button">Refresh</button>
+    </nav>
 
-                    <div class="pagination-controls">
-                        <button id="prev-page" disabled>Previous</button>
-                        <span id="page-info">Page 1 of 1</span>
-                        <button id="next-page" disabled>Next</button>
-                    </div>
-                </div>
-            </section>
-        </main>
+    <main>
+      <section id="race-info-section" aria-live="polite">
+        <div class="race-details-container">
+          <h2 id="race-tracker-header">Race Details</h2>
+          <p>
+            <strong>Start Time: </strong><span id="race-start-time">N/A</span>
+          </p>
+          <p>
+            <strong>Finish Time: </strong><span id="race-finish-time">N/A</span>
+          </p>
+          <p>
+            <strong>Checkpoints: </strong
+            ><span id="race-checkpoint-counter">N/A</span>
+          </p>
+        </div>
+        <div class="race-table-container" id="race-container">
+          <table class="race-table" id="race-info-table">
+            <thead>
+              <tr>
+                <th style="width: 10vw">BIB</th>
+                <th style="width: 60vw">NAME</th>
+                <th style="width: 20vw">FINISH</th>
+              </tr>
+            </thead>
+            <div class="race-table-body-container">
+              <tbody></tbody>
+            </div>
+          </table>
 
-        <template id="participant-row-template">
-            <tr>
-                <td class="bib-number"></td>
-                <td class="participant-name"></td>
-                <td class="finish-time"></td>
-            </tr>
-        </template>
-        
-        <template id="live-indicator-template">
-            <span class="live-indicator">LIVE</span>
-        </template>
-        
-        <script src="race.js"></script>
-    </body>
+          <div class="pagination-controls">
+            <button id="prev-page" disabled>Previous</button>
+            <span id="page-info">Page 1 of 1</span>
+            <button id="next-page" disabled>Next</button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <template id="participant-row-template">
+      <tr>
+        <td class="bib-number"></td>
+        <td class="participant-name"></td>
+        <td class="finish-time"></td>
+      </tr>
+    </template>
+
+    <template id="live-indicator-template">
+      <span class="live-indicator">LIVE</span>
+    </template>
+
+    <script src="race.js"></script>
+  </body>
 </html>

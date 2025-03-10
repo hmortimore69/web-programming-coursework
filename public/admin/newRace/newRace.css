@@ -1,4 +1,7 @@
-button {
+.race-details-step {
+  display: none;
+
+  button {
     margin-top: 10px;
     padding: 8px 15px;
     border: none;
@@ -6,16 +9,13 @@ button {
     color: white;
     cursor: pointer;
     border-radius: 5px;
-}
-
-.race-details-step {
-    display: none;
+  }
 }
 
 .race-details-step.active {
-    display: block;
+  display: block;
 }
 
 .requirement-message {
-    color: red;
+  color: red;
 }

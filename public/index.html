@@ -1,33 +1,46 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link rel="stylesheet" type="text/css" href="style.css">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" type="text/css" href="style.css" />
+    <link rel="stylesheet" type="text/css" href="static/nav.css" />
 
-        <title>PJC Race Tracker</title>
-    </head>
-    <body>
-        <nav>
-            <a href="/" id="logo-home">PJC Race Tracker</a>
-        </nav>
+    <title>PJC Race Tracker</title>
+  </head>
+  <body>
+    <nav>
+      <a href="/" id="logo-home">PJC Race Tracker</a>
+    </nav>
 
-        <main>
-            <section id="race-history">
-                <h3>Last 10 Races</h3>
-                <div class="race-table-container" id="race-history-table-container">
-                    <table class="race-table" id="race-history-table">
-                        <thead>
-                            <th>Start</th>
-                            <th>Finish</th>
-                            <th>Participants</th>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
-                </div>
-            </section>
-        </main>
-        
-        <script src="script.js"></script>
-    </body>
+    <main>
+      <section id="race-history">
+        <h3>Last 10 Races</h3>
+        <div class="race-table-container" id="race-history-table-container">
+          <table class="race-table" id="race-history-table">
+            <thead>
+              <th>Start</th>
+              <th>Finish</th>
+              <th>Participants</th>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <template id="race-row-template">
+      <tr>
+        <td class="start-time"></td>
+        <td class="end-time"></td>
+        <td class="participants"></td>
+      </tr>
+    </template>
+
+    <template id="live-indicator">
+        <span class="live-indicator">LIVE</span>
+    </template>
+
+    <script src="script.js"></script>
+  </body>
 </html>
