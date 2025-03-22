@@ -23,7 +23,7 @@ Visiting `/admin` will show a `NEW RACE` button in the navbar. Pressing this but
 
 When I designed the flow for creating a race originally, I intended for it to be divvied up into sections on the page for each major part of the race setup. This felt too clunky for what I wanted, and didn't at all achieve my desired intention. I therefore did some research and chose to go with a multi-page form. I wanted to use the form tag for this, however I ultimately didn't. I used a custom formData object to store the inputs as the user navigated the flow, ensuring validation was handled, and that progress was updated as you stepped. 
 
-Whilst developing the form, I made sure to also read the w3 standard for when forms are multiple pages loacted [here](https://www.w3.org/WAI/tutorials/forms/multi-page/). This outlined that I: (a) repeat overall instructions on every page; (b) split the form up according to logical groups; (c) make it easy to recognise and skip optional stages; and (d) not to set a time limit (I mean why would I for this?).
+Whilst developing the form, I made sure to also read the w3 standard for when forms are multiple pages loacted [here](https://www.w3.org/WAI/tutorials/forms/multi-page/). This outlined that I: (a) repeat overall instructions on every page; (b) split the form up according to logical groups; and (c) make it easy to recognise and skip optional stages.
 
 .
 .
@@ -46,8 +46,11 @@ I asked this because `<details>` elements can't be direct children of `<tbody>` 
 > How does pagination work?
 I asked this to help discover a way to introduce pagination. I already had an idea of how to implement this, however I came into roadblocks regarding the structure of how to do it without it being clustered and unreadable. It introduced me to the idea of offset regarding database queries, and passing an object to track pagination between the front and backend.
 
-### Prompts to develop GHIJ (example)
-For the GHIJ feature I ...
+### Prompts to multi-page form
+For the multi-page form, I used AI to help with uncluttering some of my code.
+
+> For the saving functions, could I use a wrapper? They all seem really identical in functionality, and seems like repetition
+I asked this, as the code I had written before had been three functions with the same functionality, but with wording differences, and class/id differing names. I had used python wrapper functions in the past, but was unaware/unsure on the approach for them within JS and how to do it cleanly and with a good approach.
 
 >  this is an example prompt given to a chatbot
 words words words etc

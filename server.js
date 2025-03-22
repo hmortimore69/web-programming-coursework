@@ -7,32 +7,13 @@ const app = express();
 const port = 8080;
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
-async function getRaces(req, res) {
-    res.json(await db.getLastTenRaces());
-}
-
-async function getRace(req, res) {
-    const { page = 1, pageSize = 10 } = req.query;
-    const result = await db.getRace(req.params.id, parseInt(page), parseInt(pageSize));
-    
-    if (result) {
-        res.json(result);
-    } else {
-        res.status(404).send("No race found with that ID.");
-    }
-}
-
-async function createRace(req, res) {
-    res.status(200).send("Race created");
-}
+app.use(express.static("public"));
+app.use(express.json());
 
 // API Endpoints
 app.get('/api/races', getRaces);
 app.get('/api/races/:id', getRace);
 app.post('/api/admin/new-race', createRace);
-
-// Static
-app.use(express.static("public"));
 
 // Endpoints
 app.get('/', (req, res) => {
@@ -53,6 +34,24 @@ app.get('/admin/new-race', (req, res) => {
     res.sendFile(join(__dirname, "public", "admin", "newRace", "newRace.html"));
 })
 
+async function getRaces(req, res) {
+    res.json(await db.getLastTenRaces());
+}
+
+async function getRace(req, res) {
+    const { page = 1, pageSize = 10 } = req.query;
+    const result = await db.getRace(req.params.id, parseInt(page), parseInt(pageSize));
+    
+    if (result) {
+        res.json(result);
+    } else {
+        res.status(404).send("No race found with that ID.");
+    }
+}
+
+async function createRace(req, res) {
+    db.createNewRace(req.body);
+}
 
 app.listen(port, () => {
     console.log(`Server running on http://localhost:${port}`);

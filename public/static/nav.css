@@ -3,8 +3,7 @@
 }
 
 body {
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-    Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
   padding: 10px;
   margin: 0;
   padding: 0;
@@ -21,24 +20,36 @@ nav {
   height: 64px;
   padding: 10px;
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
 
-  a {
-    color: white;
-    font-family: Arial, sans-serif;
-    font-size: 24px;
-    font-weight: bold;
-    text-decoration: none;
-    transition: color 0.3s ease;
-  }
+.nav-float-right {
+  margin-left: auto;
+  display: flex;
+  gap: 15px;
+  align-items: center;
+  padding: 0 10px;
+}
 
-  button {
-    background-color: #1abc9c;
-    padding: 10px;
-    border: none;
-    cursor: pointer;
-    border-radius: 5px;
-  }
+nav a {
+  color: white;
+  font-family: Arial, sans-serif;
+  font-size: 24px;
+  font-weight: bold;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+nav a:hover {
+  color: #1abc9c;
+}
+
+nav button {
+  background-color: #1abc9c;
+  padding: 10px 15px;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
 }

@@ -12,7 +12,6 @@ async function fetchRaceData(page = 1) {
     if (!response.ok) throw new Error(`Response Status: ${response.status}`);
 
     const raceData = await response.json();
-    console.log(raceData);
 
     renderRaceTable(raceData);
     updatePaginationControls(raceData.pagination);
@@ -46,10 +45,11 @@ function renderRaceTable(raceData) {
   raceFinishTimeElement.textContent = formatDate(raceData.timeFinished);
   checkpointCountElement.textContent = raceData.totalCheckpoints;
 
-  if (raceData.timeFinished * 1000 >= Date.now() && raceData.timeStarted * 1000 <= Date.now()) {
+  if (raceData.timeFinished >= Date.now() && raceData.timeStarted <= Date.now()) {
     const liveTemplate = document.querySelector('#live-indicator-template').content.cloneNode(true);
-    document.querySelector('#race-tracker-header').textContent = 'Race Details ';
-    document.querySelector('#race-tracker-header').appendChild(liveTemplate);
+    const raceTrackerHeader = document.querySelector('#race-tracker-header')
+    raceTrackerHeader.textContent = 'Race Details ';
+    raceTrackerHeader.appendChild(liveTemplate);
   }
 
   tableBody.innerHTML = '';
@@ -74,7 +74,7 @@ function renderRaceTable(raceData) {
  * @returns {string} Formatted date string.
  */
 function formatDate(timestamp, defaultText = 'N/A') {
-  return timestamp ? new Date(timestamp * 1000).toLocaleString() : defaultText;
+  return timestamp ? new Date(timestamp).toLocaleString() : defaultText;
 }
 
 /**
@@ -89,6 +89,7 @@ function formatTime(timeDiffInSeconds) {
   const minutes = Math.floor((timeDiffInSeconds % 3600) / 60);
   const seconds = timeDiffInSeconds % 60;
 
+  // e.g. 10:01:03
   return `${hours > 0 ? hours + ':' : ''}${minutes < 10 && hours > 0 ? '0' + minutes : minutes}:${seconds < 10 ? '0' + seconds : seconds}`;
 }
 
@@ -101,9 +102,11 @@ function updatePaginationControls(pagination) {
   const nextButton = document.querySelector('#next-page');
   const pageInfo = document.querySelector('#page-info');
 
+  if (pagination.totalPages === 0) pagination.page = 0;
+
   pageInfo.textContent = `Page ${pagination.page} of ${pagination.totalPages}`;
 
-  prevButton.disabled = pagination.page === 1;
+  prevButton.disabled = pagination.page <= 1;
   nextButton.disabled = pagination.page === pagination.totalPages;
 
   prevButton.dataset.page = pagination.page - 1;

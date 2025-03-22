@@ -11,11 +11,15 @@
   <body>
     <nav>
       <a href="/" id="logo-home">PJC Race Tracker</a>
+      <div class="nav-float-right">
+        <a href="/">Home</a>
+        <a href="/admin">Admin</a>
+      </div>
     </nav>
 
     <main>
       <section id="race-history">
-        <h3>Last 10 Races</h3>
+        <h3>Race History</h3>
         <div class="race-table-container" id="race-history-table-container">
           <table class="race-table" id="race-history-table">
             <thead>
@@ -34,13 +38,9 @@
         <td class="start-time"></td>
         <td class="end-time"></td>
         <td class="participants"></td>
+        <td class="status"></td>
       </tr>
     </template>
-
-    <template id="live-indicator">
-        <span class="live-indicator">LIVE</span>
-    </template>
-
     <script src="script.js"></script>
   </body>
 </html>

@@ -28,16 +28,6 @@
   text-align: center;
 }
 
-.live-indicator {
-  color: white;
-  background-color: red;
-  padding: 2px 5px;
-  border-radius: 5px;
-  font-size: 12px;
-  display: inline-block;
-  vertical-align: middle;
-}
-
 .live-race {
   background-color: #ffcccc;
   color: #900;

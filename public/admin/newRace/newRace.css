@@ -1,21 +1,21 @@
-.race-details-step {
+.new-race-step {
   display: none;
-
-  button {
-    margin-top: 10px;
-    padding: 8px 15px;
-    border: none;
-    background-color: #1abc9c;
-    color: white;
-    cursor: pointer;
-    border-radius: 5px;
-  }
 }
 
-.race-details-step.active {
+.new-race-step button {
+  margin-top: 10px;
+  padding: 8px 15px;
+  border: none;
+  background-color: #1abc9c;
+  color: white;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.new-race-step.active {
   display: block;
 }
 
-.requirement-message {
+.user-feedback-message {
   color: red;
 }

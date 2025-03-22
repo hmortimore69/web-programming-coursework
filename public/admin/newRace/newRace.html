@@ -21,48 +21,105 @@
       <div class="progress-bar">
         <div class="progress" id="progress"></div>
       </div>
-      <div class="new-race-form-flow">
+      <section class="new-race-form-flow">
         <!-- STEP 1 (RACE DETAILS SETUP) -->
-        <div class="race-details-step">
-          <label for="form-progress-bar">Step 1 of 3 - Race Details: </label> 
-          <progress name="form-progress-bar" max="3" value="1">(Step 1 of 3)</progress><br>    
+        <div class="new-race-step">
+          <h3>Step 1 of 4 - Race Details:
+          <progress name="form-progress-bar" max="4" value="1">(Step 1 of 4)</progress></h3>
 
-          <label for="race-name">Race Name:</label>
-          <input id="race-name-input" type="text" name="race-name" placeholder="My new race" /><br>
+          <div id="race-details">
+            <label for="race-name">Race Name:</label>
+            <input id="race-name" type="text" name="race-name" placeholder="My new race" /><br>
+  
+            <label for="race-start-date">Start Date:</label>
+            <input id="race-start-date" type="datetime-local" name="race-start-date-time" /><br>
+  
+            <label for="race-duration">Duration:</label>
+            <input id="race-duration" type="time" max="24:00" min="00:00" placeholder="24" name="race-duration" /><br>          
+          </div>
 
-          <label for="race-start-date">Start Date:</label>
-          <input id="race-start-date" type="datetime-local" name="race-start-date-time" /><br>
-
-          <label for="race-start-date">Finish Date:</label>
-          <input id="race-start-date" type="datetime-local" name="race-finish-date-time" /><br>
-
-          <label for="checkpoint-checkbox">Checkpoints:</label>
-          <input id="checkpoint-checkbox" type="checkbox" name="checkpoint-checkbox" /><br>
-          
           <button type="button" class="next-step">NEXT</button>
         </div>
 
         <!-- STEP 2 (CHECKPOINT SETUP) -->
-        <div class="race-details-step">
-          <label for="form-progress-bar">Step 2 of 3 - Checkpoint Setup: </label>
-          <progress name="form-progress-bar" max="3" value="2">(Step 2 of 3)</progress><br>
+        <div class="new-race-step">
+          <h3>Step 2 of 4 - Checkpoint Setup:
+          <progress name="form-progress-bar" max="4" value="2">(Step 2 of 4)</progress></h3>
+
+          <div id="checkpoint-list"></div>
+
+          <button type="button" id="add-checkpoint-button">ADD CHECKPOINT</button><br>
           
           <button type="button" class="prev-step">PREVIOUS</button>
           <button type="button" class="next-step">NEXT</button>
         </div>
 
-      <!-- STEP 3 (PARTICIPANT SETUP) -->
-        <div class="race-details-step">
-          <label for="form-progress-bar">Step 3 of 3 - Participant: </label>
-          <progress name="form-progress-bar" max="3" value="3">(Step 3 of 3)</progress><br>
+        <!-- STEP 3 (MARSHALL SETUP) -->
+        <div class="new-race-step">
+          <h3>Step 3 of 4 - Marshall Setup:
+          <progress name="form-progress-bar" max="4" value="3">(Step 3 of 4)</progress></h3>
+
+          <div id="marshall-list"></div>
+
+          <button type="button" id="add-marshall-button">ADD MARSHALL</button><br>
 
           <button type="button" class="prev-step">PREVIOUS</button>
-          <button type="button" id="submitBtn">SUBMIT</button>
+          <button type="button" class="next-step">NEXT</button>
         </div>
 
-        <p class="requirement-message" hidden>* Please enter all required information.</p>
-      </div>
+        <!-- STEP 4 (PARTICIPANT SETUP) -->
+        <div class="new-race-step">
+          <h3>Step 4 of 4 - Participant Setup:
+          <progress name="form-progress-bar" max="4" value="4">(Step 4 of 4)</progress></h3>
+
+          <div id="participant-list"></div>
+
+          <button type="button" id="add-participant-button">ADD PARTICIPANT</button><br>
+
+          <button type="button" class="prev-step">PREVIOUS</button>
+          <button type="button" id="submit-button">SUBMIT</button>
+        </div>
+
+        <p class="user-feedback-message" hidden>Please enter valid information.</p>
+      </section>
     </main>
+
+    <template id="new-checkpoint-template">
+      <div class="checkpoint-details">
+        <label for="checkpoint-name">Checkpoint Name:</label>
+        <input type="text" class="checkpoint-name" name="checkpoint-name" placeholder="My checkpoint" />
+        
+        <label for="order-number">Order:</label>
+        <input type="number" min="1" class="checkpoint-order" name="order-number" placeholder="1" />
+        
+        <button type="button" class="remove-checkpoint-button">REMOVE</button><br>
+      </div>
+    </template>
+
+    <template id="new-marshall-template">
+      <div class="marshall-details">
+        <label for="marshall-first-name">First Name:</label>
+        <input type="text" class="marshall-first-name" name="marshall-first-name" placeholder="Marshall" />
+
+        <label for="marshall-name">Last Name:</label>
+        <input type="text" class="marshall-last-name" name="marshall-last-name" placeholder="Mathers" />
+        
+        <button type="button" class="remove-marshall-button">REMOVE</button><br>
+      </div>
+    </template>
+
+    <template id="new-participant-template">
+      <div class="participant-details">
+        <label for="participant-first-name">First Name:</label>
+        <input type="text" class="participant-first-name" name="participant-first-name" placeholder="David" />
+
+        <label for="participant-last-name">Last Name:</label>
+        <input type="text" class="participant-last-name" name="participant-last-name" placeholder="Bowie" />
+        
+        <button type="button" class="remove-participant-button">REMOVE</button><br>
+      </div>
+    </template>
+
     <script src="newRace/newRace.js"></script>
   </body>
 </html>
