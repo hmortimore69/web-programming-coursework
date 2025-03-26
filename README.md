@@ -25,12 +25,20 @@ When I designed the flow for creating a race originally, I intended for it to be
 
 Whilst developing the form, I made sure to also read the w3 standard for when forms are multiple pages loacted [here](https://www.w3.org/WAI/tutorials/forms/multi-page/). This outlined that I: (a) repeat overall instructions on every page; (b) split the form up according to logical groups; and (c) make it easy to recognise and skip optional stages.
 
-.
-.
-.
-### Final Key Feature Name/Description.
-Same for each feature… you get the idea :-)
+### Database.js
+The database.js file has gone through many iterations, including accidentally using sqlite v1 rather than the updated version. After having to rewrite the file in v3, I encountered issues with promises and context.
 
+```javascript
+const raceData = dbConn.all("SELECT * FROM races");
+console.log(raceData);
+```
+
+The code above would provide the following output:
+```
+Database {}
+```
+
+However, after doing some research online, it seemed like it was recommended to use callback functions, and promises. So, I created a wrapper for running `.all()` and `.get` methods and iterated over each row to resolve the promise.
 
 ## AI
 Replace this with DETAIL about your use of AI, listing of the prompts you used, and whether the results formed or inspired part of your final submission and where we can see this (and if not, why not?). You may wish to group prompts into headings/sections - use markdown in any way that it helps you communicate your use of AI.  Tell us about what went right,  what went horribly wrong and what you learned from it.

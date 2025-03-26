@@ -1,7 +1,7 @@
 import express from "express";
 import { fileURLToPath } from "url";
 import { dirname, join } from "path";
-import * as db from "./database.js";
+import * as db from "./database/database.js";
 
 const app = express();
 const port = 8080;

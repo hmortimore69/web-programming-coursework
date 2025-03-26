@@ -73,12 +73,12 @@ function createRaceRow(raceId, race) {
 }
 
 /**
- * This function converts a UNIX timestamp in seconds to a formatted datetime string.
- * @param {number} unixTimestamp - The UNIX timestamp in seconds.
+ * This function converts a timestamp in to a formatted datetime string.
+ * @param {number} timestamp - The timestamp in miliseconds.
  * @returns {string} The formatted datetime string.
  */
-function formatUnixTimestamp(unixTimestamp) {
-  const date = new Date(unixTimestamp);
+function formatUnixTimestamp(timestamp) {
+  const date = new Date(timestamp);
   const day = date.getDate();
   const suffix =
     day % 10 === 1 && day !== 11
@@ -88,10 +88,11 @@ function formatUnixTimestamp(unixTimestamp) {
       : day % 10 === 3 && day !== 13
       ? "rd"
       : "th";
-  const formattedDate = date.toLocaleDateString("en-UK", { weekday: "long" }) + " " + day + suffix;
+  const weekday = date.toLocaleDateString("en-UK", { weekday: "long" });
+  const month = date.toLocaleDateString("en-UK", { month: "long" });
+  const year = date.getFullYear();
   const hours = date.getHours().toString().padStart(2, "0");
   const minutes = date.getMinutes().toString().padStart(2, "0");
 
-  // e.g. Wednesday 5th 00:00
-  return `${formattedDate} ${hours}:${minutes}`;
+  return `${weekday} ${day}${suffix} ${month} ${year} ${hours}:${minutes}`;
 }
