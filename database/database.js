@@ -5,9 +5,9 @@ const DB_PATH = './Database/database.sqlite';
 
 const DB_CONN = new Database(DB_PATH, (err) => {
   if (err) {
-    console.error('Error opening database:', err.message);
+    console.error('Error connecting to database:', err.message);
   } else {
-    console.log('Database opened successfully.');
+    console.log('Database connection established.');
   }
 });
 
@@ -161,8 +161,6 @@ export async function createNewRace(req) {
   }
 
   if (req.checkpoints.length > 0) {
-    console.log(req.checkpoints);
-
     for (const checkpoint of req.checkpoints) {
       DB_CONN.run(
         'INSERT INTO checkpoints (race_id, checkpoint_name, checkpoint_order) VALUES (?, ?, ?)',
@@ -172,10 +170,21 @@ export async function createNewRace(req) {
   }
 
   if (req.marshalls.length > 0) {
-    console.log(req.marshalls);
+    for (const marshall of req.marshalls) {
+      DB_CONN.run(
+        'INSERT INTO marshalls (race_id, first_name, last_name) VALUES (?, ?, ?)',
+        [newRaceID, marshall['.marshall-first-name'], marshall['.marshall-last-name']],
+      );
+    }
   }
 
   if (req.participants.length > 0) {
-    console.log(req.participants);
+    for (const participant of req.participants) {
+      DB_CONN.run(
+        `INSERT INTO participants (race_id, first_name, last_name, bib_number) 
+         VALUES (?, ?, ?, COALESCE((SELECT MAX(bib_number) + 1 FROM participants WHERE race_id = ?), 1))`,
+        [newRaceID, participant['.participant-first-name'], participant['.participant-last-name'], newRaceID]
+      );
+    }
   }
 }

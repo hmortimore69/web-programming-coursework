@@ -11,9 +11,9 @@ const migrations = readFileSync(SQL_PATH, "utf8");
 
 const dbConn = new Database(DB_PATH, (err) => {
     if (err) {
-        console.error("Error opening database:", err.message);
-    } else {
-        console.log("Database opened successfully.");
+        console.error('Error connecting to database:', err.message);
+      } else {
+        console.log('Database connection established.');
     }
 });
 
