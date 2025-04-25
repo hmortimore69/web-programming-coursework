@@ -30,14 +30,31 @@ async function getRow(sql, args) {
   });
 }
 
-export async function getLastTenRaces() {
+async function deleteRow(sql, args) {
+  return await new Promise((resolve, reject) => {
+    DB_CONN.run(sql, args, function (error) {
+      if (error) reject(error);
+      resolve(row);
+    });
+  });
+}
+
+// Main Database Queries
+export async function getAllRaces(page = 1, pageSize = 10) {
   try {
+    const offset = (page - 1) * pageSize;
     const races = {};
 
-    const raceData = await getAll('SELECT * FROM races');
+    const raceData = await getAll(`
+      SELECT * 
+      FROM races 
+      ORDER BY CAST(time_started AS INTEGER) DESC 
+      LIMIT ? OFFSET ?
+    `, [pageSize, offset]);    
+    const raceCount = await getAll('SELECT COUNT(*) as total FROM races');
 
     for (const race of raceData) {
-      const participantTotal = getRow(`
+      const participantTotal = await getRow(`
         SELECT COUNT(*) as total
         FROM participants p
         WHERE p.race_id = ?
@@ -49,6 +66,14 @@ export async function getLastTenRaces() {
         participants: participantTotal.total,
       };
     }
+
+
+    races["pagination"] = {
+      page,
+      pageSize,
+      total: raceCount[0].total,
+      totalPages: Math.ceil(raceCount[0].total / pageSize),
+    };
 
     return races;
   } catch (error) {
@@ -186,5 +211,21 @@ export async function createNewRace(req) {
         [newRaceID, participant['.participant-first-name'], participant['.participant-last-name'], newRaceID]
       );
     }
+  }
+}
+
+export async function deleteRace(raceId) {
+  try {
+    await deleteRow('DELETE FROM checkpoints WHERE race_id = ?', [raceId]);
+    await deleteRow('DELETE FROM marshalls WHERE race_id = ?', [raceId]);
+    await deleteRow('DELETE FROM participants WHERE race_id = ?', [raceId]);
+
+    const rowsDeleted = await deleteRow('DELETE FROM races WHERE race_id = ?', [raceId]);
+
+    console.log(`Race with ID ${raceId} and its associated data have been deleted.`);
+    return rowsDeleted; // Return the number of rows deleted from the races table
+  } catch (error) {
+    console.error(`Error deleting race with ID ${raceId}:`, error.message);
+    throw error;
   }
 }

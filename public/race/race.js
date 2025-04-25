@@ -1,5 +1,6 @@
 /**
  * Fetches race data from the API endpoint and updates the UI table and race details.
+ * If a race is offline, it will check whether there is a cached version of the race and use it.
  * @param {number} page - The current page number for pagination (default: 1).
  */
 async function fetchRaceData(page = 1) {
@@ -12,11 +13,28 @@ async function fetchRaceData(page = 1) {
     if (!response.ok) throw new Error(`Response Status: ${response.status}`);
 
     const raceData = await response.json();
+    
+    // Clear previously saved race data and store current race for offline use
+    localStorage.removeItem('storedRace');
+    localStorage.setItem('storedRace', JSON.stringify({
+      raceData,
+      timestamp: Date.now(),
+      raceID
+    }));
 
     renderRaceTable(raceData);
     updatePaginationControls(raceData.pagination);
   } catch (error) {
     console.error('Error fetching race data:', error);
+
+    if (hasOfflineRaceData()) {
+      const offlineData = localStorage.getItem('storedRace');
+      const parsedData = JSON.parse(offlineData);
+
+      console.log('Using offline race data');
+      renderRaceTable(parsedData.raceData);
+      updatePaginationControls(parsedData.raceData.pagination);
+    }
   }
 }
 
@@ -113,6 +131,18 @@ function updatePaginationControls(pagination) {
   nextButton.dataset.page = pagination.page + 1;
 }
 
+/**
+ * Checks if the current race matches the stored offline race
+ * @returns {boolean} True if the race is available offline
+ */
+function hasOfflineRaceData() {
+  const offlineData = localStorage.getItem('storedRace');
+  if (!offlineData) return false;
+  
+  const parsedData = JSON.parse(offlineData);
+  return parsedData.raceID === getRaceID();
+}
+
 document.querySelector('#prev-page').addEventListener('click', (event) => {
   const page = Number(event.target.dataset.page);
   if (page > 0) fetchRaceData(page);
@@ -124,7 +154,16 @@ document.querySelector('#next-page').addEventListener('click', (event) => {
 });
 
 document.addEventListener('DOMContentLoaded', () => {
-  fetchRaceData();
+  if (!navigator.onLine && hasOfflineRaceData()) {
+    const offlineData = JSON.parse(localStorage.getItem('storedRace'));
+    console.log('Offline mode - using cached race data');
+
+    renderRaceTable(offlineData.raceData);
+    updatePaginationControls(offlineData.raceData.pagination);
+  } else {
+    fetchRaceData();
+  }
+  
   setInterval(fetchRaceData, 10000);
 });
 

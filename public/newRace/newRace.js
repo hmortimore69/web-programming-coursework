@@ -67,8 +67,6 @@ document.addEventListener('DOMContentLoaded', function () {
     if (!validateStep(currentStep)) return;
     
     saveData(currentStep);
-
-    console.log(formData);
     
     try {
       const response = await fetch(`/api/admin/new-race`, {
@@ -78,8 +76,13 @@ document.addEventListener('DOMContentLoaded', function () {
         },
         body: JSON.stringify(formData),
       });
-  
-      if (!response.ok) throw new Error(`Response Status: ${response.status}`);
+
+      console.log(response);
+      if (response.ok) {
+        window.location.href = "/home";
+      } else {
+        throw new Error(`Response Status: ${response.status}`);
+      }
     } catch (error) {
       console.error('Error posting new race', error);
     }

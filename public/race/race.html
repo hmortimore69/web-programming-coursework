@@ -10,15 +10,19 @@
   </head>
   <body>
     <nav>
-      <a href="/" id="logo-home">PJC Race Tracker</a>
-      <a href="/">Home</a>
-      <button id="refresh-stats-button">Refresh</button>
+      <a href="/" id="logo-home">PJC</a>
+      <div class="nav-float-right">
+        <a href="/">Home</a>
+        <a href="/dashboard">Dashboard</a>
+        <a href="/new-race">New Race</a>      
+      </div>
     </nav>
 
     <main>
       <section id="race-info-section" aria-live="polite">
         <div class="race-details-container">
           <h2 id="race-tracker-header">Race Details</h2>
+          <button id="refresh-stats-button">Refresh</button>
           <p>
             <strong>Start Time: </strong><span id="race-start-time">N/A</span>
           </p>
@@ -26,8 +30,7 @@
             <strong>Finish Time: </strong><span id="race-finish-time">N/A</span>
           </p>
           <p>
-            <strong>Checkpoints: </strong
-            ><span id="race-checkpoint-counter">N/A</span>
+            <strong>Checkpoints: </strong><span id="race-checkpoint-counter">N/A</span>
           </p>
         </div>
         <div class="race-table-container" id="race-container">
@@ -62,7 +65,7 @@
     </template>
 
     <template id="live-indicator-template">
-      <span class="live-indicator">LIVE</span>
+      <span class="live-indicator">● LIVE</span>
     </template>
 
     <script src="race.js"></script>

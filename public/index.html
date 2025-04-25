@@ -10,16 +10,16 @@
   </head>
   <body>
     <nav>
-      <a href="/" id="logo-home">PJC Race Tracker</a>
+      <a href="/" id="logo-home">PJC</a>
       <div class="nav-float-right">
         <a href="/">Home</a>
-        <a href="/admin">Admin</a>
+        <a href="/new-race">New Race</a>      
       </div>
     </nav>
 
     <main>
       <section id="race-history">
-        <h3>Race History</h3>
+        <h3>Race List</h3>
         <div class="race-table-container" id="race-history-table-container">
           <table class="race-table" id="race-history-table">
             <thead>
@@ -29,6 +29,11 @@
             </thead>
             <tbody></tbody>
           </table>
+          <div class="pagination-controls">
+            <button id="prev-page" disabled>Previous</button>
+            <span id="page-info">Page 1 of 1</span>
+            <button id="next-page" disabled>Next</button>
+          </div>
         </div>
       </section>
     </main>
@@ -38,7 +43,6 @@
         <td class="start-time"></td>
         <td class="end-time"></td>
         <td class="participants"></td>
-        <td class="status"></td>
       </tr>
     </template>
     <script src="script.js"></script>
