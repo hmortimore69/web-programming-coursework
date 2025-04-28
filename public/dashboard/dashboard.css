@@ -52,11 +52,6 @@ h1 {
     margin-top: 10px;
 }
 
-/* Utility classes */
-.hidden {
-    display: none;
-}
-
 .race-details-container {
     text-align: center;
     padding: 15px;
