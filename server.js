@@ -15,9 +15,9 @@ app.get('/api/races', getRaces);
 app.get('/api/races/:id', getRace);
 app.post('/api/new-race', createRace);
 app.delete('/api/delete-race', deleteRace);
+app.patch('/api/update-race/', updateRace);
 
 // API Update Race Endpoints
-app.patch('/api/races/:id/', updateRace);
 
 // Endpoints
 app.get('/', (req, res) => {

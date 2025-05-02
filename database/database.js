@@ -98,7 +98,7 @@ export async function getRace(raceId, page = 1, pageSize = 10) {
       `SELECT
         race_id as raceId,
         time_started as timeStarted,
-        time_finished as timeFinished
+        time_finished as timeFinished,
         race_started as raceStarted
       FROM races
       WHERE race_id = ?`, [raceId],
@@ -144,10 +144,13 @@ export async function getRace(raceId, page = 1, pageSize = 10) {
       WHERE race_id = ? 
     `, [raceId]);
 
+    if (!raceData) return;
+
     return {
       raceId,
       timeStarted: raceData.timeStarted,
       timeFinished: raceData.timeFinished,
+      race_started: raceData.raceStarted,
       totalCheckpoints: checkpointCount.total,
       participants,
       pagination: {
@@ -159,7 +162,6 @@ export async function getRace(raceId, page = 1, pageSize = 10) {
     };
   } catch (error) {
     console.error('Error fetching race data:', error);
-    throw error;
   }
 }
 
@@ -235,7 +237,6 @@ export async function deleteRaceById(raceId) {
     return true; // Return the number of rows deleted from the races table
   } catch (error) {
     console.error(`Error deleting race with ID ${raceId}:`, error.message);
-    throw error;
   }
 }
 

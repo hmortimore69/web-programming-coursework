@@ -191,16 +191,32 @@ async function deleteRaceById(raceId) {
   }
 }
 
-function updateRaceProperty(property, value) {
+function updateLocalStorageProperty(property, value) {
   const mutableRaceData = JSON.parse(localStorage.getItem('mutableRaceData'));
   mutableRaceData.raceDetails[property] = value;
   localStorage.setItem('mutableRaceData', JSON.stringify(mutableRaceData));
 }
 
-function startRace() {
-  updateRaceProperty("timeStarted", Date.now());
+async function startRace() {
+  updateLocalStorageProperty("timeStarted", Date.now());
 
+  try {
+    const response = await fetch(`/api/update-race`, {
+      method: "PATCH",
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(formData),
+    });
 
+    if (response.ok) {
+      window.location.href = "/home";
+    } else {
+      throw new Error(`Response Status: ${response.status}`);
+    }
+  } catch (error) {
+    console.error('Error posting new race', error);
+  }
 }
 
 document.addEventListener('DOMContentLoaded', main);
