@@ -34,9 +34,18 @@ async function deleteRow(sql, args) {
   return await new Promise((resolve, reject) => {
     DB_CONN.run(sql, args, function (error) {
       if (error) reject(error);
-      resolve(row);
+      resolve(this.changes);
     });
   });
+}
+
+async function updateRace(sql, args) {
+  return await new Promise((resolve, reject) => {
+    DB_CONN.run(sql, args, function(error) {
+      if (error) reject(error);
+      resolve(this.changes);
+    })
+  })
 }
 
 // Main Database Queries
@@ -90,6 +99,7 @@ export async function getRace(raceId, page = 1, pageSize = 10) {
         race_id as raceId,
         time_started as timeStarted,
         time_finished as timeFinished
+        race_started as raceStarted
       FROM races
       WHERE race_id = ?`, [raceId],
     );
@@ -214,18 +224,21 @@ export async function createNewRace(req) {
   }
 }
 
-export async function deleteRace(raceId) {
+export async function deleteRaceById(raceId) {
   try {
     await deleteRow('DELETE FROM checkpoints WHERE race_id = ?', [raceId]);
     await deleteRow('DELETE FROM marshalls WHERE race_id = ?', [raceId]);
     await deleteRow('DELETE FROM participants WHERE race_id = ?', [raceId]);
+    await deleteRow('DELETE FROM races WHERE race_id = ?', [raceId]);
 
-    const rowsDeleted = await deleteRow('DELETE FROM races WHERE race_id = ?', [raceId]);
-
-    console.log(`Race with ID ${raceId} and its associated data have been deleted.`);
-    return rowsDeleted; // Return the number of rows deleted from the races table
+    console.log(`The race with ID ${raceId} and its associated data has been deleted.`);
+    return true; // Return the number of rows deleted from the races table
   } catch (error) {
     console.error(`Error deleting race with ID ${raceId}:`, error.message);
     throw error;
   }
+}
+
+export async function updateStartTime(raceId, data) {
+  updateRace('UPDATE table races time_started = ? WHERE race_id = ?', [data, raceId]);
 }

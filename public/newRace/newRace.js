@@ -69,7 +69,7 @@ document.addEventListener('DOMContentLoaded', function () {
     saveData(currentStep);
     
     try {
-      const response = await fetch(`/api/admin/new-race`, {
+      const response = await fetch(`/api/new-race`, {
         method: "POST",
         headers: {
           'Content-Type': 'application/json'

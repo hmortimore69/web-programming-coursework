@@ -12,18 +12,18 @@ async function fetchRaceData(page = 1) {
 
     if (!response.ok) throw new Error(`Response Status: ${response.status}`);
 
-    const raceData = await response.json();
+    const raceDetails = await response.json();
     
     // Clear previously saved race data and store current race for offline use
     localStorage.removeItem('storedRace');
     localStorage.setItem('storedRace', JSON.stringify({
-      raceData,
+      raceDetails,
       timestamp: Date.now(),
       raceID
     }));
 
-    renderRaceTable(raceData);
-    updatePaginationControls(raceData.pagination);
+    renderRaceTable(raceDetails);
+    updatePaginationControls(raceDetails.pagination);
   } catch (error) {
     console.error('Error fetching race data:', error);
 
@@ -32,8 +32,8 @@ async function fetchRaceData(page = 1) {
       const parsedData = JSON.parse(offlineData);
 
       console.log('Using offline race data');
-      renderRaceTable(parsedData.raceData);
-      updatePaginationControls(parsedData.raceData.pagination);
+      renderRaceTable(parsedData.raceDetails);
+      updatePaginationControls(parsedData.raceDetails.pagination);
     }
   }
 }
@@ -51,19 +51,19 @@ function getRaceID() {
 
 /**
  * Renders the race table using row templates.
- * @param {Object} raceData - The race data object retrieved from the API endpoint.
+ * @param {Object} raceDetails - The race data object retrieved from the API endpoint.
  */
-function renderRaceTable(raceData) {
+function renderRaceTable(raceDetails) {
   const raceStartTimeElement = document.querySelector('#race-start-time');
   const raceFinishTimeElement = document.querySelector('#race-finish-time');
   const checkpointCountElement = document.querySelector('#race-checkpoint-counter');
   const tableBody = document.querySelector('.race-table tbody');
 
-  raceStartTimeElement.textContent = formatDate(raceData.timeStarted);
-  raceFinishTimeElement.textContent = formatDate(raceData.timeFinished);
-  checkpointCountElement.textContent = raceData.totalCheckpoints;
+  raceStartTimeElement.textContent = formatDate(raceDetails.timeStarted);
+  raceFinishTimeElement.textContent = formatDate(raceDetails.timeFinished);
+  checkpointCountElement.textContent = raceDetails.totalCheckpoints;
 
-  if (raceData.timeFinished >= Date.now() && raceData.timeStarted <= Date.now()) {
+  if (raceDetails.timeFinished >= Date.now() && raceDetails.timeStarted <= Date.now()) {
     const liveTemplate = document.querySelector('#live-indicator-template').content.cloneNode(true);
     const raceTrackerHeader = document.querySelector('#race-tracker-header')
     raceTrackerHeader.textContent = 'Race Details ';
@@ -75,11 +75,11 @@ function renderRaceTable(raceData) {
   const rowTemplate = document.querySelector('#participant-row-template');
 
   
-  for (const participant of raceData.participants) {
+  for (const participant of raceDetails.participants) {
     const row = rowTemplate.content.cloneNode(true);
     row.querySelector('.bib-number').textContent = participant.bibNumber;
     row.querySelector('.participant-name').textContent = `${participant.firstName} ${participant.lastName}`;
-    row.querySelector('.finish-time').textContent = formatTime(participant.timeFinished - raceData.timeStarted) || '--';
+    row.querySelector('.finish-time').textContent = formatTime(participant.timeFinished - raceDetails.timeStarted) || '--';
 
     tableBody.appendChild(row);
   }
@@ -158,8 +158,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const offlineData = JSON.parse(localStorage.getItem('storedRace'));
     console.log('Offline mode - using cached race data');
 
-    renderRaceTable(offlineData.raceData);
-    updatePaginationControls(offlineData.raceData.pagination);
+    renderRaceTable(offlineData.raceDetails);
+    updatePaginationControls(offlineData.raceDetails.pagination);
   } else {
     fetchRaceData();
   }

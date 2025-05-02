@@ -1,5 +1,6 @@
-document.addEventListener("DOMContentLoaded", async function () {
+function main() {
   const raceTable = document.querySelector("#race-history-table tbody");
+
   fetchRaces();
 
   raceTable.addEventListener("click", function (e) {
@@ -10,7 +11,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       window.location.href = `/race/${raceId}`;
     }
   });
-});
+}
 
 /**
  * Fetches race data from the api endpoint.
@@ -26,12 +27,12 @@ async function fetchRaces(page = 1) {
       throw new Error(`Response Status: ${response.status}`);
     }
 
-    const raceData = await response.json();
+    const raceDetails = await response.json();
 
-    populateRaceTable(raceData);
-    updatePaginationControls(raceData.pagination);
+    populateRaceTable(raceDetails);
+    updatePaginationControls(raceDetails.pagination);
 
-    return raceData;
+    return raceDetails;
   } catch (error) {
     console.error("Failed to fetch races:", error.message);
     return {};
@@ -122,6 +123,12 @@ function updatePaginationControls(pagination) {
   prevButton.dataset.page = pagination.page - 1;
   nextButton.dataset.page = pagination.page + 1;
 }
+
+document.addEventListener("DOMContentLoaded", main);
+
+document.querySelector('#role-selector')?.addEventListener('change', (e) => {
+  userType.setRole(e.target.value);
+});
 
 document.querySelector('#prev-page').addEventListener('click', (event) => {
   const page = Number(event.target.dataset.page);

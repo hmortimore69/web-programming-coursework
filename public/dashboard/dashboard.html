@@ -21,18 +21,28 @@
       <h1>Race Manager</h1>
 
       <section id="live-timer-section">
-        <div class="race-details-container">
-          <h2>Race Timer <span id="live-indicator"></span></h2>
-          <div id="race-timer">00:00:00</div>
+        <h2>Race Timer <span id="live-indicator"></span></h2>
+        <div id="race-timer">00:00:00</div>
+      </section>
+
+      <section class="admin-only" id="live-timer-controls">
+        <button id="start-timer-button">Start</button>
+        <button id="stop-timer-button">Stop</button>
+        <button id="finish-timer-button">Finish</button>
+        <div>
+          <label for="adjust-time-input">Adjust Time (seconds):</label>
+          <input type="number" id="adjust-time-input" placeholder="Enter seconds" />
+          <button id="adjust-time-button">Adjust</button>
         </div>
       </section>
 
-      <section>
+      <section class="admin-only" id="danger-zone">
         <h3>Delete Race</h3>
-        <span>Would you like to delete this race? </span><button class="danger">DELETE</button>
-        <p class="warning">This action cannot be undone.</p>
+        <span>Would you like to delete this race? </span><button id="delete-race-button" class="danger">DELETE</button>
       </section>
     </main>
+
     <script src="dashboard.js"></script>
+    <script src="/static/userType.js"></script>
   </body>
 </html>

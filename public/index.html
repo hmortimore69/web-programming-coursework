@@ -10,10 +10,17 @@
   </head>
   <body>
     <nav>
-      <a href="/" id="logo-home">PJC</a>
+      <div class="nav-left">
+        <a href="/" id="logo-home">PJC</a>
+        <select id="role-selector" class="role-selector">
+          <option value="spectator">Spectator</option>
+          <option value="marshall">Marshall</option>
+          <option value="admin">Administrator</option>
+        </select>
+      </div>
       <div class="nav-float-right">
         <a href="/">Home</a>
-        <a href="/new-race">New Race</a>      
+        <a href="/new-race" class="admin-only">New Race</a>
       </div>
     </nav>
 
@@ -45,6 +52,8 @@
         <td class="participants"></td>
       </tr>
     </template>
+
     <script src="script.js"></script>
+    <script src="/static/userType.js"></script>
   </body>
 </html>

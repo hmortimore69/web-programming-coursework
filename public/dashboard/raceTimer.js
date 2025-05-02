@@ -1,4 +1,4 @@
-const raceTimer = {
+export const raceTimer = {
   // Properties
   timerElement: document.querySelector('#race-timer'),
   liveIndicator: document.querySelector('#live-indicator'),
@@ -135,73 +135,3 @@ const raceTimer = {
         `${seconds.toString().padStart(2, '0')}s`;
   },
 };
-
-function main() {
-  const race = getStoredRace();
-  const raceId = race.raceID;
-
-  // Clone storedRace for mutable actions
-  localStorage.setItem('mutableRaceData', JSON.stringify(race));
-
-  if (race) {
-    const { timeStarted, timeFinished } = race.raceDetails;
-    const now = Date.now();
-
-    if (timeStarted <= now && timeFinished >= now) {
-      // Race is live
-      const elapsed = now - timeStarted;
-      raceTimer.setTime(elapsed);
-      raceTimer.start();
-    } else if (timeStarted > now) {
-      // Race hasn't started yet (show countdown)
-      raceTimer.startCountdown(timeStarted);
-		} else if (timeFinished < now) {
-			const finalTime = timeFinished - timeStarted;
-			raceTimer.setTime(finalTime);
-			raceTimer.finish();
-    } else {
-      // Race is over or not live
-      raceTimer.reset();
-    }
-  }
-
-  document.querySelector('#delete-race-button').addEventListener('click', () => {
-    deleteRaceById(raceId);
-  });
-}
-
-function getStoredRace() {
-  const stored = localStorage.getItem('storedRace');
-  return stored ? JSON.parse(stored) : null;
-}
-
-async function deleteRaceById(raceId) {
-  try {
-    const response = await fetch(`/api/delete-race?raceId=${raceId}`, {
-      method: "DELETE",
-    });
-
-    if (response.ok) {
-      window.location.href = "/home";
-    } else {
-      throw new Error(`Response Status: ${response.status}`);
-    }
-  } catch (error) {
-    console.error('Error posting new race', error);
-  }
-}
-
-function updateRaceProperty(property, value) {
-  const mutableRaceData = JSON.parse(localStorage.getItem('mutableRaceData'));
-  mutableRaceData.raceDetails[property] = value;
-  localStorage.setItem('mutableRaceData', JSON.stringify(mutableRaceData));
-}
-
-function startRace() {
-  updateRaceProperty("timeStarted", Date.now());
-
-
-}
-
-document.addEventListener('DOMContentLoaded', main);
-document.querySelector('#start-timer-button').addEventListener('click', startRace);

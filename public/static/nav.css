@@ -62,3 +62,11 @@ nav button {
   text-decoration: none;
   transition: color 0.3s ease;
 }
+
+#role-selector {
+  padding: 5px;
+  border-radius: 4px;
+  background: white;
+  border: 1px solid #ddd;
+  margin-left: 10px;
+}

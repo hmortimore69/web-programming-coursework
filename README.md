@@ -40,6 +40,15 @@ Database {}
 
 However, after doing some research online, it seemed like it was recommended to use callback functions, and promises. So, I created a wrapper for running `.all()` and `.get` methods and iterated over each row to resolve the promise.
 
+### Persistent User Type
+Why a shared object literal vs class?
+
+    Simple state management (no instantiation needed)
+
+    Singleton pattern (only one instance exists)
+
+    Stateless functions (pure helpers)
+
 ## AI
 Replace this with DETAIL about your use of AI, listing of the prompts you used, and whether the results formed or inspired part of your final submission and where we can see this (and if not, why not?). You may wish to group prompts into headings/sections - use markdown in any way that it helps you communicate your use of AI.  Tell us about what went right,  what went horribly wrong and what you learned from it.
 
