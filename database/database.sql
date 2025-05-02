@@ -2,7 +2,7 @@ CREATE TABLE IF NOT EXISTS races (
     race_id INTEGER PRIMARY KEY AUTOINCREMENT,
     race_name TEXT,
     time_started INTEGER NOT NULL,
-    time_finished INTEGER NOT NULL,
+    time_finished INTEGER,
     race_started BOOLEAN DEFAULT FALSE
 );
 

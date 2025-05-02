@@ -1,9 +1,22 @@
-#refresh-stats-button {
+button {
+  color: white;
   background-color: #1abc9c;
   padding: 10px;
   border: none;
   cursor: pointer;
   border-radius: 5px;
+}
+
+.race-details-buttons {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.button-container button {
+  display: inline-block;
+  margin: 0;
+  padding: 5px 10px; 
 }
 
 .race-details-container h2 {

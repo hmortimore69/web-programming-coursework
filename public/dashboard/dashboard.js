@@ -136,43 +136,80 @@ const raceTimer = {
   },
 };
 
-function main() {
-  const race = getStoredRace();
+async function main() {
+  const race = await getStoredRace();
   const raceId = race.raceID;
 
-  // Clone storedRace for mutable actions
-  localStorage.setItem('mutableRaceData', JSON.stringify(race));
-
-  if (race) {
-    const { timeStarted, timeFinished } = race.raceDetails;
-    const now = Date.now();
-
-    if (timeStarted <= now && timeFinished >= now) {
-      // Race is live
-      const elapsed = now - timeStarted;
-      raceTimer.setTime(elapsed);
-      raceTimer.start();
-    } else if (timeStarted > now) {
-      // Race hasn't started yet (show countdown)
-      raceTimer.startCountdown(timeStarted);
-		} else if (timeFinished < now) {
-			const finalTime = timeFinished - timeStarted;
-			raceTimer.setTime(finalTime);
-			raceTimer.finish();
-    } else {
-      // Race is over or not live
-      raceTimer.reset();
-    }
-  }
+  syncTimerWithRaceState(race);
 
   document.querySelector('#delete-race-button').addEventListener('click', () => {
     deleteRaceById(raceId);
   });
+
+  setInterval(() => syncTimerWithRaceState(), 10000);
 }
 
-function getStoredRace() {
+function syncTimerWithRaceState(race) {
+  if (!race) return;
+
+  console.log(race);
+
+  const { timeStarted, timeFinished } = race["raceDetails"];
+  const now = Date.now();
+
+  raceTimer.stop();
+
+  if (timeStarted <= now && timeFinished >= now) {
+    // Race is live
+    const elapsed = now - timeStarted;
+    raceTimer.setTime(elapsed);
+    raceTimer.start();
+  } else if (timeStarted > now) {
+    // Race hasn't started yet
+    raceTimer.startCountdown(timeStarted);
+  } else if (timeFinished < now) {
+    // Race is finished
+    const finalTime = timeFinished - timeStarted;
+    raceTimer.setTime(finalTime);
+    raceTimer.finish();
+  } else {
+    // Default case
+    raceTimer.reset();
+  }
+
+  console.log("DONE");
+}
+
+async function getStoredRace() {
   const stored = localStorage.getItem('storedRace');
-  return stored ? JSON.parse(stored) : null;
+
+  if (navigator.onLine) {
+    try {
+      const raceId = JSON.parse(stored)?.raceDetails?.raceId;
+      if (!raceId) {
+        console.error("Race ID not found in storedRace.");
+        return null;
+      }
+
+      const response = await fetch(`/api/get-race/${raceId}`);
+      if (response.ok) {
+        const raceData = await response.json();
+
+        // Update localStorage with the latest race data
+        localStorage.setItem('storedRace', JSON.stringify(raceData));
+        return raceData;
+      } else {
+        console.error(`Failed to fetch race data. Status: ${response.status}`);
+        return stored ? JSON.parse(stored) : null; // Fallback to localStorage
+      }
+    } catch (error) {
+      console.error("Error fetching race data:", error);
+      return stored ? JSON.parse(stored) : null;
+    }
+  } else {
+    console.warn("Offline: Falling back to storedRace in localStorage.");
+    return stored ? JSON.parse(stored) : null;
+  }
 }
 
 async function deleteRaceById(raceId) {
@@ -198,24 +235,55 @@ function updateLocalStorageProperty(property, value) {
 }
 
 async function startRace() {
-  updateLocalStorageProperty("timeStarted", Date.now());
+  const updatedStartTime = Date.now();
 
+  try {
+    const raceData = JSON.parse(localStorage.getItem('mutableRaceData'));
+    const raceId = raceData.raceDetails.raceId;
+  
+    const startTime = raceData.raceDetails.timeStarted;
+    const finishTime = raceData.raceDetails.timeFinished;
+    const updatedFinishTime = finishTime + (updatedStartTime - startTime);
+
+    // Update local storage
+    updateLocalStorageProperty("timeStarted", updatedStartTime);
+    updateLocalStorageProperty("timeFinished", updatedFinishTime);
+
+    // Update server
+    await updateRaceData(raceId, 'update-start-time', { startTime: updatedStartTime });
+    await updateRaceData(raceId, 'update-finish-time', { finishTime: updatedFinishTime });
+  
+    // Sync timer with new state
+    const updatedRace = JSON.parse(localStorage.getItem('mutableRaceData'));
+    syncTimerWithRaceState(updatedRace);
+
+  } catch (error) {
+    console.error('Error starting race:', error);
+  }
+}
+
+// Helper function to avoid repetitive code
+async function updateRaceData(raceId, action, data) {
   try {
     const response = await fetch(`/api/update-race`, {
       method: "PATCH",
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify(formData),
+      body: JSON.stringify({
+        raceId,
+        action,
+        data
+      }),
     });
 
     if (response.ok) {
-      window.location.href = "/home";
+      console.log(`Successfully performed action: ${action}`);
     } else {
       throw new Error(`Response Status: ${response.status}`);
     }
   } catch (error) {
-    console.error('Error posting new race', error);
+    console.error(`Error performing action: ${action}`, error);
   }
 }
 

@@ -91,10 +91,9 @@ async function deleteRace(req, res) {
 
 async function updateRace(req, res) {
   try {
-    const { id } = req.params;
-    const { action, data } = req.body;
+    const { raceId, action, data } = req.body;
 
-    const raceExists = await db.getRace(id);
+    const raceExists = await db.getRace(raceId);
 
     if (!raceExists) {
       return res.status(404).send('Race not found');    
@@ -102,23 +101,25 @@ async function updateRace(req, res) {
 
     switch (action) {
       case 'update-start-time':
-        await db.updateStartTime(id, data);
+        await db.updateStartTime(raceId, data);
         break;
       case 'update-finish-time':
-        await db.updateFinishTime(id, data);
+        await db.updateFinishTime(raceId, data);
         break;
       case 'add-participants':
-        await db.addParticipants(id, data);
+        await db.addParticipants(raceId, data);
         break;
       case 'update-results':
-        await db.updateResults(id, data);
+        await db.updateResults(raceId, data);
         break;
       default:
         return res.status(400).send('Invalid action');
       }
 
+      res.status(200).send({ message: 'Action completed successfully', action });
   } catch (error) {
     console.error('Error updating race:', error);
+    throw error;
   }
 }
 

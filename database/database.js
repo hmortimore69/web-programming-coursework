@@ -241,5 +241,11 @@ export async function deleteRaceById(raceId) {
 }
 
 export async function updateStartTime(raceId, data) {
-  updateRace('UPDATE table races time_started = ? WHERE race_id = ?', [data, raceId]);
+  const timeStamp = JSON.parse(data.startTime);
+  updateRace('UPDATE races SET time_started = ? WHERE race_id = ?', [timeStamp, raceId]);
+}
+
+export async function updateFinishTime(raceId, data) {
+  const timeStamp = JSON.parse(data.finishTime);
+  updateRace('UPDATE races SET time_finished = ? WHERE race_id = ?', [timeStamp, raceId]);
 }

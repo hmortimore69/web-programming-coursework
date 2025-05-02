@@ -171,6 +171,10 @@ document.querySelector('#refresh-stats-button').addEventListener('click', functi
   fetchRaceData();
 });
 
+document.querySelector('#dashboard-button').addEventListener('click', function () {
+  window.location.href = '/dashboard';
+});
+
 /*  ===============
  *     GRAVEYARD
  *  ===============
