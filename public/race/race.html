@@ -18,23 +18,33 @@
     </nav>
 
     <main>
-      <section id="race-info-section" aria-live="polite">
-        <div class="race-details-container">
-          <h2 id="race-tracker-header">Race Details</h2>
-          <p>
-            <strong>Start Time: </strong><span id="race-start-time">N/A</span>
-          </p>
-          <p>
-            <strong>Finish Time: </strong><span id="race-finish-time">N/A</span>
-          </p>
-          <p>
-            <strong>Checkpoints: </strong><span id="race-checkpoint-counter">N/A</span>
-          </p>
-          <span class="race-details-buttons">
-            <button id="refresh-stats-button">Refresh</button>
-            <button class="marshall-only" id="dashboard-button">Dashboard</button>
-          </span>
+      <section id="race-info-section">
+        <div id="race-details">
+          <div>
+            <span>Start</span>
+            <span id="race-start-time">N/A</span>
+          </div>
+          <div>
+            <span>Location</span>
+            <span id="race-location">N/A</span>
+          </div>
+          <div>
+            <span>Checkpoints</span>
+            <span id="race-checkpoint-counter">0</span>
+          </div>
+          <div>
+            <span>Participants</span>
+            <span id="participant-count">0</span>
+          </div>
         </div>
+  
+        <div class="race-controls">
+          <button id="refresh-stats-button">Refresh</button>
+          <button class="marshall-only" id="dashboard-button">Dashboard</button>
+        </div>
+      </section>
+
+      <section>
         <div class="race-table-container" id="race-container">
           <table class="race-table" id="race-info-table">
             <thead>

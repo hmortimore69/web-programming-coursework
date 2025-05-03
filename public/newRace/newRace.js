@@ -98,7 +98,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Save specific data based on the current step
     switch (stepIndex) {
       case 0: // Race details saving
-        saveDetails(step, '#race-details', ['#race-name', '#race-start-date', '#race-duration'], 'raceDetails');
+        saveDetails(step, '#race-details', ['#race-name', '#race-start-date', '#race-location', '#race-duration'], 'raceDetails');
         break;
       case 1: // Checkpoint saving
         saveDetails(step, '.checkpoint-details', ['.checkpoint-name', '.checkpoint-order'], 'checkpoints');

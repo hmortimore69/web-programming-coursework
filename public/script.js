@@ -1,10 +1,10 @@
 function main() {
-  const raceTable = document.querySelector("#race-history-table tbody");
+  const raceTable = document.querySelector('#race-history-table tbody');
 
   fetchRaces();
 
-  raceTable.addEventListener("click", function (e) {
-    const row = e.target.closest("tr");
+  raceTable.addEventListener('click', function (e) {
+    const row = e.target.closest('tr');
 
     if (row && row.dataset.raceIdentifier) {
       const raceId = row.dataset.raceIdentifier;
@@ -34,7 +34,7 @@ async function fetchRaces(page = 1) {
 
     return raceDetails;
   } catch (error) {
-    console.error("Failed to fetch races:", error.message);
+    console.error('Failed to fetch races:', error.message);
     return {};
   }
 }
@@ -44,37 +44,49 @@ async function fetchRaces(page = 1) {
  * @param {JSON} races - The race JSON, where keys are race IDs.
  */
 function populateRaceTable(races) {
-  const tableBody = document.querySelector("#race-history-table tbody");
-  tableBody.innerHTML = "";
+  const tableBody = document.querySelector('#race-history-table tbody');
+  tableBody.innerHTML = '';
 
   // Creates a row in the table for each race using a template
   if (races && Object.keys(races).length > 0) {
     for (const [raceId, race] of Object.entries(races)) {
-      if (raceId === "pagination") continue; 
+      if (raceId === 'pagination') continue;
       tableBody.appendChild(createRaceRow(raceId, race));
     }
   }
 }
 
 /**
- * Creates a table row (tr) element for a given race using the given HTML template.
+ * Creates a table row element for a given race using the given HTML template.
  * @param {Number} raceId - The unique identifier for the race.
  * @param {JSON} race - The race JSON object containing details.
- * @returns {HTMLElement} The generated table row (tr) element.
+ * @returns {HTMLElement} The generated table row element.
  */
 function createRaceRow(raceId, race) {
-  console.log(race);
-  const { timeStarted, timeFinished, participants } = race;
+  const { timeStarted, raceLocation, timeFinished, scheduledStartTime, scheduledDuration, participants } = race;
   const template = document.querySelector("#race-row-template");
   const row = template.content.cloneNode(true).querySelector("tr");
 
   row.dataset.raceIdentifier = raceId;
-  row.querySelector(".start-time").textContent = formatUnixTimestamp(timeStarted);
-  row.querySelector(".end-time").textContent = formatUnixTimestamp(timeFinished);
+
+  // Display times - show actual if available, otherwise show scheduled
+  const displayStartTime = timeStarted || scheduledStartTime;
+  
+  row.querySelector(".start-time").textContent = formatUnixTimestamp(displayStartTime);
+  row.querySelector(".location").textContent = raceLocation;
   row.querySelector(".participants").textContent = participants;
 
-  if (timeFinished >= Date.now() && timeStarted <= Date.now()) {
+  // Update race status 
+  const now = Date.now();
+  const isLive = (timeStarted && timeStarted <= now && (!timeFinished || timeFinished >= now));
+
+  if (isLive) {
     row.classList.add("live-race");
+    row.dataset.raceStatus = "live";
+  } else if (!timeStarted && scheduledStartTime <= now) {
+    row.dataset.raceStatus = "ready-to-start";
+  } else if (timeFinished && timeFinished < now) {
+    row.dataset.raceStatus = "finished";
   }
 
   return row;
@@ -86,20 +98,22 @@ function createRaceRow(raceId, race) {
  * @returns {string} The formatted datetime string.
  */
 function formatUnixTimestamp(timestamp) {
+  if (!timestamp) return 'Not started';
+
   const date = new Date(timestamp);
   const day = date.getDate();
   const suffix =
     day % 10 === 1 && day !== 11
-      ? "st"
+      ? 'st'
       : day % 10 === 2 && day !== 12
-      ? "nd"
-      : day % 10 === 3 && day !== 13
-      ? "rd"
-      : "th";
-  const month = date.toLocaleDateString("en-UK", { month: "short" });
+        ? 'nd'
+        : day % 10 === 3 && day !== 13
+          ? 'rd'
+          : 'th';
+  const month = date.toLocaleDateString('en-UK', { month: 'short' });
   const year = date.getFullYear();
-  const hours = date.getHours().toString().padStart(2, "0");
-  const minutes = date.getMinutes().toString().padStart(2, "0");
+  const hours = date.getHours().toString().padStart(2, '0');
+  const minutes = date.getMinutes().toString().padStart(2, '0');
 
   return `${day}${suffix} ${month} ${year} ${hours}:${minutes}`;
 }
@@ -124,7 +138,7 @@ function updatePaginationControls(pagination) {
   nextButton.dataset.page = pagination.page + 1;
 }
 
-document.addEventListener("DOMContentLoaded", main);
+document.addEventListener('DOMContentLoaded', main);
 
 document.querySelector('#role-selector')?.addEventListener('change', (e) => {
   userType.setRole(e.target.value);

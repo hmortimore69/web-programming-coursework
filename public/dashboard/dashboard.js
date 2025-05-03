@@ -116,10 +116,10 @@ const raceTimer = {
     const milliseconds = elapsed % 1000;
 
     this.timerElement.textContent =
-        `${hours.toString().padStart(2, '0')}:` +
-        `${minutes.toString().padStart(2, '0')}:` +
-        `${seconds.toString().padStart(2, '0')}.` +
-        `${milliseconds.toString().padStart(3, '0')}`;
+      `${hours.toString().padStart(2, '0')}:` +
+      `${minutes.toString().padStart(2, '0')}:` +
+      `${seconds.toString().padStart(2, '0')}.` +
+      `${milliseconds.toString().padStart(3, '0')}`;
   },
 
   updateCountdownDisplay(timeRemaining) {
@@ -152,32 +152,45 @@ async function main() {
 function syncTimerWithRaceState(race) {
   if (!race) return;
 
-  console.log(race);
-
-  const { timeStarted, timeFinished } = race["raceDetails"];
+  const { scheduled_start_time, scheduled_duration, timeStarted, timeFinished } = race.raceDetails;
   const now = Date.now();
 
   raceTimer.stop();
 
-  if (timeStarted <= now && timeFinished >= now) {
-    // Race is live
+  // Race is currently live
+  if (timeStarted && timeStarted <= now && (!timeFinished || timeFinished >= now)) {
     const elapsed = now - timeStarted;
     raceTimer.setTime(elapsed);
     raceTimer.start();
-  } else if (timeStarted > now) {
-    // Race hasn't started yet
-    raceTimer.startCountdown(timeStarted);
-  } else if (timeFinished < now) {
-    // Race is finished
+    return;
+  }
+
+  // Race was manually started but is now finished
+  if (timeStarted && timeFinished && timeFinished < now) {
     const finalTime = timeFinished - timeStarted;
     raceTimer.setTime(finalTime);
     raceTimer.finish();
-  } else {
-    // Default case
-    raceTimer.reset();
+    return;
   }
 
-  console.log("DONE");
+  // Race hasn't started yet - show countdown to scheduled time
+  if (!timeStarted && scheduled_start_time > now) {
+    raceTimer.startCountdown(scheduled_start_time);
+    return;
+  }
+
+  // Scheduled start time passed but race wasn't started
+  if (!timeStarted && scheduled_start_time <= now) {
+    raceTimer.updateDisplay(0);
+    if (raceTimer.liveIndicator) {
+      raceTimer.liveIndicator.textContent = '● STARTING';
+      raceTimer.liveIndicator.style.color = 'orange';
+    }
+    return;
+  }
+
+  // Default case
+  raceTimer.reset();
 }
 
 async function getStoredRace() {
@@ -229,23 +242,21 @@ async function deleteRaceById(raceId) {
 }
 
 function updateLocalStorageProperty(property, value) {
-  const mutableRaceData = JSON.parse(localStorage.getItem('mutableRaceData'));
-  mutableRaceData.raceDetails[property] = value;
-  localStorage.setItem('mutableRaceData', JSON.stringify(mutableRaceData));
+  const storedRace = JSON.parse(localStorage.getItem('storedRace'));
+  storedRace.raceDetails[property] = value;
+  localStorage.setItem('storedRace', JSON.stringify(storedRace));
 }
 
 async function startRace() {
   const updatedStartTime = Date.now();
 
   try {
-    const raceData = JSON.parse(localStorage.getItem('mutableRaceData'));
+    const raceData = JSON.parse(localStorage.getItem('storedRace'));
     const raceId = raceData.raceDetails.raceId;
-  
-    const startTime = raceData.raceDetails.timeStarted;
-    const finishTime = raceData.raceDetails.timeFinished;
-    const updatedFinishTime = finishTime + (updatedStartTime - startTime);
+    const scheduledDuration = raceData.raceDetails.scheduled_duration;
 
-    // Update local storage
+    const updatedFinishTime = updatedStartTime + scheduledDuration;
+
     updateLocalStorageProperty("timeStarted", updatedStartTime);
     updateLocalStorageProperty("timeFinished", updatedFinishTime);
 
@@ -254,7 +265,7 @@ async function startRace() {
     await updateRaceData(raceId, 'update-finish-time', { finishTime: updatedFinishTime });
   
     // Sync timer with new state
-    const updatedRace = JSON.parse(localStorage.getItem('mutableRaceData'));
+    const updatedRace = JSON.parse(localStorage.getItem('storedRace'));
     syncTimerWithRaceState(updatedRace);
 
   } catch (error) {

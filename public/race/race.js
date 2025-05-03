@@ -22,6 +22,7 @@ async function fetchRaceData(page = 1) {
       raceID
     }));
 
+    updateRaceDetails(raceDetails);
     renderRaceTable(raceDetails);
     updatePaginationControls(raceDetails.pagination);
   } catch (error) {
@@ -32,6 +33,7 @@ async function fetchRaceData(page = 1) {
       const parsedData = JSON.parse(offlineData);
 
       console.log('Using offline race data');
+      updateRaceDetails(parsedData.raceDetails);
       renderRaceTable(parsedData.raceDetails);
       updatePaginationControls(parsedData.raceDetails.pagination);
     }
@@ -49,37 +51,45 @@ function getRaceID() {
   return args[args.length - 1];
 }
 
+
+/**
+ * Updates all race detail elements
+ * @param {Object} raceDetails - The race data object
+ */
+function updateRaceDetails(raceDetails) {
+  document.querySelector('#race-start-time').textContent = formatDate(raceDetails.timeStarted);
+  document.querySelector('#race-location').textContent = raceDetails.raceLocation || 'N/A';
+  document.querySelector('#race-checkpoint-counter').textContent = raceDetails.totalCheckpoints || 0;
+  document.querySelector('#participant-count').textContent = raceDetails.participants?.length || 0;
+
+  // Update live indicator if race is active
+  if (raceDetails.timeFinished >= Date.now() && raceDetails.timeStarted <= Date.now()) {
+    const liveTemplate = document.querySelector('#live-indicator-template').content.cloneNode(true);
+    const raceHeader = document.querySelector('#race-title');
+    raceHeader.appendChild(liveTemplate);
+  }
+}
+
 /**
  * Renders the race table using row templates.
  * @param {Object} raceDetails - The race data object retrieved from the API endpoint.
  */
 function renderRaceTable(raceDetails) {
-  const raceStartTimeElement = document.querySelector('#race-start-time');
-  const raceFinishTimeElement = document.querySelector('#race-finish-time');
-  const checkpointCountElement = document.querySelector('#race-checkpoint-counter');
   const tableBody = document.querySelector('.race-table tbody');
-
-  raceStartTimeElement.textContent = formatDate(raceDetails.timeStarted);
-  raceFinishTimeElement.textContent = formatDate(raceDetails.timeFinished);
-  checkpointCountElement.textContent = raceDetails.totalCheckpoints;
-
-  if (raceDetails.timeFinished >= Date.now() && raceDetails.timeStarted <= Date.now()) {
-    const liveTemplate = document.querySelector('#live-indicator-template').content.cloneNode(true);
-    const raceTrackerHeader = document.querySelector('#race-tracker-header')
-    raceTrackerHeader.textContent = 'Race Details ';
-    raceTrackerHeader.appendChild(liveTemplate);
-  }
-
   tableBody.innerHTML = '';
 
   const rowTemplate = document.querySelector('#participant-row-template');
-
   
-  for (const participant of raceDetails.participants) {
+  for (const participant of raceDetails.participants || []) {
     const row = rowTemplate.content.cloneNode(true);
     row.querySelector('.bib-number').textContent = participant.bibNumber;
     row.querySelector('.participant-name').textContent = `${participant.firstName} ${participant.lastName}`;
-    row.querySelector('.finish-time').textContent = formatTime(participant.timeFinished - raceDetails.timeStarted) || '--';
+    
+    // Calculate finish time if available
+    const finishTime = participant.timeFinished 
+      ? formatTime((participant.timeFinished - raceDetails.timeStarted) / 1000) 
+      : '--';
+    row.querySelector('.finish-time').textContent = finishTime;
 
     tableBody.appendChild(row);
   }
@@ -91,8 +101,17 @@ function renderRaceTable(raceDetails) {
  * @param {string} [defaultText="N/A"] - Default text if timestamp is missing.
  * @returns {string} Formatted date string.
  */
-function formatDate(timestamp, defaultText = 'N/A') {
-  return timestamp ? new Date(timestamp).toLocaleString() : defaultText;
+function formatDate(timestamp, defaultText = 'Not Started') {
+  if (!timestamp) return defaultText;
+  
+  const date = new Date(timestamp);
+  return date.toLocaleString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
 }
 
 /**
@@ -105,10 +124,13 @@ function formatTime(timeDiffInSeconds) {
 
   const hours = Math.floor(timeDiffInSeconds / 3600);
   const minutes = Math.floor((timeDiffInSeconds % 3600) / 60);
-  const seconds = timeDiffInSeconds % 60;
+  const seconds = Math.floor(timeDiffInSeconds % 60);
 
-  // e.g. 10:01:03
-  return `${hours > 0 ? hours + ':' : ''}${minutes < 10 && hours > 0 ? '0' + minutes : minutes}:${seconds < 10 ? '0' + seconds : seconds}`;
+  const pad = (num) => num.toString().padStart(2, '0');
+  
+  return hours > 0 
+    ? `${hours}:${pad(minutes)}:${pad(seconds)}` 
+    : `${minutes}:${pad(seconds)}`;
 }
 
 /**

@@ -34,7 +34,10 @@
   
             <label for="race-start-date">Start Date:</label>
             <input id="race-start-date" type="datetime-local" name="race-start-date-time" /><br>
-  
+            
+            <label for="race-location">Location:</label>
+            <input id="race-location" type="text" name="race-location" placeholder="Enter race location" /><br>
+
             <label for="race-duration">Duration:</label>
             <input id="race-duration" type="time" max="24:00" min="00:00" placeholder="24" name="race-duration" /><br>          
           </div>
@@ -46,8 +49,6 @@
         <div class="new-race-step">
           <h3>Step 2 of 4 - Checkpoint Setup:
           <progress name="form-progress-bar" max="4" value="2">(Step 2 of 4)</progress></h3>
-
-          <div id="checkpoint-list"></div>
 
           <button type="button" id="add-checkpoint-button">ADD CHECKPOINT</button><br>
           

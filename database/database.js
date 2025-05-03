@@ -70,6 +70,9 @@ export async function getAllRaces(page = 1, pageSize = 10) {
       `, [race.race_id]);
 
       races[race.race_id] = {
+        raceLocation: race.race_location,
+        scheduledStartTime: race.scheduled_start_time,
+        scheduledDuration: race.scheduled_duration,
         timeStarted: race.time_started,
         timeFinished: race.time_finished,
         participants: participantTotal.total,
@@ -97,9 +100,12 @@ export async function getRace(raceId, page = 1, pageSize = 10) {
     const raceData = await getRow(
       `SELECT
         race_id as raceId,
+        race_location as raceLocation,
         time_started as timeStarted,
         time_finished as timeFinished,
-        race_started as raceStarted
+        race_started as raceStarted,
+        scheduled_start_time as scheduledStartTime,
+        scheduled_duration as scheduledDuration
       FROM races
       WHERE race_id = ?`, [raceId],
     );
@@ -148,8 +154,11 @@ export async function getRace(raceId, page = 1, pageSize = 10) {
 
     return {
       raceId,
+      raceLocation: raceData.raceLocation,
       timeStarted: raceData.timeStarted,
       timeFinished: raceData.timeFinished,
+      scheduledStartTime: raceData.scheduledStartTime,
+      scheduledDuration: raceData.scheduledDuration,
       race_started: raceData.raceStarted,
       totalCheckpoints: checkpointCount.total,
       participants,
@@ -170,24 +179,23 @@ export async function createNewRace(req) {
 
   if (req.raceDetails) {
     const raceName = req.raceDetails['#race-name'];
+    const raceLocation = req.raceDetails['#race-location'];
 
     const startDateString = req.raceDetails['#race-start-date'];
     const startDate = new Date(startDateString);
-    const startTimestamp = startDate.getTime();
+    const scheduledStartTimestamp = startDate.getTime();
 
     const durationString = req.raceDetails['#race-duration'];
     const [hours, minutes] = durationString.split(':').map(Number);
-    const durationMilliseconds = (hours * 3600 + minutes * 60) * 1000;
-    const finishTimestamp = startTimestamp + durationMilliseconds;
+    const scheduledDuration = (hours * 3600 + minutes * 60) * 1000;
 
     newRaceID = await new Promise((resolve, reject) => {
       DB_CONN.run(
-        'INSERT INTO races (race_name, time_started, time_finished) VALUES (?, ?, ?)',
-        [raceName, startTimestamp, finishTimestamp],
+        'INSERT INTO races (race_name, race_location, scheduled_start_time, scheduled_duration, time_started, time_finished) VALUES (?, ?, ?, ?, NULL, NULL)',
+        [raceName, raceLocation, scheduledStartTimestamp, scheduledDuration],
         function (error) {
           if (error) {
             console.log(error);
-
             reject(error);
           } else {
             resolve(this.lastID);
