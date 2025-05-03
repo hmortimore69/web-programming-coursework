@@ -103,7 +103,6 @@ export async function getRace(raceId, page = 1, pageSize = 10) {
         race_location as raceLocation,
         time_started as timeStarted,
         time_finished as timeFinished,
-        race_started as raceStarted,
         scheduled_start_time as scheduledStartTime,
         scheduled_duration as scheduledDuration
       FROM races
@@ -159,7 +158,6 @@ export async function getRace(raceId, page = 1, pageSize = 10) {
       timeFinished: raceData.timeFinished,
       scheduledStartTime: raceData.scheduledStartTime,
       scheduledDuration: raceData.scheduledDuration,
-      race_started: raceData.raceStarted,
       totalCheckpoints: checkpointCount.total,
       participants,
       pagination: {

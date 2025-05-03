@@ -37,11 +37,76 @@
         </div>
       </section>
 
+      <section id="timestamp-recording">
+        <h3>Record Timestamps</h3>
+        <div class="timestamp-controls">
+          <button id="record-timestamp-button" class="action-button">Record Current Time</button>
+          
+          <div class="timestamp-assignment">
+            <label for="racer-number-input">Racer Number:</label>
+            <input type="number" id="racer-number-input" placeholder="Enter racer #" min="1" />
+            <button id="assign-timestamp-button" class="action-button">Assign</button>
+            <button id="commit-timestamps-button" class="commit-button">Commit</button>
+          </div>
+        </div>
+        
+        <div class="timestamp-areas">
+          <div class="timestamp-area working-area">
+            <h4>Working Area (Unassigned)</h4>
+            <table>
+              <thead>
+                <tr>
+                  <th>Timestamp</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="working-timestamps-list">
+                <!-- Working timestamps will be added here -->
+              </tbody>
+            </table>
+          </div>
+          
+          <div class="timestamp-area staged-area">
+            <h4>Staging Area (Ready to Commit)</h4>
+            <table>
+              <thead>
+                <tr>
+                  <th>Timestamp</th>
+                  <th>Racer #</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="staged-timestamps-list">
+                <!-- Staged timestamps will be added here -->
+              </tbody>
+            </table>
+          </div>
+          
+          <div class="timestamp-area committed-area">
+            <h4>Committed (Submitted)</h4>
+            <table>
+              <thead>
+                <tr>
+                  <th>Timestamp</th>
+                  <th>Racer #</th>
+                </tr>
+              </thead>
+              <tbody id="committed-timestamps-list">
+                <!-- Committed timestamps will be added here -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
       <section class="admin-only" id="danger-zone">
         <h3>Delete Race</h3>
         <span>Would you like to delete this race? </span><button id="delete-race-button" class="danger">DELETE</button>
       </section>
     </main>
+
+    <template id="">
+    </template>
 
     <script src="dashboard.js"></script>
     <script src="/util/userType.js"></script>

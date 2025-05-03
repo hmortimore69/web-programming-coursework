@@ -6,7 +6,6 @@ CREATE TABLE IF NOT EXISTS races (
     scheduled_duration INTEGER NOT NULL,
     time_started INTEGER,
     time_finished INTEGER,
-    race_started BOOLEAN DEFAULT FALSE
 );
 
 CREATE TABLE IF NOT EXISTS participants (

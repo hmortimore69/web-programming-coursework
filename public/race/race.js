@@ -16,11 +16,7 @@ async function fetchRaceData(page = 1) {
     
     // Clear previously saved race data and store current race for offline use
     localStorage.removeItem('storedRace');
-    localStorage.setItem('storedRace', JSON.stringify({
-      raceDetails,
-      timestamp: Date.now(),
-      raceID
-    }));
+    localStorage.setItem('storedRace', JSON.stringify(raceDetails));
 
     updateRaceDetails(raceDetails);
     renderRaceTable(raceDetails);
