@@ -74,21 +74,23 @@ function renderRaceTable(raceDetails) {
   const tableBody = document.querySelector('.race-table tbody');
   tableBody.innerHTML = '';
 
-  const rowTemplate = document.querySelector('#participant-row-template');
-  
-  for (const participant of raceDetails.participants || []) {
-    const row = rowTemplate.content.cloneNode(true);
+  raceDetails.participants.forEach(participant => {
+    const row = document.querySelector('#participant-row-template').content.cloneNode(true);
     row.querySelector('.bib-number').textContent = participant.bibNumber;
     row.querySelector('.participant-name').textContent = `${participant.firstName} ${participant.lastName}`;
-    
-    // Calculate finish time if available
-    const finishTime = participant.timeFinished 
-      ? formatTime((participant.timeFinished - raceDetails.timeStarted) / 1000) 
-      : '--';
-    row.querySelector('.finish-time').textContent = finishTime;
 
+    const finishTimeCell = row.querySelector('.finish-time');
+    console.log(participant);
+    
+    if (participant.timeFinished) {
+      finishTimeCell.textContent = formatRacerTime((participant.timeFinished));
+    } else {
+      finishTimeCell.textContent = participant.timeFinished 
+        ? formatRacerTime((participant.timeFinished - raceDetails.timeStarted))
+        : 'Pending';
+    }
     tableBody.appendChild(row);
-  }
+  });
 }
 
 /**
@@ -115,18 +117,12 @@ function formatDate(timestamp, defaultText = 'Not Started') {
  * @param {number} timeDiffInSeconds - Time difference in seconds.
  * @returns {string|null} Formatted time string or null if invalid.
  */
-function formatTime(timeDiffInSeconds) {
-  if (timeDiffInSeconds < 0) return null;
-
-  const hours = Math.floor(timeDiffInSeconds / 3600);
-  const minutes = Math.floor((timeDiffInSeconds % 3600) / 60);
-  const seconds = Math.floor(timeDiffInSeconds % 60);
-
-  const pad = (num) => num.toString().padStart(2, '0');
-  
-  return hours > 0 
-    ? `${hours}:${pad(minutes)}:${pad(seconds)}` 
-    : `${minutes}:${pad(seconds)}`;
+function formatRacerTime(ms) {
+  const h = Math.floor(ms / 3600000);
+  const m = Math.floor((ms % 3600000) / 60000);
+  const s = Math.floor((ms % 60000) / 1000);
+  const msRemain = ms % 1000;
+  return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}.${msRemain.toString().padStart(3, '0')}`;
 }
 
 /**
@@ -158,7 +154,7 @@ function hasOfflineRaceData() {
   if (!offlineData) return false;
   
   const parsedData = JSON.parse(offlineData);
-  return parsedData.raceID === getRaceID();
+  return parsedData.raceId === getRaceID();
 }
 
 document.querySelector('#prev-page').addEventListener('click', (event) => {
@@ -176,13 +172,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const offlineData = JSON.parse(localStorage.getItem('storedRace'));
     console.log('Offline mode - using cached race data');
 
-    renderRaceTable(offlineData.raceDetails);
-    updatePaginationControls(offlineData.raceDetails.pagination);
+    updateRaceDetails(offlineData);
+    renderRaceTable(offlineData);
+    updatePaginationControls(offlineData.pagination);
   } else {
     fetchRaceData();
+    setInterval(fetchRaceData, 10000);
   }
-  
-  setInterval(fetchRaceData, 10000);
 });
 
 document.querySelector('#refresh-stats-button').addEventListener('click', function () {
@@ -217,7 +213,7 @@ document.querySelector('#dashboard-button').addEventListener('click', function (
  *      const timeDiffInSeconds = participant.timeFinished - raceStart;
  *      const timefromPrevCheckpoint = participant.timeFinished - previousTime;
  *
- *      return `+${formatTime(timefromPrevCheckpoint)} (${formatTime(timeDiffInSeconds)})`;
+ *      return `+${formatRacerTime(timefromPrevCheckpoint)} (${formatRacerTime(timeDiffInSeconds)})`;
  *  }
  *
  *  function getUniqueSortedCheckpoints(participants) {

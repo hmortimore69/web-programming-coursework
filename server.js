@@ -15,9 +15,10 @@ app.get('/api/races', getRaces);
 app.get('/api/races/:id', getRace);
 app.post('/api/new-race', createRace);
 app.delete('/api/delete-race', deleteRace);
-app.patch('/api/update-race/', updateRace);
-
-// API Update Race Endpoints
+app.patch('/api/update-race', updateRace);
+app.get('/api/conflicts', getConflicts);
+app.post('/api/resolve-conflict', resolveConflict);
+app.post('/api/reject-timestamp', rejectTimestamp);
 
 // Endpoints
 app.get('/', (req, res) => {
@@ -76,7 +77,6 @@ async function deleteRace(req, res) {
   try {
     const { raceId } = req.query;
 
-    console.log(raceId);
     const result = await db.deleteRaceById(raceId);
 
     if (result) {
@@ -109,8 +109,8 @@ async function updateRace(req, res) {
       case 'add-participants':
         await db.addParticipants(raceId, data);
         break;
-      case 'update-results':
-        await db.updateResults(raceId, data);
+      case 'submit-results':
+        await db.submitResults(raceId, data);
         break;
       default:
         return res.status(400).send('Invalid action');
@@ -121,6 +121,24 @@ async function updateRace(req, res) {
     console.error('Error updating race:', error);
     throw error;
   }
+}
+
+async function getConflicts(req, res) {
+  const conflicts = await db.getConflicts(req.query.raceId);
+  console.log(conflicts);
+  res.json(conflicts);
+}
+
+async function resolveConflict(req, res) {
+  const { raceId, bibNumber, time } = req.body;
+  await db.resolveConflict(raceId, bibNumber, time);
+  res.sendStatus(200);
+}
+
+async function rejectTimestamp(req, res) {
+  const { raceId, bibNumber, time } = req.body;
+  await db.rejectConflict(raceId, bibNumber, time);
+  res.sendStatus(200);
 }
 
 app.listen(port, () => {

@@ -79,7 +79,6 @@ export async function getAllRaces(page = 1, pageSize = 10) {
       };
     }
 
-
     races["pagination"] = {
       page,
       pageSize,
@@ -173,7 +172,7 @@ export async function getRace(raceId, page = 1, pageSize = 10) {
 }
 
 export async function createNewRace(req) {
-  let newRaceID = null;
+  let newRaceId = null;
 
   if (req.raceDetails) {
     const raceName = req.raceDetails['#race-name'];
@@ -187,7 +186,7 @@ export async function createNewRace(req) {
     const [hours, minutes] = durationString.split(':').map(Number);
     const scheduledDuration = (hours * 3600 + minutes * 60) * 1000;
 
-    newRaceID = await new Promise((resolve, reject) => {
+    newRaceId = await new Promise((resolve, reject) => {
       DB_CONN.run(
         'INSERT INTO races (race_name, race_location, scheduled_start_time, scheduled_duration, time_started, time_finished) VALUES (?, ?, ?, ?, NULL, NULL)',
         [raceName, raceLocation, scheduledStartTimestamp, scheduledDuration],
@@ -207,7 +206,7 @@ export async function createNewRace(req) {
     for (const checkpoint of req.checkpoints) {
       DB_CONN.run(
         'INSERT INTO checkpoints (race_id, checkpoint_name, checkpoint_order) VALUES (?, ?, ?)',
-        [newRaceID, checkpoint['.checkpoint-name'], checkpoint['.checkpoint-order']],
+        [newRaceId, checkpoint['.checkpoint-name'], checkpoint['.checkpoint-order']],
       );
     }
   }
@@ -216,7 +215,7 @@ export async function createNewRace(req) {
     for (const marshall of req.marshalls) {
       DB_CONN.run(
         'INSERT INTO marshalls (race_id, first_name, last_name) VALUES (?, ?, ?)',
-        [newRaceID, marshall['.marshall-first-name'], marshall['.marshall-last-name']],
+        [newRaceId, marshall['.marshall-first-name'], marshall['.marshall-last-name']],
       );
     }
   }
@@ -226,7 +225,7 @@ export async function createNewRace(req) {
       DB_CONN.run(
         `INSERT INTO participants (race_id, first_name, last_name, bib_number) 
          VALUES (?, ?, ?, COALESCE((SELECT MAX(bib_number) + 1 FROM participants WHERE race_id = ?), 1))`,
-        [newRaceID, participant['.participant-first-name'], participant['.participant-last-name'], newRaceID]
+        [newRaceId, participant['.participant-first-name'], participant['.participant-last-name'], newRaceId]
       );
     }
   }
@@ -240,7 +239,7 @@ export async function deleteRaceById(raceId) {
     await deleteRow('DELETE FROM races WHERE race_id = ?', [raceId]);
 
     console.log(`The race with ID ${raceId} and its associated data has been deleted.`);
-    return true; // Return the number of rows deleted from the races table
+    return;
   } catch (error) {
     console.error(`Error deleting race with ID ${raceId}:`, error.message);
   }
@@ -254,4 +253,129 @@ export async function updateStartTime(raceId, data) {
 export async function updateFinishTime(raceId, data) {
   const timeStamp = JSON.parse(data.finishTime);
   updateRace('UPDATE races SET time_finished = ? WHERE race_id = ?', [timeStamp, raceId]);
+}
+
+export async function submitResults(raceId, data) {
+  console.log(data);
+  for (const submission of data) {
+    console.log(submission);
+    submitParticipantTime(raceId, submission.bibNumber, submission.time, submission.submittedBy);
+  }
+}
+
+async function submitParticipantTime(raceId, bibNumber, timestamp, submittedBy) {
+  const participant = await getRow(`
+    SELECT 
+      pending_times as pendingTimes,
+      time_finished as timeFinished
+    FROM participants 
+    WHERE race_id = ? AND bib_number = ?`, 
+    [raceId, bibNumber]
+  );
+
+  let pendingTimes = participant.pendingTimes ? JSON.parse(participant.pendingTimes) : [];
+  const currentTime = participant.timeFinished; // Store the current final time
+
+  const hasConflict = (currentTime !== null) || (pendingTimes.length > 0);
+
+  pendingTimes.push({ 
+    time: timestamp, 
+    submitted_by: submittedBy, 
+    submitted_at: new Date().toISOString(),
+    current_time: currentTime 
+  });
+
+  if (!hasConflict) {
+    DB_CONN.run(`
+      UPDATE participants
+      SET
+        time_finished = ?,
+        pending_times = NULL,
+        has_conflict = ?
+      WHERE race_id = ? AND bib_number = ?`,
+      [timestamp, false, raceId, bibNumber]
+    );
+  } else {
+    DB_CONN.run(`
+      UPDATE participants 
+      SET 
+        pending_times = ?, 
+        has_conflict = ?
+      WHERE race_id = ? AND bib_number = ?`,
+      [JSON.stringify(pendingTimes), true, raceId, bibNumber]
+    );
+  }
+
+  return { success: true, hasConflict };
+}
+
+export async function getConflicts(raceId) {
+  return await getAll(`
+    SELECT 
+      participant_id as participantId, 
+      bib_number as bibNumber,
+      first_name as firstName,
+      last_name as lastName,
+      pending_times as pendingTimes,
+      time_finished as timeFinished,
+      has_conflict as hasConflict
+    FROM participants
+    WHERE race_id = ? AND has_conflict = TRUE
+    ORDER BY bib_number`, 
+    [raceId]
+  );
+}
+
+export async function resolveConflict(raceId, bibNumber, acceptedTime) {
+  DB_CONN.run(`
+    UPDATE participants
+    SET
+      time_finished = ?,
+      pending_times = NULL,
+      has_conflict = FALSE
+    WHERE race_id = ? AND bib_number = ?`, 
+    [acceptedTime, raceId, bibNumber]
+  );
+}
+
+export async function rejectConflict(raceId, bibNumber, rejectedTime) {
+  try {
+    const participant = await getRow(`
+      SELECT pending_times as pendingTimes
+      FROM participants
+      WHERE race_id = ? AND bib_number = ?`,
+      [raceId, bibNumber]
+    );
+
+    if (!participant) {
+      throw new Error('Participant not found');
+    }
+
+    let pendingTimes = participant.pendingTimes ? JSON.parse(participant.pendingTimes) : [];
+    
+    // Remove the rejected time
+    const updatedPendingTimes = pendingTimes.filter(timeObj => 
+      timeObj.time !== rejectedTime
+    );
+
+    // Update the database
+    DB_CONN.run(`
+      UPDATE participants
+      SET
+        pending_times = ?,
+        has_conflict = ?
+      WHERE race_id = ? AND bib_number = ?`,
+      [
+        updatedPendingTimes.length > 0 ? JSON.stringify(updatedPendingTimes) : null,
+        updatedPendingTimes.length > 0, // has_conflict true if still pending times
+        raceId, 
+        bibNumber
+      ]
+    );
+
+    return { success: true, remainingConflicts: updatedPendingTimes.length };
+  } catch (error) {
+    console.error('Error rejecting conflict:', error);
+    throw error;
+  }
 }

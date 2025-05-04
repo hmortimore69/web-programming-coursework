@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS races (
     scheduled_start_time INTEGER NOT NULL,
     scheduled_duration INTEGER NOT NULL,
     time_started INTEGER,
-    time_finished INTEGER,
+    time_finished INTEGER
 );
 
 CREATE TABLE IF NOT EXISTS participants (
@@ -15,7 +15,9 @@ CREATE TABLE IF NOT EXISTS participants (
     last_name TEXT NOT NULL,
     bib_number INTEGER NOT NULL,
     attended BOOLEAN DEFAULT FALSE,
-    time_finished INTEGER DEFAULT NULL
+    time_finished INTEGER DEFAULT NULL,
+    pending_times TEXT,
+    has_conflict BOOLEAN DEFAULT FALSE
 );
 
 CREATE TABLE IF NOT EXISTS marshalls (
