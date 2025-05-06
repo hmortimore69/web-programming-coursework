@@ -8,7 +8,6 @@ const userType = {
 
   updateUI: () => {
     const role = userType.getRole();
-    console.log('Updated Role:', role);
 
     const adminElements = document.querySelectorAll('.admin-only');
     const marshallElements = document.querySelectorAll('.marshall-only');

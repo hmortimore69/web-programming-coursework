@@ -15,8 +15,6 @@ async function main() {
 function syncTimerWithRaceState(race) {
   if (!race) return;
 
-  console.log(race);
-
   const { scheduled_start_time, scheduled_duration, timeStarted, timeFinished } = race;
   const now = Date.now();
 
@@ -126,7 +124,6 @@ async function startRace() {
 
     updateLocalStorageProperty("timeStarted", updatedStartTime);
 
-    // Update server
     await updateRaceData(raceId, 'update-start-time', { startTime: updatedStartTime });
   
     // Sync timer with new state
@@ -182,7 +179,6 @@ async function updateRaceData(raceId, action, data) {
     });
 
     if (response.ok) {
-      console.log(`Successfully performed action: ${action}`);
     } else {
       throw new Error(`Response Status: ${response.status}`);
     }

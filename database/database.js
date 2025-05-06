@@ -192,7 +192,6 @@ export async function createNewRace(req) {
         [raceName, raceLocation, scheduledStartTimestamp, scheduledDuration],
         function (error) {
           if (error) {
-            console.log(error);
             reject(error);
           } else {
             resolve(this.lastID);
@@ -237,9 +236,7 @@ export async function deleteRaceById(raceId) {
     await deleteRow('DELETE FROM marshalls WHERE race_id = ?', [raceId]);
     await deleteRow('DELETE FROM participants WHERE race_id = ?', [raceId]);
     await deleteRow('DELETE FROM races WHERE race_id = ?', [raceId]);
-
-    console.log(`The race with ID ${raceId} and its associated data has been deleted.`);
-    return;
+    return true;
   } catch (error) {
     console.error(`Error deleting race with ID ${raceId}:`, error.message);
   }
@@ -256,10 +253,8 @@ export async function updateFinishTime(raceId, data) {
 }
 
 export async function submitResults(raceId, data) {
-  console.log(data);
   for (const submission of data) {
-    console.log(submission);
-    submitParticipantTime(raceId, submission.bibNumber, submission.time, submission.submittedBy);
+    await submitParticipantTime(raceId, submission.bibNumber, submission.time, submission.submittedBy);
   }
 }
 
@@ -274,9 +269,9 @@ async function submitParticipantTime(raceId, bibNumber, timestamp, submittedBy) 
   );
 
   let pendingTimes = participant.pendingTimes ? JSON.parse(participant.pendingTimes) : [];
-  const currentTime = participant.timeFinished; // Store the current final time
+  const currentTime = participant.timeFinished;
 
-  const hasConflict = (currentTime !== null) || (pendingTimes.length > 0);
+  const hasConflict = (currentTime !== null) || (pendingTimes.length > 0) || true;
 
   pendingTimes.push({ 
     time: timestamp, 
@@ -293,20 +288,21 @@ async function submitParticipantTime(raceId, bibNumber, timestamp, submittedBy) 
         pending_times = NULL,
         has_conflict = ?
       WHERE race_id = ? AND bib_number = ?`,
-      [timestamp, false, raceId, bibNumber]
+      [timestamp, hasConflict, raceId, bibNumber]
     );
   } else {
+    console.log(pendingTimes);
     DB_CONN.run(`
       UPDATE participants 
       SET 
         pending_times = ?, 
         has_conflict = ?
       WHERE race_id = ? AND bib_number = ?`,
-      [JSON.stringify(pendingTimes), true, raceId, bibNumber]
+      [JSON.stringify(pendingTimes), hasConflict, raceId, bibNumber]
     );
   }
 
-  return { success: true, hasConflict };
+  return;
 }
 
 export async function getConflicts(raceId) {

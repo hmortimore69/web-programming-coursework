@@ -80,7 +80,7 @@ async function deleteRace(req, res) {
     const result = await db.deleteRaceById(raceId);
 
     if (result) {
-      res.json('Race deleted successfully');
+      res.status(200).send('Race deleted successfuly.');
     } else {
       res.status(404).send('No race found with that ID.');
     }
@@ -125,7 +125,6 @@ async function updateRace(req, res) {
 
 async function getConflicts(req, res) {
   const conflicts = await db.getConflicts(req.query.raceId);
-  console.log(conflicts);
   res.json(conflicts);
 }
 

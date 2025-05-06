@@ -14,29 +14,24 @@ class ConflictManager {
     try {
       const response = await fetch(`/api/conflicts?raceId=${this.raceId}`);
       this.conflicts = await response.json();
+
       this.renderConflictList();
-      this.updateConflictCount();
     } catch (error) {
       console.error('Failed to load conflicts:', error);
     }
   }
 
   renderConflictList() {
-    const container = document.getElementById('conflict-list');
-
-    if (this.conflicts.length === 0) {
-      container.innerHTML = '<div class="empty-state"><p>No timestamp conflicts to resolve</p></div>';
-      return;
-    }
+    const container = document.querySelector('#conflict-list');
 
     container.innerHTML = '';
-    this.conflicts.forEach(conflict => {
-      const template = document.getElementById('conflict-card-template');
+    for (const conflict of this.conflicts) {
+      const template = document.querySelector('#conflict-card-template');
       const card = template.content.cloneNode(true);
 
       card.querySelector('.conflict-item').dataset.timeFinished = conflict.timeFinished;
       card.querySelector('.conflict-item').dataset.bibNumber = conflict.bibNumber;
-      card.querySelector('.conflict-item').dataset.participantName = `${conflict.firstName} ${conflict.lastName}`.toLowerCase();
+      card.querySelector('.conflict-item').dataset.participantName = `${conflict.firstName} ${conflict.lastName}`;
 
       card.querySelector('.participant-name').textContent = `${conflict.firstName} ${conflict.lastName}`;
       card.querySelector('.bib-number').textContent = `#${conflict.bibNumber}`;
@@ -51,14 +46,14 @@ class ConflictManager {
       this.renderTimestampOptions(optionsContainer, conflict);
 
       container.appendChild(card);
-    });
+    }
   }
 
   renderTimestampOptions(container, conflict) {
     const times = JSON.parse(conflict.pendingTimes || '[]');
     
     times.forEach((t, index) => {
-        const template = document.getElementById('timestamp-option-template');
+        const template = document.querySelector('#timestamp-option-template');
         const option = template.content.cloneNode(true);
         
         option.querySelector('.timestamp-value').textContent = this.formatTime(t.time);
@@ -93,12 +88,12 @@ class ConflictManager {
   }
 
   setupEventListeners() {
-    document.getElementById('refresh-conflicts').addEventListener('click', () => {
+    document.querySelector('#refresh-conflicts').addEventListener('click', () => {
       this.loadConflicts();
     });
 
     // Accept/reject buttons
-    document.getElementById('conflict-list').addEventListener('click', async (e) => {
+    document.querySelector('#conflict-list').addEventListener('click', async (e) => {
       if (e.target.classList.contains('accept-button')) {
         const bibNumber = e.target.dataset.bib;
         const time = e.target.dataset.time;
@@ -158,12 +153,6 @@ class ConflictManager {
     } catch (error) {
       console.error(error.message);
     }
-  }
-
-  updateConflictCount() {
-    const countElement = document.getElementById('conflict-count');
-    countElement.textContent = this.conflicts.length;
-    countElement.style.display = this.conflicts.length ? 'inline-block' : 'none';
   }
 }
 

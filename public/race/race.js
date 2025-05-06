@@ -28,7 +28,6 @@ async function fetchRaceData(page = 1) {
       const offlineData = localStorage.getItem('storedRace');
       const parsedData = JSON.parse(offlineData);
 
-      console.log('Using offline race data');
       updateRaceDetails(parsedData.raceDetails);
       renderRaceTable(parsedData.raceDetails);
       updatePaginationControls(parsedData.raceDetails.pagination);
@@ -80,14 +79,11 @@ function renderRaceTable(raceDetails) {
     row.querySelector('.participant-name').textContent = `${participant.firstName} ${participant.lastName}`;
 
     const finishTimeCell = row.querySelector('.finish-time');
-    console.log(participant);
     
     if (participant.timeFinished) {
       finishTimeCell.textContent = formatRacerTime((participant.timeFinished));
     } else {
-      finishTimeCell.textContent = participant.timeFinished 
-        ? formatRacerTime((participant.timeFinished - raceDetails.timeStarted))
-        : 'Pending';
+      finishTimeCell.textContent = 'Pending';
     }
     tableBody.appendChild(row);
   });
@@ -170,7 +166,6 @@ document.querySelector('#next-page').addEventListener('click', (event) => {
 document.addEventListener('DOMContentLoaded', () => {
   if (!navigator.onLine && hasOfflineRaceData()) {
     const offlineData = JSON.parse(localStorage.getItem('storedRace'));
-    console.log('Offline mode - using cached race data');
 
     updateRaceDetails(offlineData);
     renderRaceTable(offlineData);

@@ -178,14 +178,6 @@ input[type="number"] {
   color: #666;
 }
 
-.alert-badge {
-  background: #e74c3c;
-  color: white;
-  border-radius: 1rem;
-  padding: 0.125rem 0.5rem;
-  font-size: 0.8rem;
-}
-
 .grid-columns-2 {
   display: grid;
   grid-template-columns: 1fr 1fr;
