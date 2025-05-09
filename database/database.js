@@ -1,69 +1,34 @@
-import pkg from 'sqlite3';
-const { Database } = pkg;
+import { open } from 'sqlite';
+import sqlite3 from 'sqlite3';
 
 const DB_PATH = './Database/database.sqlite';
 
-const DB_CONN = new Database(DB_PATH, (err) => {
-  if (err) {
-    console.error('Error connecting to database:', err.message);
-  } else {
-    console.log('Database connection established.');
-  }
-});
-
-// sqlite3 promise wrappers
-async function getAll(sql, args) {
-  return await new Promise((resolve, reject) => {
-    DB_CONN.all(sql, args, (error, rows) => {
-      if (error) reject(error);
-      resolve(rows);
-    });
+// Open database connection
+let db;
+(async () => {
+  db = await open({
+    filename: DB_PATH,
+    driver: sqlite3.Database
   });
-}
+  console.log('Database connection established.');
+})();
 
-async function getRow(sql, args) {
-  return await new Promise((resolve, reject) => {
-    DB_CONN.get(sql, args, (error, row) => {
-      if (error) reject(error);
-      resolve(row);
-    });
-  });
-}
-
-async function deleteRow(sql, args) {
-  return await new Promise((resolve, reject) => {
-    DB_CONN.run(sql, args, function (error) {
-      if (error) reject(error);
-      resolve(this.changes);
-    });
-  });
-}
-
-async function updateRace(sql, args) {
-  return await new Promise((resolve, reject) => {
-    DB_CONN.run(sql, args, function(error) {
-      if (error) reject(error);
-      resolve(this.changes);
-    })
-  })
-}
-
-// Main Database Queries
+// Database Queries
 export async function getAllRaces(page = 1, pageSize = 10) {
   try {
     const offset = (page - 1) * pageSize;
     const races = {};
 
-    const raceData = await getAll(`
+    const raceData = await db.all(`
       SELECT * 
       FROM races 
       ORDER BY CAST(time_started AS INTEGER) DESC 
       LIMIT ? OFFSET ?
     `, [pageSize, offset]);    
-    const raceCount = await getAll('SELECT COUNT(*) as total FROM races');
+    const raceCount = await db.all('SELECT COUNT(*) as total FROM races');
 
     for (const race of raceData) {
-      const participantTotal = await getRow(`
+      const participantTotal = await db.get(`
         SELECT COUNT(*) as total
         FROM participants p
         WHERE p.race_id = ?
@@ -96,7 +61,7 @@ export async function getRace(raceId, page = 1, pageSize = 10) {
   try {
     const offset = (page - 1) * pageSize;
 
-    const raceData = await getRow(
+    const raceData = await db.get(
       `SELECT
         race_id as raceId,
         race_location as raceLocation,
@@ -108,7 +73,7 @@ export async function getRace(raceId, page = 1, pageSize = 10) {
       WHERE race_id = ?`, [raceId],
     );
 
-    const participants = await getAll(`
+    const participants = await db.all(`
       SELECT
         participant_id as participantId,
         first_name as firstName,
@@ -122,14 +87,14 @@ export async function getRace(raceId, page = 1, pageSize = 10) {
       LIMIT ? OFFSET ?
     `, [raceId, pageSize, offset]);
 
-    const totalParticipants = await getRow(`
+    const totalParticipants = await db.get(`
       SELECT COUNT(*) as total
       FROM participants
       WHERE race_id = ?
     `, [raceId]);
 
     for (const participant of participants) {
-      participant.checkpoints = await getAll(`
+      participant.checkpoints = await db.all(`
         SELECT
           c.checkpoint_id AS checkpointId,
           c.checkpoint_name AS checkpointName,
@@ -142,7 +107,7 @@ export async function getRace(raceId, page = 1, pageSize = 10) {
       `, [participant.participantId]);
     }
 
-    const checkpointCount = await getRow(`
+    const checkpointCount = await db.get(`
       SELECT COUNT(*) as total
       FROM checkpoints
       WHERE race_id = ? 
@@ -186,42 +151,34 @@ export async function createNewRace(req) {
     const [hours, minutes] = durationString.split(':').map(Number);
     const scheduledDuration = (hours * 3600 + minutes * 60) * 1000;
 
-    newRaceId = await new Promise((resolve, reject) => {
-      DB_CONN.run(
-        'INSERT INTO races (race_name, race_location, scheduled_start_time, scheduled_duration, time_started, time_finished) VALUES (?, ?, ?, ?, NULL, NULL)',
-        [raceName, raceLocation, scheduledStartTimestamp, scheduledDuration],
-        function (error) {
-          if (error) {
-            reject(error);
-          } else {
-            resolve(this.lastID);
-          }
-        },
-      );
-    });
+    const result = await db.run(
+      'INSERT INTO races (race_name, race_location, scheduled_start_time, scheduled_duration, time_started, time_finished) VALUES (?, ?, ?, ?, NULL, NULL)',
+      [raceName, raceLocation, scheduledStartTimestamp, scheduledDuration]
+    );
+    newRaceId = result.lastID;
   }
 
   if (req.checkpoints.length > 0) {
     for (const checkpoint of req.checkpoints) {
-      DB_CONN.run(
+      await db.run(
         'INSERT INTO checkpoints (race_id, checkpoint_name, checkpoint_order) VALUES (?, ?, ?)',
-        [newRaceId, checkpoint['.checkpoint-name'], checkpoint['.checkpoint-order']],
+        [newRaceId, checkpoint['.checkpoint-name'], checkpoint['.checkpoint-order']]
       );
     }
   }
 
   if (req.marshalls.length > 0) {
     for (const marshall of req.marshalls) {
-      DB_CONN.run(
+      await db.run(
         'INSERT INTO marshalls (race_id, first_name, last_name) VALUES (?, ?, ?)',
-        [newRaceId, marshall['.marshall-first-name'], marshall['.marshall-last-name']],
+        [newRaceId, marshall['.marshall-first-name'], marshall['.marshall-last-name']]
       );
     }
   }
 
   if (req.participants.length > 0) {
     for (const participant of req.participants) {
-      DB_CONN.run(
+      await db.run(
         `INSERT INTO participants (race_id, first_name, last_name, bib_number) 
          VALUES (?, ?, ?, COALESCE((SELECT MAX(bib_number) + 1 FROM participants WHERE race_id = ?), 1))`,
         [newRaceId, participant['.participant-first-name'], participant['.participant-last-name'], newRaceId]
@@ -232,10 +189,10 @@ export async function createNewRace(req) {
 
 export async function deleteRaceById(raceId) {
   try {
-    await deleteRow('DELETE FROM checkpoints WHERE race_id = ?', [raceId]);
-    await deleteRow('DELETE FROM marshalls WHERE race_id = ?', [raceId]);
-    await deleteRow('DELETE FROM participants WHERE race_id = ?', [raceId]);
-    await deleteRow('DELETE FROM races WHERE race_id = ?', [raceId]);
+    await db.run('DELETE FROM checkpoints WHERE race_id = ?', [raceId]);
+    await db.run('DELETE FROM marshalls WHERE race_id = ?', [raceId]);
+    await db.run('DELETE FROM participants WHERE race_id = ?', [raceId]);
+    await db.run('DELETE FROM races WHERE race_id = ?', [raceId]);
     return true;
   } catch (error) {
     console.error(`Error deleting race with ID ${raceId}:`, error.message);
@@ -244,12 +201,12 @@ export async function deleteRaceById(raceId) {
 
 export async function updateStartTime(raceId, data) {
   const timeStamp = JSON.parse(data.startTime);
-  updateRace('UPDATE races SET time_started = ? WHERE race_id = ?', [timeStamp, raceId]);
+  await db.run('UPDATE races SET time_started = ? WHERE race_id = ?', [timeStamp, raceId]);
 }
 
 export async function updateFinishTime(raceId, data) {
   const timeStamp = JSON.parse(data.finishTime);
-  updateRace('UPDATE races SET time_finished = ? WHERE race_id = ?', [timeStamp, raceId]);
+  await db.run('UPDATE races SET time_finished = ? WHERE race_id = ?', [timeStamp, raceId]);
 }
 
 export async function submitResults(raceId, data) {
@@ -259,7 +216,7 @@ export async function submitResults(raceId, data) {
 }
 
 async function submitParticipantTime(raceId, bibNumber, timestamp, submittedBy) {
-  const participant = await getRow(`
+  const participant = await db.get(`
     SELECT 
       pending_times as pendingTimes,
       time_finished as timeFinished
@@ -281,7 +238,7 @@ async function submitParticipantTime(raceId, bibNumber, timestamp, submittedBy) 
   });
 
   if (!hasConflict) {
-    DB_CONN.run(`
+    await db.run(`
       UPDATE participants
       SET
         time_finished = ?,
@@ -291,8 +248,7 @@ async function submitParticipantTime(raceId, bibNumber, timestamp, submittedBy) 
       [timestamp, hasConflict, raceId, bibNumber]
     );
   } else {
-    console.log(pendingTimes);
-    DB_CONN.run(`
+    await db.run(`
       UPDATE participants 
       SET 
         pending_times = ?, 
@@ -306,7 +262,7 @@ async function submitParticipantTime(raceId, bibNumber, timestamp, submittedBy) 
 }
 
 export async function getConflicts(raceId) {
-  return await getAll(`
+  return await db.all(`
     SELECT 
       participant_id as participantId, 
       bib_number as bibNumber,
@@ -323,7 +279,7 @@ export async function getConflicts(raceId) {
 }
 
 export async function resolveConflict(raceId, bibNumber, acceptedTime) {
-  DB_CONN.run(`
+  await db.run(`
     UPDATE participants
     SET
       time_finished = ?,
@@ -336,7 +292,7 @@ export async function resolveConflict(raceId, bibNumber, acceptedTime) {
 
 export async function rejectConflict(raceId, bibNumber, rejectedTime) {
   try {
-    const participant = await getRow(`
+    const participant = await db.get(`
       SELECT pending_times as pendingTimes
       FROM participants
       WHERE race_id = ? AND bib_number = ?`,
@@ -355,7 +311,7 @@ export async function rejectConflict(raceId, bibNumber, rejectedTime) {
     );
 
     // Update the database
-    DB_CONN.run(`
+    await db.run(`
       UPDATE participants
       SET
         pending_times = ?,
