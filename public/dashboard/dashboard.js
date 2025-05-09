@@ -187,6 +187,16 @@ async function updateRaceData(raceId, action, data) {
   }
 }
 
+function returnToResults() {
+  const stored = JSON.parse(localStorage.getItem('storedRace'));
+  const raceId = stored?.raceId;
+
+
+
+  window.location.href = `/race/${raceId}`;
+}
+
 document.addEventListener('DOMContentLoaded', main);
 document.querySelector('#start-race-button').addEventListener('click', startRace);
-document.querySelector('#finish-race-button').addEventListener('click', finishRace)
+document.querySelector('#finish-race-button').addEventListener('click', finishRace);
+document.querySelector('#back-button').addEventListener('click', returnToResults);
