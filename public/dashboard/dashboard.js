@@ -191,8 +191,6 @@ function returnToResults() {
   const stored = JSON.parse(localStorage.getItem('storedRace'));
   const raceId = stored?.raceId;
 
-
-
   window.location.href = `/race/${raceId}`;
 }
 

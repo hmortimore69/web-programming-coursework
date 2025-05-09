@@ -1,11 +1,16 @@
 document.addEventListener('DOMContentLoaded', function () {
   const steps = document.querySelectorAll('.new-race-step');
   const nextButtons = document.querySelectorAll('.next-step');
-  const prevButtons = document.querySelectorAll('.prev-step');
+  const prevButtons = document.querySelectorAll('.previous-step');
   const submitButton = document.querySelector('#submit-button');
+  const progressTabs = document.querySelectorAll('.progress-tab');
 
   let currentStep = 0;
   const formData = {};
+
+  for (const tab of progressTabs) {
+    tab.addEventListener('click', handleTabClick);
+  }
 
   /**
    * Updates the visibility of steps based on the current step index.
@@ -15,6 +20,26 @@ document.addEventListener('DOMContentLoaded', function () {
     for (const [index, step] of steps.entries()) {
       step.classList.toggle('active', index === currentStep);
     }
+    
+    for (const [index, tab] of progressTabs.entries()) {
+      tab.classList.toggle('active', index === currentStep);
+      tab.classList.toggle('completed', index < currentStep);
+    }
+  }
+
+  function handleTabClick(event) {
+    const tab = event.currentTarget;
+    const stepIndex = parseInt(tab.dataset.step);
+    
+    // Validate current step before allowing navigation
+    if (currentStep !== stepIndex) {
+      if (!validateStep(currentStep)) {
+        return; // Stay on current step if validation fails
+      }
+    }
+    
+    currentStep = stepIndex;
+    updateSteps();
   }
 
   /**
@@ -23,18 +48,31 @@ document.addEventListener('DOMContentLoaded', function () {
    * @param {number} stepIndex - The index of the step being validated.
    * @returns {boolean} - Returns true if all inputs are filled, otherwise false.
    */
-  function validateStep(stepIndex) {
-    const inputs = steps[stepIndex].querySelectorAll('input');
-    const requirementMessage = document.querySelector('.user-feedback-message');
-
+  function validateStep(stepIndex, silent = false) {
+    const step = steps[stepIndex];
+    const inputs = step.querySelectorAll('input');
+    let isValid = true;
+  
     for (const input of inputs) {
-      if (!input.value) {
-        requirementMessage.hidden = false;
-        return false;
+      if (!input.value.trim()) {
+        if (!silent) {
+          input.classList.add('invalid-input');
+          input.addEventListener('input', function clearInvalid() {
+            this.classList.remove('invalid-input');
+            this.removeEventListener('input', clearInvalid);
+            validateStep(stepIndex); // Revalidate when user types
+          }, { once: true });
+        }
+        isValid = false;
       }
     }
-    requirementMessage.hidden = true;
-    return true;
+  
+    // Update tab status
+    if (!silent) {
+      progressTabs[stepIndex].classList.toggle('invalid', !isValid);
+    }
+  
+    return isValid;
   }
 
   /**
@@ -64,7 +102,20 @@ document.addEventListener('DOMContentLoaded', function () {
    * Saves the last step's form data and submits to the server.
    */
   async function handleSubmitButtonClick() {
-    if (!validateStep(currentStep)) return;
+    // Validate all steps first
+    let allValid = true;
+    
+    for (let i = 0; i < steps.length; i++) {
+      if (!validateStep(i, true)) {
+        progressTabs[i].classList.add('invalid');
+        allValid = false;
+      }
+    }
+    
+    if (!allValid) {
+      alert('Please fix all invalid fields before submitting');
+      return;
+    }
     
     saveData(currentStep);
     
@@ -76,8 +127,7 @@ document.addEventListener('DOMContentLoaded', function () {
         },
         body: JSON.stringify(formData),
       });
-
-      console.log(response);
+  
       if (response.ok) {
         window.location.href = "/home";
       } else {

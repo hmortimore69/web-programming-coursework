@@ -6,11 +6,11 @@
     <link rel="stylesheet" href="../../util/nav.css" />
     <link rel="stylesheet" href="/newRace/newRace.css" />
 
-    <title>PJC | Admin</title>
+    <title>PJC | Create Race</title>
   </head>
   <body>
     <nav>
-      <a href="/" id="logo-home">PJC Race Tracker</a>
+      <a href="/" id="logo-home">PJC</a>
       <div class="nav-float-right">
         <a href="/">Home</a>
         <a href="/new-race">New Race</a>
@@ -19,69 +19,79 @@
     
     <main>
       <h1>Race Setup</h1>
-      <div class="progress-bar">
-        <div class="progress" id="progress"></div>
+      <div class="progress-tabs">
+        <div class="progress-tab active" data-step="0">Race Details</div>
+        <div class="progress-tab optional" data-step="1">Checkpoints (Optional)</div>
+        <div class="progress-tab optional" data-step="2">Marshalls (Optional)</div>
+        <div class="progress-tab optional" data-step="3">Participants (Optional)</div>
       </div>
+
       <section class="new-race-form-flow">
         <!-- STEP 1 (RACE DETAILS SETUP) -->
-        <div class="new-race-step">
-          <h3>Step 1 of 4 - Race Details:
-          <progress name="form-progress-bar" max="4" value="1">(Step 1 of 4)</progress></h3>
-
+        <div class="new-race-step active">
+          <h3>Race Details</h3>
+          
           <div id="race-details">
             <label for="race-name">Race Name:</label>
-            <input id="race-name" type="text" name="race-name" placeholder="My new race" /><br>
-  
+            <input id="race-name" type="text" name="race-name" placeholder="My new race" required>
+            
             <label for="race-start-date">Start Date:</label>
-            <input id="race-start-date" type="datetime-local" name="race-start-date-time" /><br>
+            <input id="race-start-date" type="datetime-local" name="race-start-date-time" required>
             
             <label for="race-location">Location:</label>
-            <input id="race-location" type="text" name="race-location" placeholder="Enter race location" /><br>
-
-            <label for="race-duration">Duration:</label>
-            <input id="race-duration" type="time" max="24:00" min="00:00" placeholder="24" name="race-duration" /><br>          
+            <input id="race-location" type="text" name="race-location" placeholder="Enter race location" required>
+            
+            <label for="race-duration">Duration (hours):</label>
+            <input id="race-duration" type="time" max="24:00" min="00:00" placeholder="24" name="race-duration" required>
           </div>
-
-          <button type="button" class="next-step">NEXT</button>
+          
+          <div class="button-group">
+            <button class="next-step">NEXT</button>
+          </div>
         </div>
 
         <!-- STEP 2 (CHECKPOINT SETUP) -->
         <div class="new-race-step">
-          <h3>Step 2 of 4 - Checkpoint Setup:
-          <progress name="form-progress-bar" max="4" value="2">(Step 2 of 4)</progress></h3>
-
-          <div id="checkpoint-list"></div>
-
-          <button type="button" id="add-checkpoint-button">ADD CHECKPOINT</button><br>
+          <h3>Checkpoint Setup</h3>
           
-          <button type="button" class="prev-step">PREVIOUS</button>
-          <button type="button" class="next-step">NEXT</button>
+          <div id="checkpoint-list"></div>
+        
+          <button id="add-checkpoint-button" class="add-button">ADD CHECKPOINT</button>
+          
+          <div class="button-group">
+            <button class="previous-step">PREVIOUS</button>
+            <button class="next-step">NEXT</button>
+          </div>
         </div>
 
         <!-- STEP 3 (MARSHALL SETUP) -->
         <div class="new-race-step">
-          <h3>Step 3 of 4 - Marshall Setup:
-          <progress name="form-progress-bar" max="4" value="3">(Step 3 of 4)</progress></h3>
-
+          <h3>Marshall Setup</h3>
+          
           <div id="marshall-list"></div>
-
-          <button type="button" id="add-marshall-button">ADD MARSHALL</button><br>
-
-          <button type="button" class="prev-step">PREVIOUS</button>
-          <button type="button" class="next-step">NEXT</button>
+        
+          <button id="add-marshall-button" class="add-button">ADD MARSHALL</button>
+          
+          <div class="button-group">
+            <button class="previous-step">PREVIOUS</button>
+            <button class="next-step">NEXT</button>
+          </div>
         </div>
 
         <!-- STEP 4 (PARTICIPANT SETUP) -->
         <div class="new-race-step">
-          <h3>Step 4 of 4 - Participant Setup:
-          <progress name="form-progress-bar" max="4" value="4">(Step 4 of 4)</progress></h3>
-
+          <h3>Participant Setup</h3>
+  
           <div id="participant-list"></div>
 
-          <button type="button" id="add-participant-button">ADD PARTICIPANT</button><br>
-
-          <button type="button" class="prev-step">PREVIOUS</button>
-          <button type="button" id="submit-button">SUBMIT</button>
+          <button id="add-participant-button" class="add-button">
+            ADD PARTICIPANT
+          </button>
+                  
+          <div class="button-group">
+            <button class="previous-step">PREVIOUS</button>
+            <button id="submit-button">SUBMIT RACE</button>
+          </div>
         </div>
 
         <p class="user-feedback-message" hidden>Please enter valid information.</p>
@@ -96,7 +106,7 @@
         <label for="order-number">Order:</label>
         <input type="number" min="1" class="checkpoint-order" name="order-number" placeholder="1" />
         
-        <button type="button" class="remove-checkpoint-button">REMOVE</button><br>
+        <button class="remove-checkpoint-button">REMOVE</button><br>
       </div>
     </template>
 
@@ -108,7 +118,7 @@
         <label for="marshall-name">Last Name:</label>
         <input type="text" class="marshall-last-name" name="marshall-last-name" placeholder="Mathers" />
         
-        <button type="button" class="remove-marshall-button">REMOVE</button><br>
+        <button class="remove-marshall-button">REMOVE</button><br>
       </div>
     </template>
 
@@ -120,7 +130,7 @@
         <label for="participant-last-name">Last Name:</label>
         <input type="text" class="participant-last-name" name="participant-last-name" placeholder="Bowie" />
         
-        <button type="button" class="remove-participant-button">REMOVE</button><br>
+        <button class="remove-participant-button">REMOVE</button><br>
       </div>
     </template>
 
