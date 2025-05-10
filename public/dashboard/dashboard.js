@@ -9,6 +9,10 @@ async function main() {
     deleteRaceById(raceId);
   });
 
+  raceTimer.onAutoEnd = async () => {
+    // This runs when 24 hours elapses
+    await finishRace();
+  };
   setInterval(() => syncTimerWithRaceState(), 10000);
 }
 

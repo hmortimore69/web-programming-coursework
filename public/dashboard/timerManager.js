@@ -7,12 +7,26 @@ const raceTimer = {
   isRunning: false,
   isCountdown: false,
   isFinished: false,
+  maxDuration: 24 * 60 * 60 * 1000,
+  autoEndTimeout: null,
 
   start() {
     if (this.isRunning) return;
 
     this.startTime = Date.now() - this.elapsedTime;
     this.isRunning = true;
+    this.elapsedTime = 0;
+
+    if (this.autoEndTimeout) {
+      clearTimeout(this.autoEndTimeout);
+    }
+
+    this.autoEndTimeout = setTimeout(() => {
+      this.finish();
+      if (typeof this.onAutoEnd === 'function') {
+        this.onAutoEnd();
+      }
+    }, this.maxDuration);
 
     if (this.liveIndicator) {
       this.liveIndicator.textContent = '● LIVE';
@@ -52,7 +66,7 @@ const raceTimer = {
           this.liveIndicator.textContent = '● STARTING';
           this.liveIndicator.style.color = 'red';
         }
-        this.updateCountdownDisplay(remaining);
+        this.updateTimerElementForCountdown(remaining);
       }
     }, 10);
   },
@@ -61,6 +75,8 @@ const raceTimer = {
     if (!this.isRunning) return;
 
     clearInterval(this.timerInterval);
+    clearTimeout(this.autoEndTimeout);
+
     this.isRunning = false;
     this.isCountdown = false;
     this.elapsedTime = Date.now() - this.startTime;
@@ -80,34 +96,24 @@ const raceTimer = {
     }
   },
 
-  reset() {
-    this.stop();
-    this.elapsedTime = 0;
-    this.updateDisplay(0);
-  },
-
-  adjustTime(deltaTime) {
-    this.elapsedTime += deltaTime;
-    if (this.elapsedTime < 0) {
-      this.elapsedTime = 0;
-    }
-    this.updateDisplay(this.elapsedTime);
-    if (this.isRunning && !this.isCountdown) {
-      this.startTime = Date.now() - this.elapsedTime;
+  resetAutoEndTimeout() {
+    if (this.autoEndTimeout) {
+      clearTimeout(this.autoEndTimeout);
+      this.autoEndTimeout = null;
     }
   },
 
   setTime(elapsed) {
     this.elapsedTime = elapsed;
-    this.updateDisplay(this.elapsedTime);
+    this.updateTimerElement(this.elapsedTime);
   },
 
   update() {
     this.elapsedTime = Date.now() - this.startTime;
-    this.updateDisplay(this.elapsedTime);
+    this.updateTimerElement(this.elapsedTime);
   },
 
-  updateDisplay(elapsed) {
+  updateTimerElement(elapsed) {
     const hours = Math.floor(elapsed / 3600000);
     const minutes = Math.floor((elapsed % 3600000) / 60000);
     const seconds = Math.floor((elapsed % 60000) / 1000);
@@ -120,7 +126,7 @@ const raceTimer = {
         `${milliseconds.toString().padStart(3, '0')}`;
   },
 
-  updateCountdownDisplay(timeRemaining) {
+  updateTimerElementForCountdown(timeRemaining) {
     const days = Math.floor(timeRemaining / 86400000);
     const hours = Math.floor((timeRemaining % 86400000) / 3600000);
     const minutes = Math.floor((timeRemaining % 3600000) / 60000);

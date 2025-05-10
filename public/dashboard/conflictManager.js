@@ -52,7 +52,7 @@ class ConflictManager {
   renderTimestampOptions(container, conflict) {
     const times = JSON.parse(conflict.pendingTimes || '[]');
     
-    times.forEach((t, index) => {
+    for (const t of times) {
         const template = document.querySelector('#timestamp-option-template');
         const option = template.content.cloneNode(true);
         
@@ -76,7 +76,7 @@ class ConflictManager {
         option.querySelector('.reject-button').dataset.time = t.time;
         
         container.appendChild(option);
-    });
+    }
   }
 
   formatTime(ms) {
@@ -94,13 +94,13 @@ class ConflictManager {
 
     // Accept/reject buttons
     document.querySelector('#conflict-list').addEventListener('click', async (e) => {
-      if (e.target.classList.contains('accept-button')) {
+      if (e.target.classList.contains('accept-timestamp-button')) {
         const bibNumber = e.target.dataset.bib;
         const time = e.target.dataset.time;
         await this.resolveConflict(bibNumber, time);
       }
 
-      if (e.target.classList.contains('reject-button')) {
+      if (e.target.classList.contains('reject-timestamp-button')) {
         const bibNumber = e.target.dataset.bib;
         const time = e.target.dataset.time;
         await this.rejectTimestamp(bibNumber, time);
@@ -156,7 +156,6 @@ class ConflictManager {
   }
 }
 
-// Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
   new ConflictManager();
 });

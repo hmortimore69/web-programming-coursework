@@ -53,6 +53,7 @@ const TimestampManager = {
   assign() {
     const bibNumber = document.querySelector('#racer-number-input').value;
     if (!bibNumber || !this.selected) {
+      // add validation to ensure bib is an actual runner
       // add an alert
       return;
     }
@@ -114,9 +115,9 @@ const TimestampManager = {
     const tbody = document.querySelector(`#${area}-timestamps-list`);
     tbody.innerHTML = '';
 
-    timestamps.forEach(ts => {
+    for (const ts of timestamps) {
       const templateId = `${area}-timestamp-template`;
-      const template = document.getElementById(templateId);
+      const template = document.querySelector(`#${templateId}`);
       const clone = template.content.cloneNode(true);
       const row = clone.querySelector('tr');
 
@@ -168,7 +169,7 @@ const TimestampManager = {
       }
 
       tbody.appendChild(row);
-    });
+    }
   },
 
   save() {

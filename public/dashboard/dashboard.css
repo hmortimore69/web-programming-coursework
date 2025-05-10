@@ -62,12 +62,12 @@ button {
   color: white;
 }
 
-.danger-button {
+.reject-timestamp-button {
   background: #e74c3c;
   color: white;
 }
 
-.success-button {
+.accept-timestamp-button {
   background: #27ae60;
   color: white;
 }
@@ -84,7 +84,7 @@ button {
   font-size: 0.8rem;
 }
 
-input[type="number"] {
+input {
   padding: 0.5rem;
   border: 1px solid #ddd;
   border-radius: 0.25rem;
@@ -192,7 +192,7 @@ input[type="number"] {
   margin: 0.125rem 0;
 }
 
-.timestamp-meta {
+.timestamp-details {
   display: flex;
   flex-direction: column;
   gap: 0.125rem;
