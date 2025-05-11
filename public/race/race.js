@@ -71,9 +71,8 @@ function updateRaceDetails(raceDetails) {
  */
 function renderRaceTable(raceDetails) {
   const tableBody = document.querySelector('.race-table tbody');
-  tableBody.innerHTML = '';
 
-  raceDetails.participants.forEach(participant => {
+  for (const participant of raceDetails.participants) {
     const row = document.querySelector('#participant-row-template').content.cloneNode(true);
     row.querySelector('.bib-number').textContent = participant.bibNumber;
     row.querySelector('.participant-name').textContent = `${participant.firstName} ${participant.lastName}`;
@@ -86,7 +85,7 @@ function renderRaceTable(raceDetails) {
       finishTimeCell.textContent = 'Pending';
     }
     tableBody.appendChild(row);
-  });
+  }
 }
 
 /**

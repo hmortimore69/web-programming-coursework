@@ -26,6 +26,7 @@ function syncTimerWithRaceState(race) {
 
   // Race is currently live
   if (timeStarted && timeStarted <= now && (!timeFinished || timeFinished >= now)) {
+    // Add check if race exceeds 24 hours, rten cap timer at 24 and finish race (TODO)
     const elapsed = now - timeStarted;
     raceTimer.setTime(elapsed);
     raceTimer.start();
