@@ -8,7 +8,6 @@ const raceTimer = {
   isCountdown: false,
   isFinished: false,
   maxDuration: 24 * 60 * 60 * 1000,
-  autoEndTimeout: null,
 
   start() {
     if (this.isRunning) return;
@@ -17,16 +16,6 @@ const raceTimer = {
     this.isRunning = true;
     this.elapsedTime = 0;
 
-    if (this.autoEndTimeout) {
-      clearTimeout(this.autoEndTimeout);
-    }
-
-    this.autoEndTimeout = setTimeout(() => {
-      this.finish();
-      if (typeof this.onAutoEnd === 'function') {
-        this.onAutoEnd();
-      }
-    }, this.maxDuration);
 
     if (this.liveIndicator) {
       this.liveIndicator.textContent = '● LIVE';
@@ -40,7 +29,6 @@ const raceTimer = {
     if (this.isRunning) return;
 
     this.isCountdown = true;
-    this.isRunning = true;
 
     if (this.liveIndicator) {
       this.liveIndicator.textContent = '● STARTS SOON';
@@ -75,7 +63,6 @@ const raceTimer = {
     if (!this.isRunning) return;
 
     clearInterval(this.timerInterval);
-    clearTimeout(this.autoEndTimeout);
 
     this.isRunning = false;
     this.isCountdown = false;
@@ -93,13 +80,6 @@ const raceTimer = {
     if (this.liveIndicator) {
       this.liveIndicator.textContent = '● FINISHED';
       this.liveIndicator.style.color = 'green';
-    }
-  },
-
-  resetAutoEndTimeout() {
-    if (this.autoEndTimeout) {
-      clearTimeout(this.autoEndTimeout);
-      this.autoEndTimeout = null;
     }
   },
 

@@ -9,17 +9,13 @@ async function main() {
     deleteRaceById(raceId);
   });
 
-  raceTimer.onAutoEnd = async () => {
-    // This runs when 24 hours elapses
-    await finishRace();
-  };
   setInterval(() => syncTimerWithRaceState(), 10000);
 }
 
 function syncTimerWithRaceState(race) {
   if (!race) return;
 
-  const { scheduled_start_time, scheduled_duration, timeStarted, timeFinished } = race;
+  const { scheduledStartTime, scheduled_duration, timeStarted, timeFinished } = race;
   const now = Date.now();
 
   raceTimer.stop();
@@ -42,13 +38,13 @@ function syncTimerWithRaceState(race) {
   }
 
   // Race hasn't started yet - show countdown to scheduled time
-  if (!timeStarted && scheduled_start_time > now) {
-    raceTimer.startCountdown(scheduled_start_time);
+  if (!timeStarted && scheduledStartTime > now) {
+    raceTimer.startCountdown(scheduledStartTime);
     return;
   }
 
   // Scheduled start time passed but race wasn't started
-  if (!timeStarted && scheduled_start_time <= now) {
+  if (!timeStarted && scheduledStartTime <= now) {
     raceTimer.updateDisplay(0);
     if (raceTimer.liveIndicator) {
       raceTimer.liveIndicator.textContent = '● STARTING';
@@ -56,9 +52,6 @@ function syncTimerWithRaceState(race) {
     }
     return;
   }
-
-  // Default case
-  raceTimer.reset();
 }
 
 async function getRace() {
@@ -131,6 +124,8 @@ async function startRace() {
 
     await updateRaceData(raceId, 'update-start-time', { startTime: updatedStartTime });
   
+
+    console.log("STARTED");
     // Sync timer with new state
     const updatedRace = JSON.parse(localStorage.getItem('storedRace'));
     syncTimerWithRaceState(updatedRace);
