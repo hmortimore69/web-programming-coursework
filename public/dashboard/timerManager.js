@@ -8,6 +8,13 @@ const raceTimer = {
   isCountdown: false,
   isFinished: false,
   maxDuration: 24 * 60 * 60 * 1000,
+  online: navigator.onLine,
+
+  init() {
+    window.addEventListener('online', this.updateConnection.bind(this)),
+    window.addEventListener('offline', this.updateConnection.bind(this))
+  },
+
 
   start() {
     if (this.isRunning) return;
@@ -16,13 +23,27 @@ const raceTimer = {
     this.isRunning = true;
     this.elapsedTime = 0;
 
-
     if (this.liveIndicator) {
       this.liveIndicator.textContent = '● LIVE';
-      this.liveIndicator.style.color = 'red';
+      this.liveIndicator.style.color = this.online ? 'red' : 'orange';
     }
 
     this.timerInterval = setInterval(() => this.update(), 10);
+  },
+
+  updateConnection() {
+    const indicator = document.querySelector('#connection-indicator');
+    if (!indicator) return;
+    
+    if (navigator.onLine) {
+      this.online = true;
+      indicator.innerHTML = '● ONLINE';
+      indicator.style.color = '#4CAF50';
+    } else {
+      this.online = false;
+      indicator.innerHTML = '● OFFLINE';
+      indicator.style.color = '#FF5722';
+    }
   },
 
   startCountdown(targetTime) {

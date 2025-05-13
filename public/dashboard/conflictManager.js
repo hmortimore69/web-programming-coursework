@@ -69,11 +69,11 @@ class ConflictManager {
             `Submitted by ${t.submitted_by} at ${new Date(t.submitted_at).toLocaleString()}`;
         
         // Set data attributes for both accept and reject buttons
-        option.querySelector('.accept-button').dataset.bib = conflict.bibNumber;
-        option.querySelector('.accept-button').dataset.time = t.time;
+        option.querySelector('.accept-timestamp-button').dataset.bib = conflict.bibNumber;
+        option.querySelector('.accept-timestamp-button').dataset.time = t.time;
         
-        option.querySelector('.reject-button').dataset.bib = conflict.bibNumber;
-        option.querySelector('.reject-button').dataset.time = t.time;
+        option.querySelector('.reject-timestamp-button').dataset.bib = conflict.bibNumber;
+        option.querySelector('.reject-timestamp-button').dataset.time = t.time;
         
         container.appendChild(option);
     }

@@ -79,7 +79,6 @@ export async function getRace(raceId, page = 1, pageSize = 10) {
         first_name as firstName,
         last_name as lastName,
         bib_number as bibNumber,
-        attended as attended,
         time_finished AS timeFinished
       FROM participants
       WHERE race_id = ?

@@ -78,6 +78,21 @@
   cursor: not-allowed;
 }
 
+.clear-storage {
+  background-color: #e74c3c;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-left: 10px;
+  font-size: 14px;
+}
+
+.clear-storage:hover {
+  background-color: #c0392b;
+}
+
 @media (max-width: 480px) {
   .race-table th,
   .race-table td {

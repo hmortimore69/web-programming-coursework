@@ -1,4 +1,6 @@
 function main() {
+  registerServiceWorker();
+  
   const raceTable = document.querySelector('#race-history-table tbody');
 
   fetchRaces();
@@ -138,6 +140,12 @@ function updatePaginationControls(pagination) {
   nextButton.dataset.page = pagination.page + 1;
 }
 
+async function registerServiceWorker() {
+  if (navigator.serviceWorker) {
+    await navigator.serviceWorker.register('./sw.js');
+  }
+}
+
 document.addEventListener('DOMContentLoaded', main);
 
 document.querySelector('#role-selector')?.addEventListener('change', (e) => {
@@ -152,4 +160,11 @@ document.querySelector('#prev-page').addEventListener('click', (event) => {
 document.querySelector('#next-page').addEventListener('click', (event) => {
   const page = Number(event.target.dataset.page);
   fetchRaces(page);
+});
+
+document.querySelector('#clear-storage')?.addEventListener('click', () => {
+  if (confirm('Are you sure you want to clear all localStorage data?')) {
+    localStorage.clear();
+    window.location.reload();
+  }
 });

@@ -2,6 +2,7 @@ const TimestampManager = {
   working: [],
   staged: [],
   selected: null,
+  boundHandleOnlineStatus: null,
 
   init(raceId) {
     this.raceId = raceId;
@@ -36,18 +37,87 @@ const TimestampManager = {
     document.querySelector('#submit-timestamps-button').addEventListener('click', this.submit.bind(this));
   },
 
-  record() {
-    if (!raceTimer.isRunning) return; // add an alert
+  async handleOnlineStatus() {
+    raceTimer.online = navigator.onLine;
+    raceTimer.online = raceTimer.online;
 
+    if (raceTimer.online) {
+      try {
+        const response = await fetch(`/api/races/${JSON.parse(localStorage.getItem('storedRace'))?.raceId}`);
+        if (!response.ok) throw new Error(`Response Status: ${response.status}`);
+        
+        const raceDetails = await response.json();
+        
+        // Clear previously saved race data and store current race for offline use
+        localStorage.removeItem('storedRace');
+        localStorage.setItem('storedRace', JSON.stringify(raceDetails));
+      } catch (error) {
+        throw Error(error);
+      }
+
+      this.convertOfflineTimestamps();
+    }
+
+    this.save();
+  },
+
+  record() {
     const timestamp = {
       id: Date.now(),
       raceId: this.raceId,
-      time: raceTimer.elapsedTime,
+      // Store differently based on online status
+      ...(raceTimer.online ? {
+        time: raceTimer.elapsedTime,
+        type: 'online'
+      } : {
+        time: Date.now(),
+        type: 'offline'
+      })
     };
 
     this.working.push(timestamp);
     this.save();
     this.renderAll();
+  },
+
+  async convertOfflineTimestamps() {
+    if (!raceTimer.online) return;
+    
+    try {
+      const response = await fetch(`/api/races/${this.raceId}`);
+      if (!response.ok) throw new Error('Failed to fetch race data');
+      
+      const raceData = await response.json();
+      const raceStartTime = new Date(raceData.timeStarted);
+
+      
+
+      // Helper function to convert timestamps in an array
+      const convertTimestamps = (array) => {
+        return array.map(t => {
+          if (t.type === 'offline') {
+            const recordedTime = new Date(t.time);
+            return {
+              ...t,
+              time: recordedTime - raceStartTime,
+              state: 'online',
+              converted: true,
+              conversionTime: Date.now()
+            };
+          }
+          return t;
+        });
+      }
+
+      // Convert timestamps for both this.working and this.staged
+      this.working = convertTimestamps(this.working);
+      this.staged = convertTimestamps(this.staged);
+
+      this.save();
+      this.renderAll();
+    } catch (error) {
+      console.error('Failed to convert timestamps:', error);
+    }
   },
 
   assign() {
@@ -90,10 +160,7 @@ const TimestampManager = {
         }),
       });
   
-      if (response.ok) {
-        console.log(`Successfully performed action: ${action}`);
-        
-      } else {
+      if (!response.ok) {
         throw new Error(`Response Status: ${response.status}`);
       }
     } catch (error) {
@@ -126,7 +193,12 @@ const TimestampManager = {
 
       // Set the timestamp
       const timeCell = row.querySelector('.timestamp-cell');
-      timeCell.textContent = this.formatTime(ts.time);
+      if (ts.state === 'online') {
+        timeCell.textContent = this.formatTime(ts.time);
+      } else {
+        timeCell.textContent = `[OFFLINE] Recorded at: ${this.formatOfflineTimestamp(ts.time)}`;
+        timeCell.style.color = 'orange';
+      }
 
       // Set bib number
       if (area == 'staged') {
@@ -144,7 +216,7 @@ const TimestampManager = {
         });
       }
 
-      const deleteButton = row.querySelector('.delete-action');
+      const deleteButton = row.querySelector('.delete-timestamp-button');
       if (deleteButton) {
         deleteButton.dataset.id = ts.id;
         deleteButton.addEventListener('click', () => {
@@ -173,14 +245,14 @@ const TimestampManager = {
   },
 
   save() {
-    const storageKey = 'raceTimestamps';
     const dataToStore = {
       working: this.working,
       staged: this.staged,
       raceId: this.raceId,
-      lastUpdated: new Date().toISOString(),
+      online: raceTimer.online,
+      lastUpdated: new Date().toISOString()
     };
-    localStorage.setItem(storageKey, JSON.stringify(dataToStore));
+    localStorage.setItem('raceTimestamps', JSON.stringify(dataToStore));
   },
 
   formatTime(ms) {
@@ -188,6 +260,15 @@ const TimestampManager = {
     const m = Math.floor((ms % 3600000) / 60000);
     const s = Math.floor((ms % 60000) / 1000);
     const msRemain = ms % 1000;
+    return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}.${msRemain.toString().padStart(3, '0')}`;
+  },
+
+  formatOfflineTimestamp(unixTimestamp) {
+    const date = new Date(unixTimestamp);
+    const h = date.getHours(); // Get hours in local time
+    const m = date.getMinutes(); // Get minutes in local time
+    const s = date.getSeconds(); // Get seconds in local time
+    const msRemain = date.getMilliseconds(); // Get milliseconds in local time
     return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}.${msRemain.toString().padStart(3, '0')}`;
   },
 };

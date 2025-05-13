@@ -17,7 +17,9 @@ CREATE TABLE IF NOT EXISTS participants (
     attended BOOLEAN DEFAULT FALSE,
     time_finished INTEGER DEFAULT NULL,
     pending_times TEXT,
-    has_conflict BOOLEAN DEFAULT FALSE
+    has_conflict BOOLEAN DEFAULT FALSE,
+    registered BOOLEAN DEFAULT FALSE,
+
 );
 
 CREATE TABLE IF NOT EXISTS marshalls (
