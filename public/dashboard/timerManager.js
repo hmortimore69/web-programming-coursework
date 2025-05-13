@@ -30,11 +30,6 @@ const raceTimer = {
 
     this.isCountdown = true;
 
-    if (this.liveIndicator) {
-      this.liveIndicator.textContent = '● STARTS SOON';
-      this.liveIndicator.style.color = 'orange';
-    }
-
     this.timerInterval = setInterval(() => {
       const now = Date.now();
       const remaining = targetTime - now;
@@ -42,7 +37,7 @@ const raceTimer = {
       if (remaining <= 0) {
         clearInterval(this.timerInterval);
         this.isCountdown = false;
-        this.start();
+
       } else {
         if (remaining > 60000) {
           this.liveIndicator.textContent = '● WAITING';
@@ -52,7 +47,7 @@ const raceTimer = {
           this.liveIndicator.style.color = 'orange';
         } else {
           this.liveIndicator.textContent = '● STARTING';
-          this.liveIndicator.style.color = 'red';
+          this.liveIndicator.style.color = 'orange';
         }
         this.updateTimerElementForCountdown(remaining);
       }

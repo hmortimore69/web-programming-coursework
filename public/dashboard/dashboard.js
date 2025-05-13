@@ -21,6 +21,7 @@ function syncTimerWithRaceState(race) {
   raceTimer.stop();
 
   // Race is currently live
+  console.log(timeStarted && timeStarted <= now && (!timeFinished || timeFinished >= now));
   if (timeStarted && timeStarted <= now && (!timeFinished || timeFinished >= now)) {
     // Add check if race exceeds 24 hours, rten cap timer at 24 and finish race (TODO)
     const elapsed = now - timeStarted;
@@ -45,7 +46,13 @@ function syncTimerWithRaceState(race) {
 
   // Scheduled start time passed but race wasn't started
   if (!timeStarted && scheduledStartTime <= now) {
-    raceTimer.updateDisplay(0);
+    // If offline, start race as normal and if you are not a race admin (server will handle time differential)
+    if (!navigator.onLine && userType.getRole() !== 'admin') {
+      elapsed = now - scheduledStartTime;
+      raceTimer.setTime(elapsed);
+      raceTimer.start();
+    }
+
     if (raceTimer.liveIndicator) {
       raceTimer.liveIndicator.textContent = '● STARTING';
       raceTimer.liveIndicator.style.color = 'orange';

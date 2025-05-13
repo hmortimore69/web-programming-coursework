@@ -1,3 +1,5 @@
+let currentPage = 1;
+
 /**
  * Fetches race data from the API endpoint and updates the UI table and race details.
  * If a race is offline, it will check whether there is a cached version of the race and use it.
@@ -13,6 +15,8 @@ async function fetchRaceData(page = 1) {
     if (!response.ok) throw new Error(`Response Status: ${response.status}`);
 
     const raceDetails = await response.json();
+
+    currentPage = page;
     
     // Clear previously saved race data and store current race for offline use
     localStorage.removeItem('storedRace');
@@ -46,7 +50,6 @@ function getRaceID() {
   return args[args.length - 1];
 }
 
-
 /**
  * Updates all race detail elements
  * @param {Object} raceDetails - The race data object
@@ -55,7 +58,7 @@ function updateRaceDetails(raceDetails) {
   document.querySelector('#race-start-time').textContent = formatDate(raceDetails.timeStarted);
   document.querySelector('#race-location').textContent = raceDetails.raceLocation || 'N/A';
   document.querySelector('#race-checkpoint-counter').textContent = raceDetails.totalCheckpoints || 0;
-  document.querySelector('#participant-count').textContent = raceDetails.participants?.length || 0;
+  document.querySelector('#participant-count').textContent = raceDetails.pagination?.total || 0;
 
   // Update live indicator if race is active
   if (raceDetails.timeFinished >= Date.now() && raceDetails.timeStarted <= Date.now()) {
@@ -71,6 +74,8 @@ function updateRaceDetails(raceDetails) {
  */
 function renderRaceTable(raceDetails) {
   const tableBody = document.querySelector('.race-table tbody');
+
+  tableBody.innerHTML = '';
 
   for (const participant of raceDetails.participants) {
     const row = document.querySelector('#participant-row-template').content.cloneNode(true);
@@ -170,13 +175,13 @@ document.addEventListener('DOMContentLoaded', () => {
     renderRaceTable(offlineData);
     updatePaginationControls(offlineData.pagination);
   } else {
-    fetchRaceData();
-    setInterval(fetchRaceData, 10000);
+    fetchRaceData(currentPage);
+    setInterval(() => fetchRaceData(currentPage), 10000);
   }
 });
 
 document.querySelector('#refresh-stats-button').addEventListener('click', function () {
-  fetchRaceData();
+  fetchRaceData(currentPage);
 });
 
 document.querySelector('#dashboard-button').addEventListener('click', function () {
