@@ -14,16 +14,13 @@ CREATE TABLE IF NOT EXISTS participants (
     first_name TEXT NOT NULL,
     last_name TEXT NOT NULL,
     bib_number INTEGER NOT NULL,
-    attended BOOLEAN DEFAULT FALSE,
     time_finished INTEGER DEFAULT NULL,
     pending_times TEXT,
-    has_conflict BOOLEAN DEFAULT FALSE,
-    registered BOOLEAN DEFAULT FALSE,
-
+    has_conflict BOOLEAN DEFAULT FALSE
 );
 
-CREATE TABLE IF NOT EXISTS marshalls (
-    marshall_id INTEGER PRIMARY KEY AUTOINCREMENT,
+CREATE TABLE IF NOT EXISTS marshals (
+    marshal_id INTEGER PRIMARY KEY AUTOINCREMENT,
     race_id INTEGER NOT NULL REFERENCES races (race_id),
     first_name TEXT NOT NULL,
     last_name TEXT NOT NULL
@@ -42,4 +39,14 @@ CREATE TABLE IF NOT EXISTS checkpoints_times(
     participant_id INTEGER NOT NULL REFERENCES participants (participant_id),
     time_finished INTEGER NOT NULL,
     PRIMARY KEY (checkpoint_id, participant_id)
+);
+
+CREATE TABLE IF NOT EXISTS race_interests (
+    interest_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    race_id INTEGER NOT NULL,
+    first_name TEXT NOT NULL,
+    last_name TEXT NOT NULL,
+    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+    status TEXT,
+    FOREIGN KEY (race_id) REFERENCES races (race_id)
 );

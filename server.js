@@ -13,9 +13,13 @@ app.use(express.json());
 // API Endpoints
 app.get('/api/races', getRaces);
 app.get('/api/races/:id', getRace);
+app.get('/api/races/:id/pending-participants', getPendingParticipants);
+app.patch('/api/races/:raceId/participants/:userId', updateParticipantStatus);
+
 app.post('/api/new-race', createRace);
 app.delete('/api/delete-race', deleteRace);
 app.patch('/api/update-race', updateRace);
+app.post('/api/register-interest', registerInterest);
 app.get('/api/conflicts', getConflicts);
 app.post('/api/resolve-conflict', resolveConflict);
 app.post('/api/reject-timestamp', rejectTimestamp);
@@ -91,7 +95,7 @@ async function deleteRace(req, res) {
 
 async function updateRace(req, res) {
   try {
-    const { raceId, action, data } = req.body;
+    const { raceId, action, data, submittedBy } = req.body;
 
     const raceExists = await db.getRace(raceId);
 
@@ -110,7 +114,7 @@ async function updateRace(req, res) {
         await db.addParticipants(raceId, data);
         break;
       case 'submit-results':
-        await db.submitResults(raceId, data);
+        await db.submitResults(raceId, data, submittedBy);
         break;
       default:
         return res.status(400).send('Invalid action');
@@ -138,6 +142,51 @@ async function rejectTimestamp(req, res) {
   const { raceId, bibNumber, time } = req.body;
   await db.rejectConflict(raceId, bibNumber, time);
   res.sendStatus(200);
+}
+
+async function registerInterest(req, res) {
+  try {
+    const { raceId, firstName, lastName } = req.body;
+    
+    await db.registerParticipantInterest(raceId, firstName, lastName);
+    
+    res.status(200).json({ success: true });
+  } catch (error) {
+    console.error('Error saving interest:', error);
+    res.status(500).json({ error: 'Failed to register interest' });
+  }
+}
+
+async function getPendingParticipants(req, res) {
+  try {
+    const participants = await db.getPendingParticipants(req.params.id);
+    res.json(participants);
+  } catch (error) {
+    console.error('Error fetching pending participants:', error);
+    res.status(500).json({ error: 'Failed to fetch pending participants' });
+  }
+}
+
+async function updateParticipantStatus(req, res) {
+  try {
+    const { raceId, userId } = req.params;
+    const { action } = req.body;
+    
+    if (!['approve', 'reject'].includes(action)) {
+      return res.status(400).json({ error: 'Invalid action' });
+    }
+
+    const success = await db.updateParticipantStatus(raceId, userId, action);
+    
+    if (success) {
+      res.json({ success: true });
+    } else {
+      res.status(500).json({ error: 'Failed to update participant status' });
+    }
+  } catch (error) {
+    console.error('Error updating participant status:', error);
+    res.status(500).json({ error: 'Failed to update participant status' });
+  }
 }
 
 app.listen(port, () => {

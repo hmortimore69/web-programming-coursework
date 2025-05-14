@@ -18,16 +18,22 @@ const raceTimer = {
 
   start() {
     if (this.isRunning) return;
-
+  
+    // Clear any existing countdown interval
+    if (this.isCountdown) {
+      clearInterval(this.timerInterval);
+      this.isCountdown = false;
+    }
+  
     this.startTime = Date.now() - this.elapsedTime;
     this.isRunning = true;
     this.elapsedTime = 0;
-
+  
     if (this.liveIndicator) {
       this.liveIndicator.textContent = '● LIVE';
       this.liveIndicator.style.color = this.online ? 'red' : 'orange';
     }
-
+  
     this.timerInterval = setInterval(() => this.update(), 10);
   },
 

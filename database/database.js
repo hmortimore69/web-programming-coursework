@@ -112,6 +112,8 @@ export async function getRace(raceId, page = 1, pageSize = 10) {
       WHERE race_id = ? 
     `, [raceId]);
 
+    const marshals = await getMarshals(raceId);
+
     if (!raceData) return;
 
     return {
@@ -123,6 +125,7 @@ export async function getRace(raceId, page = 1, pageSize = 10) {
       scheduledDuration: raceData.scheduledDuration,
       totalCheckpoints: checkpointCount.total,
       participants,
+      marshals,
       pagination: {
         page,
         pageSize,
@@ -132,6 +135,25 @@ export async function getRace(raceId, page = 1, pageSize = 10) {
     };
   } catch (error) {
     console.error('Error fetching race data:', error);
+  }
+}
+
+export async function getMarshals(raceId) {
+  try {
+    const marshals = await db.all(`
+      SELECT
+        marshal_id as marshalId,
+        first_name as firstName,
+        last_name as lastName
+      FROM marshals
+      WHERE race_id = ?
+      ORDER BY last_name, first_name
+    `, [raceId]);
+
+    return marshals;
+  } catch (error) {
+    console.error('Error fetching marshals:', error);
+    return [];
   }
 }
 
@@ -166,11 +188,11 @@ export async function createNewRace(req) {
     }
   }
 
-  if (req.marshalls.length > 0) {
-    for (const marshall of req.marshalls) {
+  if (req.marshals.length > 0) {
+    for (const marshal of req.marshals) {
       await db.run(
-        'INSERT INTO marshalls (race_id, first_name, last_name) VALUES (?, ?, ?)',
-        [newRaceId, marshall['.marshall-first-name'], marshall['.marshall-last-name']]
+        'INSERT INTO marshals (race_id, first_name, last_name) VALUES (?, ?, ?)',
+        [newRaceId, marshal['.marshal-first-name'], marshal['.marshal-last-name']]
       );
     }
   }
@@ -189,7 +211,7 @@ export async function createNewRace(req) {
 export async function deleteRaceById(raceId) {
   try {
     await db.run('DELETE FROM checkpoints WHERE race_id = ?', [raceId]);
-    await db.run('DELETE FROM marshalls WHERE race_id = ?', [raceId]);
+    await db.run('DELETE FROM marshals WHERE race_id = ?', [raceId]);
     await db.run('DELETE FROM participants WHERE race_id = ?', [raceId]);
     await db.run('DELETE FROM races WHERE race_id = ?', [raceId]);
     return true;
@@ -208,13 +230,26 @@ export async function updateFinishTime(raceId, data) {
   await db.run('UPDATE races SET time_finished = ? WHERE race_id = ?', [timeStamp, raceId]);
 }
 
-export async function submitResults(raceId, data) {
+export async function submitResults(raceId, data, submittedBy) {
   for (const submission of data) {
-    await submitParticipantTime(raceId, submission.bibNumber, submission.time, submission.submittedBy);
+    // Ensure we're using the converted time if available
+    const timeToSubmit = submission.converted ? submission.time : 
+                        (submission.type === 'online' ? submission.time : 
+                        new Date(submission.time) - new Date(submission.raceStartTime));
+        
+    await submitParticipantTime(
+      raceId, 
+      submission.bibNumber, 
+      timeToSubmit, 
+      submittedBy
+    );
   }
 }
 
 async function submitParticipantTime(raceId, bibNumber, timestamp, submittedBy) {
+  // Convert timestamp to number if it isn't already
+  const timeValue = typeof timestamp === 'number' ? timestamp : new Date(timestamp) - new Date(0);
+
   const participant = await db.get(`
     SELECT 
       pending_times as pendingTimes,
@@ -227,10 +262,10 @@ async function submitParticipantTime(raceId, bibNumber, timestamp, submittedBy) 
   let pendingTimes = participant.pendingTimes ? JSON.parse(participant.pendingTimes) : [];
   const currentTime = participant.timeFinished;
 
-  const hasConflict = (currentTime !== null) || (pendingTimes.length > 0) || true;
+  const hasConflict = (currentTime !== null) || (pendingTimes.length > 0);
 
   pendingTimes.push({ 
-    time: timestamp, 
+    time: timeValue, 
     submitted_by: submittedBy, 
     submitted_at: new Date().toISOString(),
     current_time: currentTime 
@@ -244,7 +279,7 @@ async function submitParticipantTime(raceId, bibNumber, timestamp, submittedBy) 
         pending_times = NULL,
         has_conflict = ?
       WHERE race_id = ? AND bib_number = ?`,
-      [timestamp, hasConflict, raceId, bibNumber]
+      [timeValue, hasConflict, raceId, bibNumber]
     );
   } else {
     await db.run(`
@@ -256,8 +291,6 @@ async function submitParticipantTime(raceId, bibNumber, timestamp, submittedBy) 
       [JSON.stringify(pendingTimes), hasConflict, raceId, bibNumber]
     );
   }
-
-  return;
 }
 
 export async function getConflicts(raceId) {
@@ -327,6 +360,64 @@ export async function rejectConflict(raceId, bibNumber, rejectedTime) {
     return { success: true, remainingConflicts: updatedPendingTimes.length };
   } catch (error) {
     console.error('Error rejecting conflict:', error);
+    throw error;
+  }
+}
+
+export async function registerParticipantInterest(raceId, firstName, lastName) {
+  await db.run(
+    'INSERT INTO race_interests (race_id, first_name, last_name) VALUES (?, ?, ?)',
+    [raceId, firstName, lastName]
+  );
+}
+
+export async function getPendingParticipants(raceId) {
+  try {
+    const participants = await db.all(`
+      SELECT 
+        interest_id as interestId,
+        first_name as firstName,
+        last_name as lastName,
+        timestamp
+      FROM race_interests
+      WHERE race_id = ? AND status IS NULL
+      ORDER BY timestamp
+    `, [raceId]);
+
+    return participants;
+  } catch (error) {
+    console.error('Error fetching pending participants:', error);
+    return [];
+  }
+}
+
+export async function updateParticipantStatus(raceId, interestId, action) {
+  try {
+    if (action === 'approve') {
+      // Get participant details
+      const participant = await db.get(`
+        SELECT first_name, last_name
+        FROM race_interests
+        WHERE interest_id = ?
+      `, [interestId]);
+
+      // Add to participants table
+      await db.run(
+        `INSERT INTO participants (race_id, first_name, last_name, bib_number) 
+         VALUES (?, ?, ?, COALESCE((SELECT MAX(bib_number) + 1 FROM participants WHERE race_id = ?), 1))`,
+        [raceId, participant.first_name, participant.last_name, raceId]
+      );
+    }
+
+    // Update status in race_interests table
+    await db.run(
+      'UPDATE race_interests SET status = ? WHERE interest_id = ?',
+      [action === 'approve' ? 'approved' : 'rejected', interestId]
+    );
+
+    return true;
+  } catch (error) {
+    console.error('Error updating participant status:', error);
     throw error;
   }
 }

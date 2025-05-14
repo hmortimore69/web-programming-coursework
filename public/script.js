@@ -1,5 +1,5 @@
 function main() {
-  registerServiceWorker();
+  // registerServiceWorker();
   
   const raceTable = document.querySelector('#race-history-table tbody');
 

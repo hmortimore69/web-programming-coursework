@@ -55,6 +55,8 @@ class ConflictManager {
     for (const t of times) {
         const template = document.querySelector('#timestamp-option-template');
         const option = template.content.cloneNode(true);
+
+        console.log(t);
         
         option.querySelector('.timestamp-value').textContent = this.formatTime(t.time);
         

@@ -157,6 +157,33 @@ function hasOfflineRaceData() {
   return parsedData.raceId === getRaceID();
 }
 
+async function registerInterest(firstName, lastName) {
+  const raceId = getRaceID();
+  
+  try {
+    const response = await fetch('/api/register-interest', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        raceId,
+        firstName,
+        lastName
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to register interest');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error registering interest:', error);
+    throw error;
+  }
+}
+
 document.querySelector('#prev-page').addEventListener('click', (event) => {
   const page = Number(event.target.dataset.page);
   if (page > 0) fetchRaceData(page);
@@ -186,6 +213,41 @@ document.querySelector('#refresh-stats-button').addEventListener('click', functi
 
 document.querySelector('#dashboard-button').addEventListener('click', function () {
   window.location.href = '/dashboard';
+});
+
+document.querySelector('#interest-form')?.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  
+  const firstName = document.querySelector('#first-name').value.trim();
+  const lastName = document.querySelector('#last-name').value.trim();
+  const button = document.querySelector('#register-interest-button');
+  const confirmation = document.querySelector('#interest-confirmation');
+  
+  if (!firstName || !lastName) {
+    confirmation.textContent = 'Please enter both first and last name';
+    confirmation.className = 'error-message';
+    confirmation.classList.remove('hidden');
+    return;
+  }
+
+  button.disabled = true;
+  button.textContent = 'Registering...';
+
+  try {
+    await registerInterest(firstName, lastName);
+    
+    document.querySelector('#interest-form').reset();
+    confirmation.textContent = 'Thank you for your interest!';
+    confirmation.className = 'success-message';
+    confirmation.classList.remove('hidden');
+  } catch (error) {
+    confirmation.textContent = 'Failed to register interest. Please try again.';
+    confirmation.className = 'error-message';
+    confirmation.classList.remove('hidden');
+  } finally {
+    button.disabled = false;
+    button.textContent = 'Register Interest';
+  }
 });
 
 /*  ===============

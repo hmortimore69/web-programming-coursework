@@ -34,7 +34,7 @@
 
 #race-details,
 .checkpoint-details,
-.marshall-details,
+.marshal-details,
 .participant-details {
   display: grid;
   grid-template-columns: 150px 1fr;
@@ -75,14 +75,14 @@ input{
 
 
 #add-checkpoint-button,
-#add-marshall-button,
+#add-marshal-button,
 #add-participant-button {
   background-color: #3498db;
   margin-bottom: 20px;
 }
 
 .remove-checkpoint-button,
-.remove-marshall-button,
+.remove-marshal-button,
 .remove-participant-button {
   background-color: #e74c3c;
   grid-column: 2;
@@ -90,7 +90,7 @@ input{
 }
 
 #checkpoint-list,
-#marshall-list,
+#marshal-list,
 #participant-list {
   margin-bottom: 20px;
 }
@@ -99,7 +99,7 @@ input{
 @media (max-width: 768px) {
   #race-details,
   .checkpoint-details,
-  .marshall-details,
+  .marshal-details,
   .participant-details {
     grid-template-columns: 1fr;
     gap: 5px;
@@ -111,7 +111,7 @@ input{
   }
   
   .remove-checkpoint-button,
-  .remove-marshall-button,
+  .remove-marshal-button,
   .remove-participant-button {
     grid-column: 1;
     margin-top: 10px;

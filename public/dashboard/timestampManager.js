@@ -2,13 +2,15 @@ const TimestampManager = {
   working: [],
   staged: [],
   selected: null,
-  boundHandleOnlineStatus: null,
+  raceStartTime: null,
 
   init(raceId) {
     this.raceId = raceId;
     this.load();
     this.renderAll();
     this.bindEvents();
+    this.updateSubmitButtonState();
+    this.renderMarshalDropdown();
   },
 
   load() {
@@ -24,6 +26,7 @@ const TimestampManager = {
 
       this.working = storedData.working || [];
       this.staged = storedData.staged || [];
+      this.raceStartTime = storedRace?.timeStarted ? new Date(storedRace.timeStarted) : null;
     } catch (e) {
       console.error('Error parsing timestamp data:', e);
       this.working = [];
@@ -35,11 +38,15 @@ const TimestampManager = {
     document.querySelector('#record-timestamp-button').addEventListener('click', this.record.bind(this));
     document.querySelector('#assign-timestamp-button').addEventListener('click', this.assign.bind(this));
     document.querySelector('#submit-timestamps-button').addEventListener('click', this.submit.bind(this));
+
+    window.addEventListener('online', this.handleOnlineStatus.bind(this));
+    window.addEventListener('offline', this.handleOnlineStatus.bind(this));
   },
 
   async handleOnlineStatus() {
     raceTimer.online = navigator.onLine;
-    raceTimer.online = raceTimer.online;
+    console.log(raceTimer.online);
+    this.updateSubmitButtonState();
 
     if (raceTimer.online) {
       try {
@@ -61,46 +68,96 @@ const TimestampManager = {
     this.save();
   },
 
+  updateSubmitButtonState() {
+    const submitButton = document.querySelector('#submit-timestamps-button');
+    if (!submitButton) return;
+    
+    submitButton.disabled = !raceTimer.online;
+    submitButton.title = raceTimer.online ? 'Submit timestamps to server' : 'Submission requires internet connection';
+    
+    // Visual feedback
+    if (raceTimer.online) {
+      submitButton.classList.remove('disabled-button');
+      submitButton.classList.add('enabled-button');
+    } else {
+      submitButton.classList.remove('enabled-button');
+      submitButton.classList.add('disabled-button');
+    }
+  },
+
+  renderMarshalDropdown() {
+    const dropdown = document.querySelector('#marshal-select');
+    if (!dropdown) return;
+    
+    // Clear existing options
+    dropdown.innerHTML = '';
+    
+    // Add default option
+    const defaultOption = document.createElement('option');
+    defaultOption.value = '';
+    defaultOption.textContent = 'Select a marshal';
+    dropdown.appendChild(defaultOption);
+    
+    // Add marshal options
+    for (const marshal of JSON.parse(localStorage.getItem('storedRace')).marshals) {
+      const option = document.createElement('option');
+      option.value = `${marshal.firstName} ${marshal.lastName}`;
+      option.textContent = `${marshal.firstName} ${marshal.lastName} (${marshal.marshalId})`;
+      dropdown.appendChild(option);
+    }
+  },
+
   record() {
-    const timestamp = {
-      id: Date.now(),
-      raceId: this.raceId,
-      // Store differently based on online status
-      ...(raceTimer.online ? {
+    let timestamp;
+    
+    if (raceTimer.online) {
+      // Online - always use elapsed time
+      timestamp = {
+        id: Date.now(),
+        raceId: this.raceId,
         time: raceTimer.elapsedTime,
         type: 'online'
-      } : {
-        time: Date.now(),
-        type: 'offline'
-      })
-    };
+      };
+    } else {
+      // Offline - check if there is a race start time
+      if (this.raceStartTime && raceTimer.isLive) {
+        // Timer is live (was started before going offline) - use elapsed time
+        timestamp = {
+          id: Date.now(),
+          raceId: this.raceId,
+          time: raceTimer.elapsedTime,
+          type: 'online' // Still mark as online since it's using the timer
+        };
+      } else {
+        // No race start time or timer not live - record with current time
+        timestamp = {
+          id: Date.now(),
+          raceId: this.raceId,
+          time: Date.now(), // Record actual time of recording
+          type: 'offline'
+        };
+      }
+    }
 
     this.working.push(timestamp);
     this.save();
     this.renderAll();
   },
 
+
   async convertOfflineTimestamps() {
-    if (!raceTimer.online) return;
+    if (!raceTimer.online || !this.raceStartTime) return;
     
     try {
-      const response = await fetch(`/api/races/${this.raceId}`);
-      if (!response.ok) throw new Error('Failed to fetch race data');
-      
-      const raceData = await response.json();
-      const raceStartTime = new Date(raceData.timeStarted);
-
-      
-
-      // Helper function to convert timestamps in an array
+      // Convert timestamps that were recorded offline without a live timer
       const convertTimestamps = (array) => {
         return array.map(t => {
           if (t.type === 'offline') {
             const recordedTime = new Date(t.time);
             return {
               ...t,
-              time: recordedTime - raceStartTime,
-              state: 'online',
+              time: recordedTime - this.raceStartTime,
+              type: 'online',
               converted: true,
               conversionTime: Date.now()
             };
@@ -109,7 +166,6 @@ const TimestampManager = {
         });
       }
 
-      // Convert timestamps for both this.working and this.staged
       this.working = convertTimestamps(this.working);
       this.staged = convertTimestamps(this.staged);
 
@@ -141,7 +197,19 @@ const TimestampManager = {
   },
 
   async submit() {
-    if (this.staged.length === 0) return; // add an alert
+    const timestampErrorElement = document.querySelector('#timestamp-error-message');
+    timestampErrorElement.style.color = 'red';
+
+    if (this.staged.length === 0) {
+      timestampErrorElement.textContent = 'Stage the timestamps you want to commit.';
+      return;
+    }
+
+    const submittedBy = document.querySelector('#marshal-select').value;
+    if (!submittedBy) {
+      timestampErrorElement.textContent = 'Select a marshal.';
+      return;
+    }
     
     const data = [...this.staged];
     const action = 'submit-results';
@@ -156,13 +224,16 @@ const TimestampManager = {
         body: JSON.stringify({
           raceId,
           action,
-          data
+          data,
+          submittedBy
         }),
       });
   
       if (!response.ok) {
         throw new Error(`Response Status: ${response.status}`);
       }
+
+      timestampErrorElement.textContent = '';
     } catch (error) {
       console.error(`Error performing action: ${action}`, error);
     }
@@ -191,9 +262,8 @@ const TimestampManager = {
       row.dataset.id = ts.id;
       if (ts.id === this.selected) row.style.backgroundColor = '#e6f7ff';
 
-      // Set the timestamp
       const timeCell = row.querySelector('.timestamp-cell');
-      if (ts.state === 'online') {
+      if (ts.type === 'online') {
         timeCell.textContent = this.formatTime(ts.time);
       } else {
         timeCell.textContent = `[OFFLINE] Recorded at: ${this.formatOfflineTimestamp(ts.time)}`;

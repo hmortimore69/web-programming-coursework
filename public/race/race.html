@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="stylesheet" href="race.css" />
     <link rel="stylesheet" type="text/css" href="../util/nav.css" />
-
     <title>PJC | Race Viewer</title>
   </head>
   <body>
@@ -18,40 +17,63 @@
     </nav>
 
     <main>
-      <section id="race-info-section">
-        <div id="race-details">
-          <div>
-            <span>Start</span>
-            <span id="race-start-time">N/A</span>
-          </div>
-          <div>
-            <span>Location</span>
-            <span id="race-location">N/A</span>
-          </div>
-          <div>
-            <span>Checkpoints</span>
-            <span id="race-checkpoint-counter">0</span>
-          </div>
-          <div>
-            <span>Participants</span>
-            <span id="participant-count">0</span>
-          </div>
-        </div>
-  
-        <section class="race-controls">
-          <button id="refresh-stats-button">Refresh</button>
-          <button class="marshall-only" id="dashboard-button">Dashboard</button>
-        </section>
-      </section>
+      <div class="race-header-container">
+        <section id="race-info-section">
+          <section id="race-details">
+            <div>
+              <span>Start</span>
+              <span id="race-start-time">N/A</span>
+            </div>
+            <div>
+              <span>Location</span>
+              <span id="race-location">N/A</span>
+            </div>
+            <div>
+              <span>Checkpoints</span>
+              <span id="race-checkpoint-counter">0</span>
+            </div>
+            <div>
+              <span>Participants</span>
+              <span id="participant-count">0</span>
+            </div>
+          </section>
 
-      <section>
+          <section class="race-controls">
+            <button id="refresh-stats-button">Refresh</button>
+            <button class="marshall-only" id="dashboard-button">Dashboard</button>
+          </section>
+        </section>
+
+        <section id="register-interest-section" class="register-interest">
+          <h3>Register Interest</h3>
+          <p>Interested in this race? Sign up!</p>
+          <form id="interest-form">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="first-name">First Name</label>
+                <input type="text" id="first-name" name="firstName" required placeholder="John">
+              </div>
+              <div class="form-group">
+                <label for="last-name">Last Name</label>
+                <input type="text" id="last-name" name="lastName" required placeholder="Doe">
+              </div>
+            </div>
+            <button type="submit" id="register-interest-button">
+              <span class="button-text">Register Interest</span>
+            </button>
+            <div id="interest-confirmation" class="hidden"></div>
+          </form>
+        </section>
+      </div>
+
+      <section class="race-content">
         <div class="race-table-container" id="race-container">
           <table class="race-table" id="race-info-table">
             <thead>
               <tr>
-                <th style="width: 10vw">BIB</th>
-                <th style="width: 60vw">NAME</th>
-                <th style="width: 20vw">FINISH</th>
+                <th style="width: 10%">BIB</th>
+                <th style="width: 70%">NAME</th>
+                <th style="width: 20%">FINISH</th>
               </tr>
             </thead>
             <div class="race-table-body-container">

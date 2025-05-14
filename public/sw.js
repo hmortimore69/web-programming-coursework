@@ -1,41 +1,28 @@
-/* Log fetch requests and then serve them
- * from the cache */
+/* Log fetch requests and then serve them from the cache */
 function interceptFetch(evt) {
+  const req = evt.request
+
+  if (req.method !== 'GET') {
+    return;
+  }
+
   evt.respondWith(handleFetch(evt.request));
+  evt.waitUntil(updateCache(evt.request));
 }
 
 /* Retrieve a requested resource from the cache
- * or return a resolved promise if its not there. */
+ * or return a resolved promise if its not there.
+ */
 async function handleFetch(request) {
-  try {
-    const c = await caches.open(CACHE);
-    const cachedCopy = await c.match(request);
-    
-    // Return cached version if available
-    if (cachedCopy) {
-      return cachedCopy;
-    }
-    
-    // Otherwise fetch from network and cache it
-    const networkResponse = await fetch(request);
-    
-    // Clone the response because it can only be consumed once
-    const responseClone = networkResponse.clone();
-    
-    // Update cache in the background
-    caches.open(CACHE).then(cache => {
-      cache.put(request, responseClone);
-    });
-    
-    return networkResponse;
-  } catch (error) {
-
-  }
+  const c = await caches.open(CACHE);
+  const cachedCopy = await c.match(request);
+  return cachedCopy || Promise.reject(new Error('no-match'));
 }
 
 /* Invoke the default fetch capability to
  * pull a resource over the network and use
- * that to update the cache. */
+ * that to update the cache.
+ */
 async function updateCache(request) {
   const c = await caches.open(CACHE);
   const response = await fetch(request);
@@ -67,25 +54,12 @@ const CACHEABLE = [
   '/dashboard/conflictManager.js'
 ];
 
-/* Prepare and populate the cache. */
+/* Prepare and populate a cache. */
 async function prepareCache() {
   const c = await caches.open(CACHE);
   await c.addAll(CACHEABLE);
 }
 
-self.addEventListener('install', (event) => {
-  event.waitUntil(prepareCache());
-});
+// install the event listener so it can run in the background.
+self.addEventListener('install', prepareCache);
 self.addEventListener('fetch', interceptFetch);
-
-self.addEventListener('activate', (event) => {
-  event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames
-          .filter((name) => name !== CACHE)
-          .map((name) => caches.delete(name))
-      );
-    })
-  );
-});

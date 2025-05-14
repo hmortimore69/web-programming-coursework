@@ -119,6 +119,8 @@ document.addEventListener('DOMContentLoaded', function () {
     
     saveData(currentStep);
     
+    console.log(formData);
+
     try {
       const response = await fetch(`/api/new-race`, {
         method: "POST",
@@ -154,7 +156,7 @@ document.addEventListener('DOMContentLoaded', function () {
         saveDetails(step, '.checkpoint-details', ['.checkpoint-name', '.checkpoint-order'], 'checkpoints');
         break;
       case 2: // Marshall saving
-        saveDetails(step, '.marshall-details', ['.marshall-first-name', '.marshall-last-name'], 'marshalls');
+        saveDetails(step, '.marshal-details', ['.marshal-first-name', '.marshal-last-name'], 'marshals');
         break;
       case 3: // Participant saving
         saveDetails(step, '.participant-details', ['.participant-first-name', '.participant-last-name'], 'participants');
@@ -165,7 +167,7 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   /**
-   * Saves details of each form step (checkpoints, marshalls, and participants).
+   * Saves details of each form step (checkpoints, marshals, and participants).
    * @param {HTMLElement} step - The step element containing details div.
    * @param {string} selector - The CSS selector for the details container.
    * @param {string[]} fields - An array containing the identifiers for the fields to save.
@@ -210,7 +212,7 @@ function addEventListenersToButtons(buttons, handler) {
 }
 
 /**
- * Adds the templates to different steps of the forms: checkpoints, participants, and marshalls.
+ * Adds the templates to different steps of the forms: checkpoints, participants, and marshals.
  * @param {HTMLElement} listId - ID of the display div.
  * @param {HTMLTemplateElement} templateId - ID of the template to use.
  * @param {HTMLElement} removeButtonClass - Class of the remove button.
@@ -235,8 +237,8 @@ document.querySelector('#add-checkpoint-button').addEventListener('click', () =>
   addItem('#checkpoint-list', '#new-checkpoint-template', '.remove-checkpoint-button');
 });
 
-document.querySelector('#add-marshall-button').addEventListener('click', () => {
-  addItem('#marshall-list', '#new-marshall-template', '.remove-marshall-button');
+document.querySelector('#add-marshal-button').addEventListener('click', () => {
+  addItem('#marshal-list', '#new-marshal-template', '.remove-marshal-button');
 });
 
 document.querySelector('#add-participant-button').addEventListener('click', () => {

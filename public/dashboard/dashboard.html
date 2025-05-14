@@ -32,8 +32,13 @@
       <section class="card marshall-only">
         <h2>Record Timestamps</h2>
         <button id="record-timestamp-button">Record Current Time</button>
+        <select id="marshal-select">
+          <option value="">Select a marshal</option>
+        </select>
 
+        <br>
         <label for="racer-number-input">Racer Number:</label>
+        <br>
         <input type="number" id="racer-number-input" placeholder="Enter racer #" min="1" />
 
         <button id="assign-timestamp-button">Assign</button>
@@ -67,6 +72,7 @@
           </div>
         </div>
 
+        <p id="timestamp-error-message"></p>
         <button id="submit-timestamps-button" class="submit-button">Submit</button>
       </section>
 
@@ -81,6 +87,21 @@
         <div id="conflict-list" class="conflict-list card-timestamp-conflicts ">
           <div class="empty-state">
             <p>No timestamp conflicts to resolve</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="card admin-only">
+        <div class="card-header">
+          <h2>Pending Participants</h2>
+          <button id="refresh-participants" class="button-small">
+            Refresh
+          </button>
+        </div>
+      
+        <div id="pending-participants-list" class="conflict-list">
+          <div class="empty-state">
+            <p>No pending participants to approve</p>
           </div>
         </div>
       </section>
@@ -139,6 +160,21 @@
             <button class="button-small unstage-action">Unstage</button>
           </td>
         </tr>
+      </template>
+
+      <template id="participant-card-template">
+        <div class="conflict-item" data-user-id="">
+          <div class="conflict-header">
+            <div>
+              <span class="participant-name"></span>
+              <span class="participant-email"></span>
+            </div>
+          </div>
+          <div class="timestamp-actions">
+            <button class="accept-participant">Accept</button>
+            <button class="reject-participant">Reject</button>
+          </div>
+        </div>
       </template>
     </main>
 

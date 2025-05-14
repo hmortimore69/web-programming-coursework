@@ -203,6 +203,44 @@ input {
   margin-bottom: 1rem;
 }
 
+.disabled-button {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background-color: #cccccc;
+}
+
+.enabled-button {
+  opacity: 1;
+  cursor: pointer;
+  background-color: #4CAF50; /* Green */
+}
+
+#marshal-select {
+  margin: 10px 0;
+  padding: 8px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+}
+
+.participant-email {
+  font-size: 0.9rem;
+  color: #666;
+  display: block;
+  margin-top: 0.25rem;
+}
+
+#pending-participants-list .conflict-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+#pending-participants-list .conflict-header {
+  margin-bottom: 0;
+}
+
 /* Mobile Responsiveness */
 @media (max-width: 768px) {
   .grid-columns-2 {

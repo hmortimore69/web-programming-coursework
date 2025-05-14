@@ -11,6 +11,24 @@ async function main() {
     deleteRaceById(raceId);
   });
 
+  const participants = await fetchPendingParticipants(raceId);
+  renderPendingParticipants(participants);
+
+  document.querySelector('#pending-participants-list').addEventListener('click', (e) => {
+    if (e.target.classList.contains('accept-participant')) {
+      const item = e.target.closest('.conflict-item');
+      handleParticipantAction(raceId, item.dataset.userId, 'approve');
+    } else if (e.target.classList.contains('reject-participant')) {
+      const item = e.target.closest('.conflict-item');
+      handleParticipantAction(raceId, item.dataset.userId, 'reject');
+    }
+  });
+
+  document.querySelector('#refresh-participants').addEventListener('click', async () => {
+    const participants = await fetchPendingParticipants(raceId);
+    renderPendingParticipants(participants);
+  });
+
   setInterval(() => syncTimerWithRaceState(), 10000);
 }
 
@@ -198,6 +216,70 @@ function returnToResults() {
   const raceId = stored?.raceId;
 
   window.location.href = `/race/${raceId}`;
+}
+
+async function fetchPendingParticipants(raceId) {
+  try {
+    const response = await fetch(`/api/races/${raceId}/pending-participants`);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch pending participants. Status: ${response.status}`);
+    }
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching pending participants:', error);
+    return [];
+  }
+}
+
+function renderPendingParticipants(participants) {
+  const container = document.querySelector('#pending-participants-list');
+  const template = document.querySelector('#participant-card-template');
+  const emptyState = container.querySelector('.empty-state');
+
+  // Clear existing content except empty state
+  for (const el of container.querySelectorAll('.conflict-item')) {
+    el.remove();
+  }
+
+  if (participants.length === 0) {
+    emptyState.style.display = 'block';
+    return;
+  }
+
+  emptyState.style.display = 'none';
+
+  for (const participant of participants) {
+    const clone = template.content.cloneNode(true);
+    const item = clone.querySelector('.conflict-item');
+    console.log(participant.interestId);
+    item.dataset.userId = participant.interestId;
+    
+    clone.querySelector('.participant-name').textContent = `${participant.firstName} ${participant.lastName}`;
+    
+    container.appendChild(clone);
+  }
+}
+
+async function handleParticipantAction(raceId, userId, action) {
+  try {
+    const response = await fetch(`/api/races/${raceId}/participants/${userId}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ action })
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to ${action} participant. Status: ${response.status}`);
+    }
+
+    // Refresh the list
+    const participants = await fetchPendingParticipants(raceId);
+    renderPendingParticipants(participants);
+  } catch (error) {
+    console.error(`Error ${action}ing participant:`, error);
+  }
 }
 
 document.addEventListener('DOMContentLoaded', main);
