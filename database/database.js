@@ -161,14 +161,14 @@ export async function createNewRace(req) {
   let newRaceId = null;
 
   if (req.raceDetails) {
-    const raceName = req.raceDetails['#race-name'];
-    const raceLocation = req.raceDetails['#race-location'];
+    const raceName = req.raceDetails['race-name'];
+    const raceLocation = req.raceDetails['race-location'];
 
-    const startDateString = req.raceDetails['#race-start-date'];
+    const startDateString = req.raceDetails['race-start-date'];
     const startDate = new Date(startDateString);
     const scheduledStartTimestamp = startDate.getTime();
 
-    const durationString = req.raceDetails['#race-duration'];
+    const durationString = req.raceDetails['race-duration'];
     const [hours, minutes] = durationString.split(':').map(Number);
     const scheduledDuration = (hours * 3600 + minutes * 60) * 1000;
 
@@ -183,7 +183,7 @@ export async function createNewRace(req) {
     for (const checkpoint of req.checkpoints) {
       await db.run(
         'INSERT INTO checkpoints (race_id, checkpoint_name, checkpoint_order) VALUES (?, ?, ?)',
-        [newRaceId, checkpoint['.checkpoint-name'], checkpoint['.checkpoint-order']]
+        [newRaceId, checkpoint['checkpoint-name'], checkpoint['checkpoint-order']]
       );
     }
   }
@@ -192,7 +192,7 @@ export async function createNewRace(req) {
     for (const marshal of req.marshals) {
       await db.run(
         'INSERT INTO marshals (race_id, first_name, last_name) VALUES (?, ?, ?)',
-        [newRaceId, marshal['.marshal-first-name'], marshal['.marshal-last-name']]
+        [newRaceId, marshal['marshal-first-name'], marshal['marshal-last-name']]
       );
     }
   }
@@ -202,7 +202,7 @@ export async function createNewRace(req) {
       await db.run(
         `INSERT INTO participants (race_id, first_name, last_name, bib_number) 
          VALUES (?, ?, ?, COALESCE((SELECT MAX(bib_number) + 1 FROM participants WHERE race_id = ?), 1))`,
-        [newRaceId, participant['.participant-first-name'], participant['.participant-last-name'], newRaceId]
+        [newRaceId, participant['participant-first-name'], participant['participant-last-name'], newRaceId]
       );
     }
   }
@@ -336,10 +336,10 @@ export async function rejectConflict(raceId, bibNumber, rejectedTime) {
     }
 
     let pendingTimes = participant.pendingTimes ? JSON.parse(participant.pendingTimes) : [];
-    
+
     // Remove the rejected time
-    const updatedPendingTimes = pendingTimes.filter(timeObj => 
-      timeObj.time !== rejectedTime
+    const updatedPendingTimes = pendingTimes.filter(timeObj =>
+      String(timeObj.time) !== String(rejectedTime)
     );
 
     // Update the database
@@ -418,6 +418,42 @@ export async function updateParticipantStatus(raceId, interestId, action) {
     return true;
   } catch (error) {
     console.error('Error updating participant status:', error);
+    throw error;
+  }
+}
+
+export async function getAllParticipantsForRace(raceId) {
+  try {
+    const participants = await db.all(`
+      SELECT
+        participant_id as participantId,
+        first_name as firstName,
+        last_name as lastName,
+        bib_number as bibNumber,
+        time_finished AS timeFinished
+      FROM participants
+      WHERE race_id = ?
+      ORDER BY bib_number
+    `, [raceId]);
+
+    // Get checkpoints for each participant
+    for (const participant of participants) {
+      participant.checkpoints = await db.all(`
+        SELECT
+          c.checkpoint_id AS checkpointId,
+          c.checkpoint_name AS checkpointName,
+          c.checkpoint_order AS checkpointOrder,
+          ct.time_finished AS checkpointTimeFinished
+        FROM checkpoints_times ct
+        JOIN checkpoints c ON ct.checkpoint_id = c.checkpoint_id
+        WHERE ct.participant_id = ?
+        ORDER BY c.checkpoint_order;
+      `, [participant.participantId]);
+    }
+
+    return participants;
+  } catch (error) {
+    console.error('Error fetching all participants:', error);
     throw error;
   }
 }

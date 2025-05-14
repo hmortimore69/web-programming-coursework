@@ -1,9 +1,17 @@
+/**
+ * Global constant for the current page in pagination.
+ * @type {number}
+ */
 let currentPage = 1;
 
 /**
  * Fetches race data from the API endpoint and updates the UI table and race details.
- * If a race is offline, it will check whether there is a cached version of the race and use it.
- * @param {number} page - The current page number for pagination (default: 1).
+ * If offline, checks for cached race data and uses it if available.
+ * @async
+ * @function
+ * @param {number} [page=1] - The current page number for pagination (default: 1).
+ * @throws {Error} When API response is not OK or network request fails.
+ * @returns {Promise<void>}
  */
 async function fetchRaceData(page = 1) {
   const pageSize = 10;
@@ -40,8 +48,9 @@ async function fetchRaceData(page = 1) {
 }
 
 /**
- * Retrieves the race ID from the URL.
- * @returns {string} The race ID from the current URL.
+ * Retrieves the race ID from the current URL path.
+ * @function
+ * @returns {string} The race ID extracted from the URL.
  */
 function getRaceID() {
   const url = new URL(window.location.href);
@@ -51,8 +60,15 @@ function getRaceID() {
 }
 
 /**
- * Updates all race detail elements
- * @param {Object} raceDetails - The race data object
+ * Updates all race detail elements in the UI.
+ * @function
+ * @param {Object} raceDetails - The race data object containing:
+ * @param {number} raceDetails.timeStarted - Unix timestamp of race start
+ * @param {string} raceDetails.raceLocation - Location of the race
+ * @param {number} raceDetails.totalCheckpoints - Number of checkpoints
+ * @param {Object} raceDetails.pagination - Pagination info
+ * @param {number} raceDetails.pagination.total - Total participant count
+ * @returns {void}
  */
 function updateRaceDetails(raceDetails) {
   document.querySelector('#race-start-time').textContent = formatDate(raceDetails.timeStarted);
@@ -69,8 +85,11 @@ function updateRaceDetails(raceDetails) {
 }
 
 /**
- * Renders the race table using row templates.
- * @param {Object} raceDetails - The race data object retrieved from the API endpoint.
+ * Renders the race participant table using row templates.
+ * @function
+ * @param {Object} raceDetails - The race data object containing:
+ * @param {Array} raceDetails.participants - Array of participant objects
+ * @returns {void}
  */
 function renderRaceTable(raceDetails) {
   const tableBody = document.querySelector('.race-table tbody');
@@ -95,9 +114,10 @@ function renderRaceTable(raceDetails) {
 
 /**
  * Formats a Unix timestamp into a readable date string.
- * @param {number} timestamp - The Unix timestamp to format.
- * @param {string} [defaultText="N/A"] - Default text if timestamp is missing.
- * @returns {string} Formatted date string.
+ * @function
+ * @param {number} timestamp - The Unix timestamp in milliseconds
+ * @param {string} [defaultText="Not Started"] - Default text if timestamp is missing
+ * @returns {string} Formatted date string or default text
  */
 function formatDate(timestamp, defaultText = 'Not Started') {
   if (!timestamp) return defaultText;
@@ -113,9 +133,10 @@ function formatDate(timestamp, defaultText = 'Not Started') {
 }
 
 /**
- * Formats time difference in seconds into a human-readable format (hh:mm:ss or mm:ss).
- * @param {number} timeDiffInSeconds - Time difference in seconds.
- * @returns {string|null} Formatted time string or null if invalid.
+ * Formats milliseconds into a human-readable time format (HH:MM:SS.mmm).
+ * @function
+ * @param {number} ms - Time duration in milliseconds
+ * @returns {string} Formatted time string (HH:MM:SS.mmm)
  */
 function formatRacerTime(ms) {
   const h = Math.floor(ms / 3600000);
@@ -126,8 +147,12 @@ function formatRacerTime(ms) {
 }
 
 /**
- * Updates pagination buttons and page information.
- * @param {Object} pagination - Pagination details object.
+ * Updates pagination controls based on current pagination state.
+ * @function
+ * @param {Object} pagination - Pagination details object containing:
+ * @param {number} pagination.page - Current page number
+ * @param {number} pagination.totalPages - Total number of pages
+ * @returns {void}
  */
 function updatePaginationControls(pagination) {
   const prevButton = document.querySelector('#prev-page');
@@ -146,8 +171,9 @@ function updatePaginationControls(pagination) {
 }
 
 /**
- * Checks if the current race matches the stored offline race
- * @returns {boolean} True if the race is available offline
+ * Checks if offline race data is available for the current race.
+ * @function
+ * @returns {boolean} True if matching offline race data exists in localStorage
  */
 function hasOfflineRaceData() {
   const offlineData = localStorage.getItem('storedRace');
@@ -157,6 +183,15 @@ function hasOfflineRaceData() {
   return parsedData.raceId === getRaceID();
 }
 
+/**
+ * Registers user interest in a race via API.
+ * @async
+ * @function
+ * @param {string} firstName - Participant's first name
+ * @param {string} lastName - Participant's last name
+ * @throws {Error} When registration fails
+ * @returns {Promise<Object>} API response data
+ */
 async function registerInterest(firstName, lastName) {
   const raceId = getRaceID();
   
@@ -184,16 +219,221 @@ async function registerInterest(firstName, lastName) {
   }
 }
 
+/**
+ * Exports race data to CSV format and triggers download.
+ * @async
+ * @function
+ * @throws {Error} When export process fails
+ * @returns {Promise<void>}
+ */
+async function exportToCSV() {
+  try {
+    const raceId = getRaceID();
+    const button = document.querySelector('#export-csv-button');
+    
+    button.disabled = true;
+    
+    // First get basic race info
+    const raceResponse = await fetch(`/api/races/${raceId}`);
+    if (!raceResponse.ok) throw new Error('Failed to fetch race details');
+    const raceDetails = await raceResponse.json();
+    
+    // Then get ALL participants
+    const participants = await fetchAllParticipants(raceId);
+    
+    if (!participants || participants.length === 0) {
+      alert('No participant data to export');
+      return;
+    }
+
+    // Create CSV content
+    let csv = `Location:,${raceDetails.raceLocation}\n`;
+    csv += `Start Time:,${new Date(raceDetails.timeStarted)}\n\n`;
+    
+    // Header row
+    csv += 'Bib Number,First Name,Last Name,Finish Time';
+    
+    // Add checkpoint headers if available
+    if (participants[0]?.checkpoints?.length > 0) {
+      participants[0].checkpoints.forEach(cp => {
+        csv += `,${cp.checkpointName}`;
+      });
+    }
+    csv += '\n';
+    
+    // Participant rows
+    for (const participant of participants) {
+      const finishTime = participant.timeFinished 
+        ? formatRacerTime(participant.timeFinished)
+        : 'Pending';
+      
+      csv += `"${participant.bibNumber}","${participant.firstName}","${participant.lastName}","${finishTime}"\n`;
+    }
+
+    // Create and trigger download
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+
+    link.setAttribute('href', url);
+    link.setAttribute('download', `race_${raceId}_export_${new Date().toISOString().split('T')[0]}.csv`);
+
+    document.body.appendChild(link);
+
+    link.click();
+    
+    document.body.removeChild(link);
+    
+  } catch (error) {
+    console.error('Export failed:', error);
+    alert('Failed to export data: ' + error.message);
+  } finally {
+    const button = document.querySelector('#export-csv-button');
+    if (button) {
+      button.disabled = false;
+    }
+  }
+}
+
+/**
+ * Fetches all participants for a race from the API.
+ * @async
+ * @function
+ * @param {string} raceId - The ID of the race
+ * @throws {Error} When API request fails
+ * @returns {Promise<Array>} Array of participant objects
+ */
+async function fetchAllParticipants(raceId) {
+  try {
+    const response = await fetch(`/api/races/${raceId}/all-participants`);
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching all participants:', error);
+    throw error;
+  }
+}
+
+/**
+ * Handles the submission of the interest form, validates input, and registers interest via API.
+ * @async
+ * @function handleInterestFormSubmission
+ * @param {Event} event - The form submission event
+ * @returns {Promise<void>}
+ * @throws {Error} When form validation fails or registration API call fails
+ */
+async function handleInterestFormSubmission(event) {
+  event.preventDefault();
+  
+  // Get form elements
+  const form = event.target;
+  const firstNameInput = form.querySelector('#first-name');
+  const lastNameInput = form.querySelector('#last-name');
+  const submitButton = form.querySelector('#register-interest-button');
+  const confirmationMessage = form.querySelector('#interest-confirmation');
+  
+  // Validate inputs
+  const firstName = firstNameInput.value.trim();
+  const lastName = lastNameInput.value.trim();
+  
+  if (!firstName || !lastName) {
+    showConfirmationMessage(
+      confirmationMessage,
+      'Please enter both first and last name',
+      'error'
+    );
+    return;
+  }
+
+  // Update UI for loading state
+  setButtonState(submitButton, {
+    disabled: true,
+    text: 'Registering...'
+  });
+
+  try {
+    // Attempt registration
+    await registerInterest(firstName, lastName);
+    
+    // Handle success
+    form.reset();
+    showConfirmationMessage(
+      confirmationMessage,
+      'Thank you for your interest!',
+      'success'
+    );
+  } catch (error) {
+    // Handle error
+    showConfirmationMessage(
+      confirmationMessage,
+      'Failed to register interest. Please try again.',
+      'error'
+    );
+  } finally {
+    // Reset button state
+    setButtonState(submitButton, {
+      disabled: false,
+      text: 'Register Interest'
+    });
+  }
+}
+
+/**
+ * Displays a confirmation message with the specified type (success/error).
+ * @function showConfirmationMessage
+ * @param {HTMLElement} element - The confirmation message element
+ * @param {string} message - The message to display
+ * @param {'success'|'error'} type - The type of message (determines styling)
+ * @returns {void}
+ */
+function showConfirmationMessage(element, message, type) {
+  if (!element) return;
+  
+  element.textContent = message;
+  element.className = `${type}-message`;
+  element.classList.remove('hidden');
+}
+
+/**
+ * Updates the state of a button element.
+ * @function setButtonState
+ * @param {HTMLButtonElement} button - The button element to update
+ * @param {Object} options - Configuration options
+ * @param {boolean} options.disabled - Whether the button should be disabled
+ * @param {string} options.text - The text to display on the button
+ * @returns {void}
+ */
+function setButtonState(button, { disabled, text }) {
+  if (!button) return;
+  
+  button.disabled = disabled;
+  button.textContent = text;
+}
+
+// Event Listeners
+
+/**
+ * Previous page button click handler.
+ * @event
+ */
 document.querySelector('#prev-page').addEventListener('click', (event) => {
   const page = Number(event.target.dataset.page);
   if (page > 0) fetchRaceData(page);
 });
 
+/**
+ * Next page button click handler.
+ * @event
+ */
 document.querySelector('#next-page').addEventListener('click', (event) => {
   const page = Number(event.target.dataset.page);
   fetchRaceData(page);
 });
 
+/**
+ * DOMContentLoaded event handler that initializes race data.
+ * @event
+ */
 document.addEventListener('DOMContentLoaded', () => {
   if (!navigator.onLine && hasOfflineRaceData()) {
     const offlineData = JSON.parse(localStorage.getItem('storedRace'));
@@ -207,87 +447,30 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
+/**
+ * Refresh stats button click handler.
+ * @event
+ */
 document.querySelector('#refresh-stats-button').addEventListener('click', function () {
   fetchRaceData(currentPage);
 });
 
+/**
+ * Dashboard button click handler.
+ * @event
+ */
 document.querySelector('#dashboard-button').addEventListener('click', function () {
   window.location.href = '/dashboard';
 });
 
-document.querySelector('#interest-form')?.addEventListener('submit', async (e) => {
-  e.preventDefault();
-  
-  const firstName = document.querySelector('#first-name').value.trim();
-  const lastName = document.querySelector('#last-name').value.trim();
-  const button = document.querySelector('#register-interest-button');
-  const confirmation = document.querySelector('#interest-confirmation');
-  
-  if (!firstName || !lastName) {
-    confirmation.textContent = 'Please enter both first and last name';
-    confirmation.className = 'error-message';
-    confirmation.classList.remove('hidden');
-    return;
-  }
-
-  button.disabled = true;
-  button.textContent = 'Registering...';
-
-  try {
-    await registerInterest(firstName, lastName);
-    
-    document.querySelector('#interest-form').reset();
-    confirmation.textContent = 'Thank you for your interest!';
-    confirmation.className = 'success-message';
-    confirmation.classList.remove('hidden');
-  } catch (error) {
-    confirmation.textContent = 'Failed to register interest. Please try again.';
-    confirmation.className = 'error-message';
-    confirmation.classList.remove('hidden');
-  } finally {
-    button.disabled = false;
-    button.textContent = 'Register Interest';
-  }
-});
-
-/*  ===============
- *     GRAVEYARD
- *  ===============
- *
- *  ${checkpoints.map(checkpoint => {
- *      const cpTime = participant.checkpoints.find(cp => cp.checkpointId === checkpoint.checkpointId);
- *      const formattedTime = formatCheckpointTime(cpTime, previousTime, raceStart);
- *
- *      if (cpTime && cpTime.timeFinished !== null) {
- *          previousTime = cpTime.timeFinished;
- *
- *      return `
- *          <tr>
- *              <td>${checkpoint.name}</td>
- *              <td>${formattedTime}</td>
- *          </tr>`;
- *  }).join("")}
- *
- *  function formatCheckpointTime(participant, previousTime, raceStart) {
- *      if (!participant || participant.timeFinished === null) return "--";
- *
- *      const timeDiffInSeconds = participant.timeFinished - raceStart;
- *      const timefromPrevCheckpoint = participant.timeFinished - previousTime;
- *
- *      return `+${formatRacerTime(timefromPrevCheckpoint)} (${formatRacerTime(timeDiffInSeconds)})`;
- *  }
- *
- *  function getUniqueSortedCheckpoints(participants) {
- *      const uniqueCheckpoints = [];
- *
- *      for (const participant of participants) {
- *          for (const cp of participant.checkpoints) {
- *              if (!uniqueCheckpoints.some(c => c.checkpointId === cp.checkpointId)) {
- *                  uniqueCheckpoints.push(cp);
- *              }
- *           }
- *      }
- *
- *      return uniqueCheckpoints.sort((a, b) => a.order - b.order);
- *  }
+/**
+ * Export CSV button click handler.
+ * @event
  */
+document.querySelector('#export-csv-button')?.addEventListener('click', exportToCSV);
+
+/**
+ * Interest form submission handler.
+ * @event
+ */
+document.querySelector('#interest-form')?.addEventListener('submit', handleInterestFormSubmission);

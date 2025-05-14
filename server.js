@@ -15,6 +15,7 @@ app.get('/api/races', getRaces);
 app.get('/api/races/:id', getRace);
 app.get('/api/races/:id/pending-participants', getPendingParticipants);
 app.patch('/api/races/:raceId/participants/:userId', updateParticipantStatus);
+app.get('/api/races/:id/all-participants', getAllParticipants);
 
 app.post('/api/new-race', createRace);
 app.delete('/api/delete-race', deleteRace);
@@ -186,6 +187,16 @@ async function updateParticipantStatus(req, res) {
   } catch (error) {
     console.error('Error updating participant status:', error);
     res.status(500).json({ error: 'Failed to update participant status' });
+  }
+}
+
+async function getAllParticipants(req, res) {
+  try {
+    const participants = await db.getAllParticipantsForRace(req.params.id);
+    res.json(participants);
+  } catch (error) {
+    console.error('Error fetching all participants:', error);
+    res.status(500).json({ error: 'Failed to fetch participants' });
   }
 }
 

@@ -1,5 +1,11 @@
+/**
+ * Main entry point for the application.
+ * Initializes the service worker, sets up event listeners, and fetches initial race data.
+ * @function
+ * @returns {void}
+ */
 function main() {
-  // registerServiceWorker();
+  registerServiceWorker();
   
   const raceTable = document.querySelector('#race-history-table tbody');
 
@@ -16,8 +22,11 @@ function main() {
 }
 
 /**
- * Fetches race data from the api endpoint.
- * @returns {Promise<JSON>} A promise that will resolve to a race data object.
+ * Fetches race data from the API endpoint with pagination support.
+ * @async
+ * @function
+ * @param {number} [page=1] - The page number to fetch (defaults to 1).
+ * @returns {Promise<Object>} A promise that resolves to an object containing race data and pagination information.
  */
 async function fetchRaces(page = 1) {
   const pageSize = 10;
@@ -42,8 +51,10 @@ async function fetchRaces(page = 1) {
 }
 
 /**
- * Populates the race history table with the race data.
- * @param {JSON} races - The race JSON, where keys are race IDs.
+ * Populates the race history table with the provided race data.
+ * @function
+ * @param {Object} races - The race data object where keys are race IDs and values are race details.
+ * @returns {void}
  */
 function populateRaceTable(races) {
   const tableBody = document.querySelector('#race-history-table tbody');
@@ -59,10 +70,17 @@ function populateRaceTable(races) {
 }
 
 /**
- * Creates a table row element for a given race using the given HTML template.
- * @param {Number} raceId - The unique identifier for the race.
- * @param {JSON} race - The race JSON object containing details.
- * @returns {HTMLElement} The generated table row element.
+ * Creates a table row element for a given race using an HTML template.
+ * @function
+ * @param {string} raceId - The unique identifier for the race.
+ * @param {Object} race - The race object containing details.
+ * @param {number} race.timeStarted - The timestamp when the race actually started.
+ * @param {string} race.raceLocation - The location of the race.
+ * @param {number} race.timeFinished - The timestamp when the race finished.
+ * @param {number} race.scheduledStartTime - The scheduled start time of the race.
+ * @param {number} race.scheduledDuration - The scheduled duration of the race.
+ * @param {number} race.participants - The number of participants in the race.
+ * @returns {HTMLTableRowElement} The generated table row element.
  */
 function createRaceRow(raceId, race) {
   const { timeStarted, raceLocation, timeFinished, scheduledStartTime, scheduledDuration, participants } = race;
@@ -95,9 +113,10 @@ function createRaceRow(raceId, race) {
 }
 
 /**
- * This function converts a timestamp in to a formatted datetime string.
- * @param {number} timestamp - The timestamp in miliseconds.
- * @returns {string} The formatted datetime string.
+ * Converts a Unix timestamp into a formatted datetime string.
+ * @function
+ * @param {number} timestamp - The timestamp in milliseconds.
+ * @returns {string} The formatted datetime string or 'Not started' if timestamp is erroneous.
  */
 function formatUnixTimestamp(timestamp) {
   if (!timestamp) return 'Not started';
@@ -121,8 +140,12 @@ function formatUnixTimestamp(timestamp) {
 }
 
 /**
- * Updates pagination buttons and page information.
+ * Updates the pagination controls based on the current pagination state.
+ * @function
  * @param {Object} pagination - Pagination details object.
+ * @param {number} pagination.page - Current page number.
+ * @param {number} pagination.totalPages - Total number of pages available.
+ * @returns {void}
  */
 function updatePaginationControls(pagination) {
   const prevButton = document.querySelector('#prev-page');
@@ -140,28 +163,55 @@ function updatePaginationControls(pagination) {
   nextButton.dataset.page = pagination.page + 1;
 }
 
+/**
+ * Registers the service worker for the application.
+ * @async
+ * @function
+ */
 async function registerServiceWorker() {
   if (navigator.serviceWorker) {
     await navigator.serviceWorker.register('./sw.js');
   }
 }
 
+// Event Listeners
+
+/**
+ * DOMContentLoaded event listener that calls the main function.
+ * @event
+ */
 document.addEventListener('DOMContentLoaded', main);
 
+/**
+ * Change event listener for the role selector dropdown.
+ * @event
+ */
 document.querySelector('#role-selector')?.addEventListener('change', (e) => {
   userType.setRole(e.target.value);
 });
 
+/**
+ * Click event listener for the previous page button.
+ * @event
+ */
 document.querySelector('#prev-page').addEventListener('click', (event) => {
   const page = Number(event.target.dataset.page);
   if (page > 0) fetchRaces(page);
 });
 
+/**
+ * Click event listener for the next page button.
+ * @event
+ */
 document.querySelector('#next-page').addEventListener('click', (event) => {
   const page = Number(event.target.dataset.page);
   fetchRaces(page);
 });
 
+/**
+ * Click event listener for the clear storage button.
+ * @event
+ */
 document.querySelector('#clear-storage')?.addEventListener('click', () => {
   if (confirm('Are you sure you want to clear all localStorage data?')) {
     localStorage.clear();

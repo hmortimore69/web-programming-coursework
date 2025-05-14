@@ -1,37 +1,62 @@
+/**
+ * Main initialization function for the race dashboard.
+ * @async
+ * @function main
+ * @returns {Promise<void>}
+ */
 async function main() {
   const race = await getRace();
   const raceId = race.raceId;
 
+  // Initialise components
   syncTimerWithRaceState(race);
-
   raceTimer.init();
   TimestampManager.init(raceId);
 
+  // Add click handler for race deletion
   document.querySelector('#delete-race-button').addEventListener('click', () => {
     deleteRaceById(raceId);
   });
 
+  // Fetch and display pending participant requests
   const participants = await fetchPendingParticipants(raceId);
   renderPendingParticipants(participants);
 
+  // Add event for participant approval/rejection buttons
   document.querySelector('#pending-participants-list').addEventListener('click', (e) => {
     if (e.target.classList.contains('accept-participant')) {
+      // Handle participant approval
+
       const item = e.target.closest('.conflict-item');
       handleParticipantAction(raceId, item.dataset.userId, 'approve');
     } else if (e.target.classList.contains('reject-participant')) {
+      // Handle participant rejection
+
       const item = e.target.closest('.conflict-item');
       handleParticipantAction(raceId, item.dataset.userId, 'reject');
     }
   });
 
+  // Add refresh button for pending participants list
   document.querySelector('#refresh-participants').addEventListener('click', async () => {
     const participants = await fetchPendingParticipants(raceId);
     renderPendingParticipants(participants);
   });
 
+  // Set up periodic synchronization of race state (every 10 seconds)
   setInterval(() => syncTimerWithRaceState(), 10000);
 }
 
+/**
+ * Synchronizes the race timer with the current race state.
+ * @function syncTimerWithRaceState
+ * @param {Object} [race] - The race data object
+ * @param {number} race.scheduledStartTime - Scheduled start time timestamp
+ * @param {number} race.scheduled_duration - Scheduled duration in milliseconds
+ * @param {number} race.timeStarted - Actual start time timestamp
+ * @param {number} race.timeFinished - Actual finish time timestamp
+ * @returns {void}
+ */
 function syncTimerWithRaceState(race) {
   if (!race) return;
 
@@ -42,7 +67,6 @@ function syncTimerWithRaceState(race) {
 
   // Race is currently live
   if (timeStarted && timeStarted <= now && (!timeFinished || timeFinished >= now)) {
-    // Add check if race exceeds 24 hours, rten cap timer at 24 and finish race (TODO)
     const elapsed = now - timeStarted;
     raceTimer.setTime(elapsed);
     raceTimer.start();
@@ -78,6 +102,12 @@ function syncTimerWithRaceState(race) {
   }
 }
 
+/** 
+ * Retrieves race data from API or localStorage fallback (includes pagination).
+ * @async
+ * @function getRace
+ * @returns {Promise<Object|null>} Race data object or null if not found
+ */
 async function getRace() {
   const stored = localStorage.getItem('storedRace');
 
@@ -92,7 +122,7 @@ async function getRace() {
       const response = await fetch(`/api/races/${raceId}`);
       if (!response.ok) {
         console.error(`Failed to fetch race data. Status: ${response.status}`);
-        return stored ? JSON.parse(stored) : null; // Fallback to localStorage
+        return stored ? JSON.parse(stored) : null;
       }
 
       const raceDetails = await response.json();
@@ -110,6 +140,13 @@ async function getRace() {
   }
 }
 
+/**
+ * Deletes a race by ID.
+ * @async
+ * @function deleteRaceById
+ * @param {string} raceId - The ID of the race to delete
+ * @returns {Promise<void>}
+ */
 async function deleteRaceById(raceId) {
   try {
     const response = await fetch(`/api/delete-race?raceId=${raceId}`, {
@@ -123,16 +160,29 @@ async function deleteRaceById(raceId) {
       throw new Error(`Response Status: ${response.status}`);
     }
   } catch (error) {
-    console.error('Error posting new race', error);
+    console.error('Error deleting race', error);
   }
 }
 
+/**
+ * Updates a property in the storedRace localStorage.
+ * @function updateLocalStorageProperty
+ * @param {string} property - The property to update
+ * @param {*} value - The new value
+ * @returns {void}
+ */
 function updateLocalStorageProperty(property, value) {
   const storedRace = JSON.parse(localStorage.getItem('storedRace'));
   storedRace[property] = value;
   localStorage.setItem('storedRace', JSON.stringify(storedRace));
 }
 
+/**
+ * Starts the race by setting the start time.
+ * @async
+ * @function startRace
+ * @returns {Promise<void>}
+ */
 async function startRace() {
   const updatedStartTime = Date.now();
 
@@ -149,7 +199,6 @@ async function startRace() {
     await updateRaceData(raceId, 'update-start-time', { startTime: updatedStartTime });
   
 
-    console.log("STARTED");
     // Sync timer with new state
     const updatedRace = JSON.parse(localStorage.getItem('storedRace'));
     syncTimerWithRaceState(updatedRace);
@@ -158,6 +207,12 @@ async function startRace() {
   }
 }
 
+/**
+ * Finishes the race by setting the finish time.
+ * @async
+ * @function finishRace
+ * @returns {Promise<void>}
+ */
 async function finishRace() {
   try {
     const raceDetails = JSON.parse(localStorage.getItem('storedRace'));
@@ -187,7 +242,15 @@ async function finishRace() {
   }
 }
 
-// Helper function to avoid repetitive code
+/**
+ * Helper function to update race data on the server.
+ * @async
+ * @function updateRaceData
+ * @param {string} raceId - The race ID
+ * @param {string} action - The action to perform
+ * @param {Object} data - The data to update
+ * @returns {Promise<void>}
+ */
 async function updateRaceData(raceId, action, data) {
   try {
     const response = await fetch(`/api/update-race`, {
@@ -211,6 +274,11 @@ async function updateRaceData(raceId, action, data) {
   }
 }
 
+/**
+ * Navigates back to the race results page.
+ * @function returnToResults
+ * @returns {void}
+ */
 function returnToResults() {
   const stored = JSON.parse(localStorage.getItem('storedRace'));
   const raceId = stored?.raceId;
@@ -218,6 +286,13 @@ function returnToResults() {
   window.location.href = `/race/${raceId}`;
 }
 
+/**
+ * Fetches pending participants for a race.
+ * @async
+ * @function fetchPendingParticipants
+ * @param {string} raceId - The race ID
+ * @returns {Promise<Array>} Array of pending participants
+ */
 async function fetchPendingParticipants(raceId) {
   try {
     const response = await fetch(`/api/races/${raceId}/pending-participants`);
@@ -231,6 +306,15 @@ async function fetchPendingParticipants(raceId) {
   }
 }
 
+/**
+ * Renders pending participants to the UI.
+ * @function renderPendingParticipants
+ * @param {Array} participants - Array of participant objects
+ * @param {string} participants[].interestId - Participant interest ID
+ * @param {string} participants[].firstName - Participant first name
+ * @param {string} participants[].lastName - Participant last name
+ * @returns {void}
+ */
 function renderPendingParticipants(participants) {
   const container = document.querySelector('#pending-participants-list');
   const template = document.querySelector('#participant-card-template');
@@ -251,7 +335,6 @@ function renderPendingParticipants(participants) {
   for (const participant of participants) {
     const clone = template.content.cloneNode(true);
     const item = clone.querySelector('.conflict-item');
-    console.log(participant.interestId);
     item.dataset.userId = participant.interestId;
     
     clone.querySelector('.participant-name').textContent = `${participant.firstName} ${participant.lastName}`;
@@ -260,6 +343,15 @@ function renderPendingParticipants(participants) {
   }
 }
 
+/**
+ * Handles participant approval/rejection actions.
+ * @async
+ * @function handleParticipantAction
+ * @param {string} raceId - The race ID
+ * @param {string} userId - The user ID to act on
+ * @param {'approve'|'reject'} action - The action to perform
+ * @returns {Promise<void>}
+ */
 async function handleParticipantAction(raceId, userId, action) {
   try {
     const response = await fetch(`/api/races/${raceId}/participants/${userId}`, {
@@ -282,6 +374,7 @@ async function handleParticipantAction(raceId, userId, action) {
   }
 }
 
+// Event Listeners
 document.addEventListener('DOMContentLoaded', main);
 document.querySelector('#start-race-button').addEventListener('click', startRace);
 document.querySelector('#finish-race-button').addEventListener('click', finishRace);

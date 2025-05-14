@@ -1,32 +1,55 @@
-document.addEventListener('DOMContentLoaded', function () {
+/**
+ * Initializes the new race form when DOM is loaded.
+ * @event DOMContentLoaded
+ */
+document.addEventListener('DOMContentLoaded', function() {
   const steps = document.querySelectorAll('.new-race-step');
   const nextButtons = document.querySelectorAll('.next-step');
   const prevButtons = document.querySelectorAll('.previous-step');
   const submitButton = document.querySelector('#submit-button');
   const progressTabs = document.querySelectorAll('.progress-tab');
 
+  // State variables
   let currentStep = 0;
   const formData = {};
 
+  // Initialize event listeners
   for (const tab of progressTabs) {
     tab.addEventListener('click', handleTabClick);
   }
 
+  addEventListenersToButtons(nextButtons, handleNextButtonClick);
+  addEventListenersToButtons(prevButtons, handlePrevButtonClick);
+  submitButton.addEventListener('click', handleSubmitButtonClick);
+
+  // Set initial state
+  updateSteps();
+
   /**
-   * Updates the visibility of steps based on the current step index.
-   * Only the active step will be visible.
+   * Updates UI to reflect current step in multi-step form.
+   * Shows active step and updates progress tabs.
+   * @function updateSteps
+   * @returns {void}
    */
   function updateSteps() {
+    // Update step visibility
     for (const [index, step] of steps.entries()) {
       step.classList.toggle('active', index === currentStep);
     }
     
+    // Update progress tabs
     for (const [index, tab] of progressTabs.entries()) {
       tab.classList.toggle('active', index === currentStep);
       tab.classList.toggle('completed', index < currentStep);
     }
   }
 
+  /**
+   * Handles progress tab clicks for direct step navigation.
+   * @function handleTabClick
+   * @param {Event} event - The click event
+   * @returns {void}
+   */
   function handleTabClick(event) {
     const tab = event.currentTarget;
     const stepIndex = parseInt(tab.dataset.step);
@@ -37,20 +60,24 @@ document.addEventListener('DOMContentLoaded', function () {
         return; // Stay on current step if validation fails
       }
     }
-    
+
+    // Save current step
+    saveData(currentStep);
+    console.log(formData);
     currentStep = stepIndex;
     updateSteps();
   }
 
   /**
-   * Validates that all input fields in the current step are filled.
-   * Displays a requirement message if any field is empty.
-   * @param {number} stepIndex - The index of the step being validated.
-   * @returns {boolean} - Returns true if all inputs are filled, otherwise false.
+   * Validates all required inputs in the specified step.
+   * @function validateStep
+   * @param {number} stepIndex - The index of the step to validate
+   * @param {boolean} [silent=false] - Whether to show visual validation errors
+   * @returns {boolean} True if all inputs are valid, false otherwise
    */
   function validateStep(stepIndex, silent = false) {
     const step = steps[stepIndex];
-    const inputs = step.querySelectorAll('input');
+    const inputs = step.querySelectorAll('input[required]');
     let isValid = true;
   
     for (const input of inputs) {
@@ -76,21 +103,24 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   /**
-   * Handles the next button click event.
-   * Validates the current step before allowing the transition.
-   * Saves the form data of the current step.
+   * Handles next button clicks with validation and saving.
+   * @function handleNextButtonClick
+   * @returns {void}
    */
   function handleNextButtonClick() {
     if (!validateStep(currentStep)) return;
 
     saveData(currentStep);
+    console.log(formData);
+
     currentStep++;
     updateSteps();
   }
 
   /**
-   * Handles the previous button click event.
-   * Moves back one step in the form.
+   * Handles previous button clicks to navigate back a step.
+   * @function handlePrevButtonClick
+   * @returns {void}
    */
   function handlePrevButtonClick() {
     currentStep--;
@@ -98,8 +128,10 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   /**
-   * Handles the submit button click event.
-   * Saves the last step's form data and submits to the server.
+   * Handles form submission with validation.
+   * @async
+   * @function handleSubmitButtonClick
+   * @returns {Promise<void>}
    */
   async function handleSubmitButtonClick() {
     // Validate all steps first
@@ -119,8 +151,6 @@ document.addEventListener('DOMContentLoaded', function () {
     
     saveData(currentStep);
     
-    console.log(formData);
-
     try {
       const response = await fetch(`/api/new-race`, {
         method: "POST",
@@ -141,24 +171,31 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   /**
-   * Saves the form data of the current step.
-   * @param {number} stepIndex - The index of the step being processed.
+   * Saves form data from the current step.
+   * @function saveData
+   * @param {number} stepIndex - The index of the step being saved
+   * @returns {void}
    */
   function saveData(stepIndex) {
     const step = steps[stepIndex];
 
+    // Initialize arrays if they don't exist
+    if (stepIndex === 1 && !formData.checkpoints) formData.checkpoints = [];
+    if (stepIndex === 2 && !formData.marshals) formData.marshals = [];
+    if (stepIndex === 3 && !formData.participants) formData.participants = [];
+
     // Save specific data based on the current step
     switch (stepIndex) {
-      case 0: // Race details saving
+      case 0: // Race details
         saveDetails(step, '#race-details', ['#race-name', '#race-start-date', '#race-location', '#race-duration'], 'raceDetails');
         break;
-      case 1: // Checkpoint saving
+      case 1: // Checkpoints
         saveDetails(step, '.checkpoint-details', ['.checkpoint-name', '.checkpoint-order'], 'checkpoints');
         break;
-      case 2: // Marshall saving
+      case 2: // Marshals
         saveDetails(step, '.marshal-details', ['.marshal-first-name', '.marshal-last-name'], 'marshals');
         break;
-      case 3: // Participant saving
+      case 3: // Participants
         saveDetails(step, '.participant-details', ['.participant-first-name', '.participant-last-name'], 'participants');
         break;
       default:
@@ -167,11 +204,13 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   /**
-   * Saves details of each form step (checkpoints, marshals, and participants).
-   * @param {HTMLElement} step - The step element containing details div.
-   * @param {string} selector - The CSS selector for the details container.
-   * @param {string[]} fields - An array containing the identifiers for the fields to save.
-   * @param {string} key - The key name for where details will get stored.
+   * Saves form details to the formData object.
+   * @function saveDetails
+   * @param {HTMLElement} step - The step element containing the details
+   * @param {string} selector - CSS selector for the details container
+   * @param {string[]} fields - Array of field selectors to save
+   * @param {string} key - The key in formData to store the values
+   * @returns {void}
    */
   function saveDetails(step, selector, fields, key) {
     const details = step.querySelectorAll(selector);
@@ -179,31 +218,28 @@ document.addEventListener('DOMContentLoaded', function () {
   
     if (key === 'raceDetails') {
       for (const field of fields) {
-        formData[key][field] = step.querySelector(field).value;
+        const fieldName = field.substring(1); // Remove # from selector
+        formData[key][fieldName] = step.querySelector(field).value;
       }
     } else {
       for (const detail of details) {
         const data = {};
         for (const field of fields) {
-          data[field] = detail.querySelector(field).value;
+          const fieldName = field.substring(1); // Remove . from selector
+          data[fieldName] = detail.querySelector(field).value;
         }
         formData[key].push(data);
       }
     }
   }
-
-  addEventListenersToButtons(nextButtons, handleNextButtonClick);
-  addEventListenersToButtons(prevButtons, handlePrevButtonClick);
-  submitButton.addEventListener('click', handleSubmitButtonClick);
-
-  // Set the first step as active
-  updateSteps();
 });
 
 /**
- * Adds event listeners to a group of buttons.
- * @param {NodeList} buttons - List of related buttons.
- * @param {Function} handler - Function to handle button clicks.
+ * Adds event listeners to multiple buttons with the same handler.
+ * @function addEventListenersToButtons
+ * @param {NodeList} buttons - Collection of button elements
+ * @param {Function} handler - Click handler function
+ * @returns {void}
  */
 function addEventListenersToButtons(buttons, handler) {
   for (const button of buttons) {
@@ -212,10 +248,12 @@ function addEventListenersToButtons(buttons, handler) {
 }
 
 /**
- * Adds the templates to different steps of the forms: checkpoints, participants, and marshals.
- * @param {HTMLElement} listId - ID of the display div.
- * @param {HTMLTemplateElement} templateId - ID of the template to use.
- * @param {HTMLElement} removeButtonClass - Class of the remove button.
+ * Adds a new item to a form section using a template.
+ * @function addItem
+ * @param {string} listId - ID selector for the container element
+ * @param {string} templateId - ID selector for the template element
+ * @param {string} removeButtonClass - Class selector for the remove button
+ * @returns {void}
  */
 function addItem(listId, templateId, removeButtonClass) {
   const list = document.querySelector(listId);
@@ -232,7 +270,7 @@ function addItem(listId, templateId, removeButtonClass) {
   });
 }
 
-// Adds addItem for each form step that requires the similar templates.
+// Initialize dynamic form elements
 document.querySelector('#add-checkpoint-button').addEventListener('click', () => {
   addItem('#checkpoint-list', '#new-checkpoint-template', '.remove-checkpoint-button');
 });
