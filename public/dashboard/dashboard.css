@@ -212,7 +212,7 @@ input {
 .enabled-button {
   opacity: 1;
   cursor: pointer;
-  background-color: #4CAF50; /* Green */
+  background-color: #4CAF50;
 }
 
 #marshal-select {

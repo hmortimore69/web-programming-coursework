@@ -213,7 +213,9 @@ class ConflictManager {
   }
 }
 
-// Initialize ConflictManager when DOM is ready
-document.addEventListener('DOMContentLoaded', () => {
+/**
+ * Initialise conflict manager when DOM loads.
+ * @event
+ */document.addEventListener('DOMContentLoaded', () => {
   new ConflictManager();
 });

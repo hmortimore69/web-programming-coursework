@@ -8,12 +8,12 @@ const raceTimer = {
   liveIndicator: document.querySelector('#live-indicator'),
   
   // Timer state properties
-  startTime: null,          // Timestamp when timer started
-  timerInterval: null,      // Reference to the interval
-  elapsedTime: 0,           // Current elapsed time in ms
-  isRunning: false,         // Whether timer is actively counting
-  isCountdown: false,       // Whether in countdown mode
-  isFinished: false,        // Whether race is finished
+  startTime: null, // Timestamp when timer started
+  timerInterval: null, // Reference to the interval
+  elapsedTime: 0, // Current elapsed time in ms
+  isRunning: false, // Whether timer is actively counting
+  isCountdown: false, // Whether in countdown mode
+  isFinished: false, // Whether race is finished
   maxDuration: 24 * 60 * 60 * 1000, // 24 hour maximum duration
   online: navigator.onLine, // Current connection status
 

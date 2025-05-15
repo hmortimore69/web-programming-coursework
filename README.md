@@ -34,11 +34,11 @@ The table, by default, Name, Bib Number, and Finish. This is because all races h
 
 To refresh data for this table, I intended to use either a button to manually refresh statistics, or automatically retrieve them every 10 seconds using `setInterval();`. I ended both options, as it allowed the page to stay live - but also allow the user to request it manually. When updating the table, it clears and rewrites. If you were reading the table, and it updated - you would be sent back to the top of the table; annoying right? To solve this, I added in a variable to capture the scrolling position during the table. This would then allow me to restore the scroll position in the table after a fetch request.
 
-The page race details section at the top of the screen, contains details regarding the time the race started, the location of the race, how many checkpoints there are, and the total number of participants.
+The page race details section at the top of the screen, contains details regarding the time the race started, the location of the race, how many checkpoints there are, and the total number of participants. This also includes the race, and a race indicator if the race is live. If the race is finished, it will have the final time of the race.
 
 The same section also includes a refresh button, and a dashboard button (if userType is marshal or administrator). 
 
-On the top right of the page, there is a register interest form, allowing any user to enter their first and last name, and request to join the race. This can be accepted, or rejected, from the dashboard when viewed as an administrator. 
+On the top right of the page, there is a register interest form, allowing any user to enter their first and last name, and request to join the race. This can be accepted, or rejected, from the dashboard when viewed as an administrator. When a race is live, this registration form is deleted from the page, resizing the race details to cover the top.
 
 ### Race Creation
 When authenticated as an administrator, it will show New Race permanently in your nav bar. This allows for a global place to enact a new race.
@@ -83,16 +83,14 @@ This zone is an administrator only area that allows the admin to delete the race
 CSV exports can be made by the race administrators from the race details page. This will download a file of al participants (excluding pagination limitation).
 
 ## AI
-Replace this with DETAIL about your use of AI, listing of the prompts you used, and whether the results formed or inspired part of your final submission and where we can see this (and if not, why not?). You may wish to group prompts into headings/sections - use markdown in any way that it helps you communicate your use of AI.  Tell us about what went right,  what went horribly wrong and what you learned from it.
+My use of AI in this project was to instigate further personal development and research topics/ideas to further improve my code and approach. By and large, the whole experience was good, and provided me with a good range of new ideas and options to take with my code. 
 
 ### Prompts to develop race details table
-A sequence of prompts helped me develop this feature:
-
 >  How can I turn a table row in a tbody into a details tag?
 
 I asked this because `<details>` elements can't be direct children of `<tbody>` elements to preserve structure. The response recommended wrapping the `<details>` element inside of a `<td>` element. This helped create the inner details sections, however it meant I had to nest tables to properly display it.
 
-*The above was removed after further revisions.*
+*The above was removed after further revisions due to the impracticatality of the feature.*
 
 > How does pagination work?
 

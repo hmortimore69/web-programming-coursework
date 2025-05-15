@@ -3,9 +3,9 @@
  * @namespace TimestampManager
  */
 const TimestampManager = {
-  working: [],      // Timestamps stored without assignment
-  staged: [],       // Timestamps assigned but not submitted
-  selected: null,   // Currently selected timestamp ID
+  working: [], // Timestamps stored without assignment
+  staged: [], // Timestamps assigned but not submitted
+  selected: null, // Currently selected timestamp ID
   raceStartTime: null, // Race start time
 
   /**
@@ -14,11 +14,11 @@ const TimestampManager = {
    */
   init(raceId) {
     this.raceId = raceId;
-    this.load();                // Load saved data from localStorage
-    this.renderAll();           // Render all timestamp lists
-    this.bindEvents();          // Set up event listeners
+    this.load(); // Load saved data from localStorage
+    this.renderAll(); // Render all timestamp lists
+    this.bindEvents(); // Set up event listeners
     this.updateSubmitButtonState(); // Configure submit button
-    this.renderMarshalDropdown();  // Populate marshal selection
+    this.renderMarshalDropdown(); // Populate marshal selection
   },
 
   /**

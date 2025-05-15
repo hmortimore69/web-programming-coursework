@@ -225,7 +225,7 @@ async function finishRace() {
     const raceId = raceDetails.raceId;
     const timeStarted = raceDetails.timeStarted;
 
-    if (!timeStarted) return;
+    if (!timeStarted || raceTimer.isFinished) return;
 
     // Use the raceTimer's elapsedTime which accounts for pauses
     const finalTime = raceTimer.elapsedTime;
@@ -381,7 +381,27 @@ async function handleParticipantAction(raceId, userId, action) {
 }
 
 // Event Listeners
+
+/**
+ * Load main when DOM loaded.
+ * @event
+ */
 document.addEventListener('DOMContentLoaded', main);
+
+/**
+ * Start race event.
+ * @event
+ */
 document.querySelector('#start-race-button').addEventListener('click', startRace);
+
+/**
+ * Finish race event.
+ * @event
+ */
 document.querySelector('#finish-race-button').addEventListener('click', finishRace);
+
+/**
+ * Return to race view event.
+ * @event
+ */
 document.querySelector('#back-button').addEventListener('click', returnToResults);

@@ -3,6 +3,7 @@
  * @type {number}
  */
 let currentPage = 1;
+let liveTimerInterval = null;
 
 /**
  * Fetches race data from the API endpoint and updates the UI table and race details.
@@ -37,6 +38,7 @@ async function fetchRaceData(page = 1) {
     console.error('Error fetching race data:', error);
 
     if (hasOfflineRaceData()) {
+      // Use offline data
       const offlineData = localStorage.getItem('storedRace');
       const parsedData = JSON.parse(offlineData);
 
@@ -71,16 +73,77 @@ function getRaceID() {
  * @returns {void}
  */
 function updateRaceDetails(raceDetails) {
+  // Date-Related States
+  const now = Date.now();
+  const isLive = raceDetails.timeStarted && raceDetails.timeStarted <= now && 
+    (!raceDetails.timeFinished || raceDetails.timeFinished >= now);
+  const isFinished = raceDetails.timeFinished && raceDetails.timeFinished < now;
+  
+  // Element handles
+  const liveTimer = document.querySelector('#race-live-timer');
+  const raceHeader = document.querySelector('#race-title');
+  const liveIndicator = document.querySelector('.live-indicator');
+  const registerForm = document.querySelector('#register-interest-section');
+  const raceHeaderContainer = document.querySelector('#race-header-container');
+
+  // Initialise default text content
   document.querySelector('#race-start-time').textContent = formatDate(raceDetails.timeStarted);
   document.querySelector('#race-location').textContent = raceDetails.raceLocation || 'N/A';
   document.querySelector('#race-checkpoint-counter').textContent = raceDetails.totalCheckpoints || 0;
   document.querySelector('#participant-count').textContent = raceDetails.pagination?.total || 0;
 
-  // Update live indicator if race is active
-  if (raceDetails.timeFinished >= Date.now() && raceDetails.timeStarted <= Date.now()) {
-    const liveTemplate = document.querySelector('#live-indicator-template').content.cloneNode(true);
-    const raceHeader = document.querySelector('#race-title');
-    raceHeader.appendChild(liveTemplate);
+  // Clear any existing interval
+  if (liveTimerInterval) {
+    clearInterval(liveTimerInterval);
+    liveTimerInterval = null;
+  }
+
+  // Race is currently live
+  if (isLive) {
+    // Add live indicator if not already present
+    if (!liveIndicator) {
+      const template = document.querySelector('#live-indicator-template');
+      if (template) {
+        const clone = template.content.cloneNode(true);
+        raceHeader.appendChild(clone);
+      }
+    }
+
+    // Remove registration form if exists
+    if (registerForm) {
+      registerForm.remove();
+      if (raceHeaderContainer) {
+        raceHeaderContainer.style["grid-template-columns"] = "1fr"; // Enlarge race header by removing a column
+      }
+    }
+
+    // Start 10ms update interval
+    liveTimerInterval = setInterval(() => {
+      const elapsed = Date.now() - raceDetails.timeStarted;
+      liveTimer.textContent = formatRacerTime(elapsed);
+    }, 10);
+  } 
+  // Race was manually started but is now finished
+  else if (isFinished) {
+    const duration = raceDetails.timeFinished - raceDetails.timeStarted;
+    liveTimer.textContent = formatRacerTime(duration);
+
+    // Remove live indicator if exists
+    if (liveIndicator) {
+      liveIndicator.remove();
+    }
+
+    // Remove registration form if exists
+    if (registerForm) {
+      registerForm.remove();
+      if (raceHeaderContainer) {
+        raceHeaderContainer.style["grid-template-columns"] = "1fr"; // Enlarge race header by removing a column
+      }
+    }
+  }
+  // Race hasn't started yet
+  else {
+    liveTimer.textContent = "00:00:00.000";
   }
 }
 
@@ -94,19 +157,22 @@ function updateRaceDetails(raceDetails) {
 function renderRaceTable(raceDetails) {
   const tableBody = document.querySelector('.race-table tbody');
 
+  // Clear table
   tableBody.innerHTML = '';
 
   for (const participant of raceDetails.participants) {
+    const finishTimeCell = row.querySelector('.finish-time');
     const row = document.querySelector('#participant-row-template').content.cloneNode(true);
+
+    // Set racer details
     row.querySelector('.bib-number').textContent = participant.bibNumber;
     row.querySelector('.participant-name').textContent = `${participant.firstName} ${participant.lastName}`;
 
-    const finishTimeCell = row.querySelector('.finish-time');
-    
+    // Show racer time
     if (participant.timeFinished) {
       finishTimeCell.textContent = formatRacerTime((participant.timeFinished));
     } else {
-      finishTimeCell.textContent = 'Pending';
+      finishTimeCell.textContent = 'N/A';
     }
     tableBody.appendChild(row);
   }
