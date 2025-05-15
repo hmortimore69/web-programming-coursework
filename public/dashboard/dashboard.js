@@ -14,8 +14,11 @@ async function main() {
   TimestampManager.init(raceId);
 
   // Add click handler for race deletion
-  document.querySelector('#delete-race-button').addEventListener('click', () => {
-    deleteRaceById(raceId);
+  document.querySelector('#delete-race-button').addEventListener('click', async () => {
+    const confirmDelete = confirm('Are you sure you want to delete this race? This action cannot be undone.');
+    if (confirmDelete) {
+      await deleteRaceById(raceId);
+    }
   });
 
   // Fetch and display pending participant requests
@@ -194,6 +197,9 @@ async function startRace() {
       return;
     }
 
+    const confirmStart = confirm('Are you sure you want to start this race?');
+    if (!confirmStart) return;
+
     updateLocalStorageProperty("timeStarted", updatedStartTime);
 
     await updateRaceData(raceId, 'update-start-time', { startTime: updatedStartTime });
@@ -219,14 +225,14 @@ async function finishRace() {
     const raceId = raceDetails.raceId;
     const timeStarted = raceDetails.timeStarted;
 
-    if (!timeStarted) {
-      alert('Race has not been started yet!');
-      return;
-    }
+    if (!timeStarted) return;
 
     // Use the raceTimer's elapsedTime which accounts for pauses
     const finalTime = raceTimer.elapsedTime;
     const updatedFinishTime = timeStarted + finalTime;
+
+    const confirmFinish = confirm('Are syou sure you want to end this race?');
+    if (!confirmFinish) return;
 
     // Update localStorage
     updateLocalStorageProperty("timeFinished", updatedFinishTime);

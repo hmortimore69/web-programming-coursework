@@ -271,22 +271,20 @@ async function exportToCSV() {
     }
 
     // Create and trigger download
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
+    const encodedUri = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
     const link = document.createElement('a');
 
-    link.setAttribute('href', url);
+    link.setAttribute('href', encodedUri);
     link.setAttribute('download', `race_${raceId}_export_${new Date().toISOString().split('T')[0]}.csv`);
 
     document.body.appendChild(link);
 
     link.click();
-    
+
     document.body.removeChild(link);
     
   } catch (error) {
     console.error('Export failed:', error);
-    alert('Failed to export data: ' + error.message);
   } finally {
     const button = document.querySelector('#export-csv-button');
     if (button) {

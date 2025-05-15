@@ -55,7 +55,7 @@ main {
   background-color: #34495e;
   color: white;
   box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: box-shadow 0.2s ease;
 }
 
 #race-details > div {
@@ -189,7 +189,6 @@ main {
 
 #register-interest-button:hover {
   background-color: #16a085;
-  transform: translateY(-1px);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
@@ -248,13 +247,11 @@ main {
 
 .pagination-controls button:hover {
   background-color: #16a085;
-  transform: translateY(-1px);
 }
 
 .pagination-controls button:disabled {
   background-color: #bdc3c7;
   cursor: not-allowed;
-  transform: none;
 }
 
 /* Live Indicator */

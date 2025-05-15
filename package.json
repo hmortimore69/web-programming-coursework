@@ -1,15 +1,7 @@
 {
   "name": "web-programming-coursework",
   "version": "1.0.0",
-  "description": "Replace this text with an introduction to your key features.",
-  "homepage": "https://github.com/hmortimore69/web-programming-coursework#readme",
-  "bugs": {
-    "url": "https://github.com/hmortimore69/web-programming-coursework/issues"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/hmortimore69/web-programming-coursework.git"
-  },
+  "description": "Race application for PJC.",
   "license": "ISC",
   "author": "",
   "type": "module",

@@ -98,6 +98,12 @@ I asked this because `<details>` elements can't be direct children of `<tbody>` 
 
 I asked this to help discover a way to introduce pagination. I already had an idea of how to implement this, however I came into roadblocks regarding the structure of how to do it without it being clustered and unreadable. It introduced me to the idea of offset regarding database queries, and passing a JSON object to track pagination between the front and backend.
 
+> How can I provide a way for users to download files from the server?
+
+The immediate response I got was to use Blob. However I had to research upon what a blob was - as this was the first time. After some research, I learned that a Blob is a data structure that represents immutable raw data. 
+
+During my research, I also discovered an alternative approach using URI encoding—specifically, creating a data: URI. This method embeds the entire file content directly into the href attribute of a link by encoding it into a URL-safe format. I opted to use this over Blob as the CSV files would not be larger than 2mb, and only be small, easy exports.
+
 ### Prompts to multi-page form
 For the multi-page form, I used AI to help with uncluttering some of my code.
 
@@ -115,3 +121,14 @@ This allowed me to start engineering a solution to the base different scenarios 
 > With regards to mainainability, what should I be looking for in the code?
 
 This, as much of an obvious one as it may seem, allowed me to look for any potential parts of my code that I may have missed in terms of simplification or modularity, alongside - and especially - my code documentation. I researched further into documentation and used https://jsdoc.app/ as reference for my function decorations. This improvement from research can be seen above functions and within them.
+
+## Personal Development
+My personal development throughout the lifetime of this coursework has enabled me to discover areas and approaches to my code that I wouldn't have thought to do prior. Examples of this are the style of approach to decorating functions in accordance to @Use JSDoc. 
+
+It has enabled me to think in a more modular manner, allowing for my code to be reused in other aspects of the project. An example of this is in the new race form flow, where I iterated over my old code to create a wrapper-based approach - reducing redundancy.
+
+Tinkering with offline, and online events was a lot more difficult that it appeared to be on the surface, including with getting them to fire (firefox didn't like them). 
+
+Returning back to the aforementioned new race form, research into these types of multi-page forms showed me the recommendations from W3C, of which I took into account to design it. These guidelines were applied during the iteration I made over my old code, ensuring a better user experience.
+
+Through many difficulties, I have had it more emphasises that planning is essential to projects that are bigger than a couple of lines. Architectural decisions you make early on can highly impact what routes you take later down the line.  
