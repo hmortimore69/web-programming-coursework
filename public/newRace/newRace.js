@@ -63,7 +63,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Save current step
     saveData(currentStep);
-    console.log(formData);
+    
     currentStep = stepIndex;
     updateSteps();
   }
@@ -111,7 +111,6 @@ document.addEventListener('DOMContentLoaded', function() {
     if (!validateStep(currentStep)) return;
 
     saveData(currentStep);
-    console.log(formData);
 
     currentStep++;
     updateSteps();
@@ -144,10 +143,7 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     }
     
-    if (!allValid) {
-      alert('Please fix all invalid fields before submitting');
-      return;
-    }
+    if (!allValid) return;
     
     saveData(currentStep);
     

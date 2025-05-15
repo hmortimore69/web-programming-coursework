@@ -22,7 +22,7 @@
       <div class="progress-tabs">
         <div class="progress-tab active" data-step="0">Race Details</div>
         <div class="progress-tab optional" data-step="1">Checkpoints (Optional)</div>
-        <div class="progress-tab optional" data-step="2">Marshalls (Optional)</div>
+        <div class="progress-tab" data-step="2">Marshalls</div>
         <div class="progress-tab optional" data-step="3">Participants (Optional)</div>
       </div>
 
@@ -68,7 +68,15 @@
         <div class="new-race-step">
           <h3>Marshall Setup</h3>
           
-          <div id="marshal-list"></div>
+          <div id="marshal-list">
+            <div class="marshal-details">
+              <label for="marshal-first-name">First Name:</label>
+              <input type="text" class="marshal-first-name" name="marshal-first-name" placeholder="Marshall" required/>
+
+              <label for="marshal-name">Last Name:</label>
+              <input type="text" class="marshal-last-name" name="marshal-last-name" placeholder="Mathers" required/>
+            </div>
+          </div>
         
           <button id="add-marshal-button" class="add-button">ADD MARSHALL</button>
           
@@ -101,10 +109,10 @@
     <template id="new-checkpoint-template">
       <div class="checkpoint-details">
         <label for="checkpoint-name">Checkpoint Name:</label>
-        <input type="text" class="checkpoint-name" name="checkpoint-name" placeholder="My checkpoint" />
+        <input type="text" class="checkpoint-name" name="checkpoint-name" placeholder="My checkpoint" required/>
         
         <label for="order-number">Order:</label>
-        <input type="number" min="1" class="checkpoint-order" name="order-number" placeholder="1" />
+        <input type="number" min="1" class="checkpoint-order" name="order-number" placeholder="1" required/>
         
         <button class="remove-checkpoint-button">REMOVE</button><br>
       </div>
@@ -113,10 +121,10 @@
     <template id="new-marshal-template">
       <div class="marshal-details">
         <label for="marshal-first-name">First Name:</label>
-        <input type="text" class="marshal-first-name" name="marshal-first-name" placeholder="Marshall" />
+        <input type="text" class="marshal-first-name" name="marshal-first-name" placeholder="Marshall" required/>
 
         <label for="marshal-name">Last Name:</label>
-        <input type="text" class="marshal-last-name" name="marshal-last-name" placeholder="Mathers" />
+        <input type="text" class="marshal-last-name" name="marshal-last-name" placeholder="Mathers" required/>
         
         <button class="remove-marshal-button">REMOVE</button><br>
       </div>
@@ -125,10 +133,10 @@
     <template id="new-participant-template">
       <div class="participant-details">
         <label for="participant-first-name">First Name:</label>
-        <input type="text" class="participant-first-name" name="participant-first-name" placeholder="David" />
+        <input type="text" class="participant-first-name" name="participant-first-name" placeholder="David" required/>
 
         <label for="participant-last-name">Last Name:</label>
-        <input type="text" class="participant-last-name" name="participant-last-name" placeholder="Bowie" />
+        <input type="text" class="participant-last-name" name="participant-last-name" placeholder="Bowie" required/>
         
         <button class="remove-participant-button">REMOVE</button><br>
       </div>

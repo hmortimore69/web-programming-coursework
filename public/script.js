@@ -86,6 +86,7 @@ function createRaceRow(raceId, race) {
   const { timeStarted, raceLocation, timeFinished, scheduledStartTime, scheduledDuration, participants } = race;
   const template = document.querySelector("#race-row-template");
   const row = template.content.cloneNode(true).querySelector("tr");
+  const liveIndicator = row.querySelector('.live-indicator');
 
   row.dataset.raceIdentifier = raceId;
 
@@ -101,12 +102,15 @@ function createRaceRow(raceId, race) {
   const isLive = (timeStarted && timeStarted <= now && (!timeFinished || timeFinished >= now));
 
   if (isLive) {
-    row.classList.add("live-race");
+    if (!liveIndicator) {
+      const template = document.querySelector('#live-indicator-template');
+      if (template) {
+        const clone = template.content.cloneNode(true);
+        row.querySelector(".start-time").appendChild(clone);
+      }
+    }
+
     row.dataset.raceStatus = "live";
-  } else if (!timeStarted && scheduledStartTime <= now) {
-    row.dataset.raceStatus = "ready-to-start";
-  } else if (timeFinished && timeFinished < now) {
-    row.dataset.raceStatus = "finished";
   }
 
   return row;

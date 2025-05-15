@@ -18,7 +18,7 @@ const TimestampManager = {
     this.renderAll(); // Render all timestamp lists
     this.bindEvents(); // Set up event listeners
     this.updateSubmitButtonState(); // Configure submit button
-    this.renderMarshalDropdown(); // Populate marshal selection
+    this.renderTimestampDropdowns(); // Populate marshal selection
   },
 
   /**
@@ -108,28 +108,50 @@ const TimestampManager = {
   },
 
   /**
-   * Render marshal selection dropdown
+   * Render timestamp checkpoint and marshal dropdowns
    */
-  renderMarshalDropdown() {
-    const dropdown = document.querySelector('#marshal-select');
-    if (!dropdown) return;
+  renderTimestampDropdowns() {
+    const marshalDropdown = document.querySelector('#marshal-select');
+    const checkpointDropdown = document.querySelector('#checkpoint-select');
     
-    dropdown.innerHTML = ''; // Clear existing options
+    // Clear existing options
+    marshalDropdown.innerHTML = ''; 
+    checkpointDropdown.innerHTML = ''; 
     
-    // Add default option
-    const defaultOption = document.createElement('option');
-    defaultOption.value = '';
-    defaultOption.textContent = 'Select a marshal';
-    dropdown.appendChild(defaultOption);
+    // Add default option for Marshal
+    const defaultMarshalOption = document.createElement('option');
+    defaultMarshalOption.value = '';
+    defaultMarshalOption.textContent = 'Select a Marshal';
+    marshalDropdown.appendChild(defaultMarshalOption);
+
+    // Add default options for Checkpoint
+    const defaultCheckpointOption = document.createElement('option');
+    defaultCheckpointOption.value = '';
+    defaultCheckpointOption.textContent = 'Select a Checkpoint';
+    checkpointDropdown.appendChild(defaultCheckpointOption);
     
     // Add marshal options from stored race data
     const marshals = JSON.parse(localStorage.getItem('storedRace')).marshals || [];
     for (const marshal of marshals) {
       const option = document.createElement('option');
       option.value = `${marshal.firstName} ${marshal.lastName}`;
-      option.textContent = `${marshal.firstName} ${marshal.lastName} (${marshal.marshalId})`;
-      dropdown.appendChild(option);
+      option.textContent = `${marshal.firstName} ${marshal.lastName}`;
+      marshalDropdown.appendChild(option);
     }
+
+    // Add checkpoint options from stored race data
+    const checkpoints = JSON.parse(localStorage.getItem('storedRace')).checkpoints || [];
+    for (const checkpoint of checkpoints) {
+      const option = document.createElement('option');
+      option.value = `${checkpoint.checkpointId}`;
+      option.textContent = `${checkpoint.checkpointName} (${checkpoint.checkpointOrder})`;
+      checkpointDropdown.appendChild(option);
+    }
+
+    const finishCheckpointOption = document.createElement('option');
+    finishCheckpointOption.value = 'Finish';
+    finishCheckpointOption.textContent = 'Finish';
+    checkpointDropdown.appendChild(finishCheckpointOption);
   },
 
   /**
@@ -247,6 +269,12 @@ const TimestampManager = {
       timestampErrorElement.textContent = 'Select a marshal.';
       return;
     }
+
+    const checkpoint = document.querySelector('#checkpoint-select').value;
+    if (!checkpoint) {
+      timestampErrorElement.textContent = 'Select a checkpoint.';
+      return;
+    }
     
     // Prepare submission data
     const data = [...this.staged];
@@ -263,7 +291,8 @@ const TimestampManager = {
           raceId,
           action,
           data,
-          submittedBy
+          submittedBy,
+          checkpoint
         }),
       });
   

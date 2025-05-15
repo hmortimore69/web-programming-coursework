@@ -36,17 +36,20 @@
             </thead>
             <tbody></tbody>
           </table>
-          <div class="pagination-controls">
-            <button id="prev-page" disabled>Previous</button>
-            <span id="page-info">Page 1 of 1</span>
-            <button id="next-page" disabled>Next</button>
-          </div>
+          <div id="table-toolbar">
+            <button id="clear-storage" class="clear-storage">Clear Local Storage</button>
+
+            <div class="pagination-controls">
+              <button id="prev-page" disabled>Previous</button>
+              <span id="page-info">Page 1 of 1</span>
+              <button id="next-page" disabled>Next</button>
+            </div>
+          </div>  
         </div>
       </section>
     </main>
 
     <br>
-    <button id="clear-storage" class="clear-storage">Clear Local Storage</button>
 
     <template id="race-row-template">
       <tr>
@@ -54,6 +57,10 @@
         <td class="location"></td>
         <td class="participants"></td>
       </tr>
+    </template>
+
+    <template id="live-indicator-template">
+      <span class="live-indicator">● LIVE</span>
     </template>
 
     <script src="script.js"></script>

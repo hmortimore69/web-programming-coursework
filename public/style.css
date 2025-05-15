@@ -4,77 +4,78 @@
   text-align: center;
 }
 
-.live-race {
-  background-color: #ffcccc !important;
+.live-indicator {
   color: #900;
   font-weight: bold;
 }
 
 .race-table-container {
-  width: 100%;
-  min-width: 90%;
+  background-color: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
   overflow-x: auto;
-  margin: 0 auto;
 }
 
 .race-table {
   width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.race-table th {
-  background-color: #28af98;
-  color: white;
-  position: sticky;
-  top: 0;
-}
-
-.race-table tr {
-  width: 100%;
-}
-
-.race-table tr:nth-child(even) {
-  background-color: #f8f9fa;
+  border-collapse: collapse;
 }
 
 .race-table th,
 .race-table td {
-  padding: 8px;
-  text-align: center;
-  border: none;
+  padding: 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid #ecf0f1;
 }
 
 .race-table th {
-  border-bottom: 1px solid;
+  background-color: #f8f9fa;
+  font-weight: 600;
+  color: #1abc9c;
+}
+
+.race-table tbody tr:nth-child(even) {
+  background-color: #f8f9fa;
 }
 
 .race-table tbody tr:hover {
-  background: #b9b9b9;
-  transition: background-color 0.15s ease;
+  background-color: #ecf0f1;
   cursor: pointer;
+}
+
+#table-toolbar {
+  padding: 10px;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  margin-bottom: 1rem;
 }
 
 .pagination-controls {
   display: flex;
   justify-content: center;
+  gap: 10px;
   align-items: center;
-  gap: 1rem;
-  margin-top: 1rem;
+  grid-column: 2; /* Place in middle column */
 }
 
 .pagination-controls button {
+  padding: 0.6rem 1rem;
   background-color: #1abc9c;
   color: white;
   border: none;
-  padding: 8px 16px;
   border-radius: 4px;
   cursor: pointer;
+  transition: all 0.2s;
+}
+
+.pagination-controls button:hover {
+  background-color: #16a085;
 }
 
 .pagination-controls button:disabled {
-  background-color: #535c65;
+  background-color: #bdc3c7;
   cursor: not-allowed;
 }
 
@@ -85,8 +86,9 @@
   padding: 8px 16px;
   border-radius: 4px;
   cursor: pointer;
-  margin-left: 10px;
   font-size: 14px;
+  grid-column: 1;
+  justify-self: start;
 }
 
 .clear-storage:hover {

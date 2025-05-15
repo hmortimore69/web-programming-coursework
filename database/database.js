@@ -113,6 +113,7 @@ export async function getRace(raceId, page = 1, pageSize = 10) {
     `, [raceId]);
 
     const marshals = await getMarshals(raceId);
+    const checkpoints = await getCheckpoints(raceId);
 
     if (!raceData) return;
 
@@ -126,6 +127,7 @@ export async function getRace(raceId, page = 1, pageSize = 10) {
       totalCheckpoints: checkpointCount.total,
       participants,
       marshals,
+      checkpoints,
       pagination: {
         page,
         pageSize,
@@ -153,6 +155,26 @@ export async function getMarshals(raceId) {
     return marshals;
   } catch (error) {
     console.error('Error fetching marshals:', error);
+    return [];
+  }
+}
+
+export async function getCheckpoints(raceId) {
+  try {
+    const checkpoints = await db.all(`
+      SELECT
+        checkpoint_id as checkpointId,
+        race_id as raceId,
+        checkpoint_name as checkpointName,
+        checkpoint_order as checkpointOrder
+      FROM checkpoints
+      WHERE race_id = ?
+      ORDER BY checkpoint_order, checkpoint_name
+    `, [raceId]);
+
+    return checkpoints;
+  } catch (error) {
+    console.error('Error fetching checkpoints:', error);
     return [];
   }
 }
@@ -230,9 +252,8 @@ export async function updateFinishTime(raceId, data) {
   await db.run('UPDATE races SET time_finished = ? WHERE race_id = ?', [timeStamp, raceId]);
 }
 
-export async function submitResults(raceId, data, submittedBy) {
+export async function submitResults(raceId, data, submittedBy, checkpoint) {
   for (const submission of data) {
-    // Ensure we're using the converted time if available
     const timeToSubmit = submission.converted ? submission.time : 
                         (submission.type === 'online' ? submission.time : 
                         new Date(submission.time) - new Date(submission.raceStartTime));
@@ -241,17 +262,20 @@ export async function submitResults(raceId, data, submittedBy) {
       raceId, 
       submission.bibNumber, 
       timeToSubmit, 
-      submittedBy
+      submittedBy,
+      checkpoint
     );
   }
 }
 
-async function submitParticipantTime(raceId, bibNumber, timestamp, submittedBy) {
+async function submitParticipantTime(raceId, bibNumber, timestamp, submittedBy, checkpoint) {
   // Convert timestamp to number if it isn't already
   const timeValue = typeof timestamp === 'number' ? timestamp : new Date(timestamp) - new Date(0);
 
+  // First get the participant and their existing times
   const participant = await db.get(`
     SELECT 
+      participant_id as participantId,
       pending_times as pendingTimes,
       time_finished as timeFinished
     FROM participants 
@@ -259,37 +283,64 @@ async function submitParticipantTime(raceId, bibNumber, timestamp, submittedBy) 
     [raceId, bibNumber]
   );
 
-  let pendingTimes = participant.pendingTimes ? JSON.parse(participant.pendingTimes) : [];
-  const currentTime = participant.timeFinished;
+  if (!participant) {
+    throw new Error('Participant not found');
+  }
 
-  const hasConflict = (currentTime !== null) || (pendingTimes.length > 0);
+  if (checkpoint === 'Finish') {
+    let pendingTimes = participant.pendingTimes ? JSON.parse(participant.pendingTimes) : [];
+    const currentTime = participant.timeFinished;
+    const hasConflict = (currentTime !== null) || (pendingTimes.length > 0);
 
-  pendingTimes.push({ 
-    time: timeValue, 
-    submitted_by: submittedBy, 
-    submitted_at: new Date().toISOString(),
-    current_time: currentTime 
-  });
+    pendingTimes.push({ 
+      time: timeValue, 
+      submitted_by: submittedBy, 
+      submitted_at: new Date().toISOString(),
+      current_time: currentTime 
+    });
 
-  if (!hasConflict) {
-    await db.run(`
-      UPDATE participants
-      SET
-        time_finished = ?,
-        pending_times = NULL,
-        has_conflict = ?
-      WHERE race_id = ? AND bib_number = ?`,
-      [timeValue, hasConflict, raceId, bibNumber]
-    );
+    if (!hasConflict) {
+      await db.run(`
+        UPDATE participants
+        SET
+          time_finished = ?,
+          pending_times = NULL,
+          has_conflict = ?
+        WHERE race_id = ? AND bib_number = ?`,
+        [timeValue, hasConflict, raceId, bibNumber]
+      );
+    } else {
+      await db.run(`
+        UPDATE participants 
+        SET 
+          pending_times = ?, 
+          has_conflict = ?
+        WHERE race_id = ? AND bib_number = ?`,
+        [JSON.stringify(pendingTimes), hasConflict, raceId, bibNumber]
+      );
+    }
   } else {
-    await db.run(`
-      UPDATE participants 
-      SET 
-        pending_times = ?, 
-        has_conflict = ?
-      WHERE race_id = ? AND bib_number = ?`,
-      [JSON.stringify(pendingTimes), hasConflict, raceId, bibNumber]
+    const existingTime = await db.get(`
+      SELECT time_finished
+      FROM checkpoints_times
+      WHERE checkpoint_id = ? AND participant_id = ?`,
+      [checkpoint, participant.participantId]
     );
+
+    if (existingTime) {
+      await db.run(`
+        UPDATE checkpoints_times
+        SET time_finished = ?
+        WHERE checkpoint_id = ? AND participant_id = ?`,
+        [timeValue, checkpoint, participant.participantId]
+      );
+    } else {
+      await db.run(`
+        INSERT INTO checkpoints_times (checkpoint_id, participant_id, time_finished)
+        VALUES (?, ?, ?)`,
+        [checkpoint, participant.participantId, timeValue]
+      );
+    }
   }
 }
 

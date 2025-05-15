@@ -87,7 +87,7 @@ function updateRaceDetails(raceDetails) {
   const raceHeaderContainer = document.querySelector('#race-header-container');
 
   // Initialise default text content
-  document.querySelector('#race-start-time').textContent = formatDate(raceDetails.timeStarted);
+  document.querySelector('#race-start-time').textContent = formatDate(raceDetails.timeStarted ? raceDetails.timeStarted : raceDetails.scheduledStartTime);
   document.querySelector('#race-location').textContent = raceDetails.raceLocation || 'N/A';
   document.querySelector('#race-checkpoint-counter').textContent = raceDetails.totalCheckpoints || 0;
   document.querySelector('#participant-count').textContent = raceDetails.pagination?.total || 0;
@@ -156,24 +156,66 @@ function updateRaceDetails(raceDetails) {
  */
 function renderRaceTable(raceDetails) {
   const tableBody = document.querySelector('.race-table tbody');
+  const tableHeader = document.querySelector('.race-table thead tr');
+  const checkpointHeaderTemplate = document.querySelector('#race-table-checkpoint-header-template');
 
   // Clear table
   tableBody.innerHTML = '';
 
+  // Remove existing checkpoint headers
+  while (tableHeader.children.length > 3) {
+    tableHeader.removeChild(tableHeader.children[2]);
+  }
+ 
+  if (raceDetails.checkpoints && raceDetails.checkpoints.length > 0) {    
+  const sortedCheckpoints = [...raceDetails.checkpoints].sort((a, b) => a.order - b.order).reverse();
+
+    for (const cp of sortedCheckpoints) {
+      const clone = checkpointHeaderTemplate.content.cloneNode(true);
+      const th = clone.querySelector('.checkpoint-header');
+      th.textContent = cp.checkpointName || `C${cp.order}`;
+      th.id = `table-c${cp.checkpointId}-header`;
+      tableHeader.insertBefore(th, tableHeader.children[1].nextSibling);
+    }
+  }
+
   for (const participant of raceDetails.participants) {
-    const finishTimeCell = row.querySelector('.finish-time');
     const row = document.querySelector('#participant-row-template').content.cloneNode(true);
+    const rowElement = row.querySelector('tr');
+    const finishTimeCell = row.querySelector('.finish-time');
 
     // Set racer details
     row.querySelector('.bib-number').textContent = participant.bibNumber;
     row.querySelector('.participant-name').textContent = `${participant.firstName} ${participant.lastName}`;
+    finishTimeCell.textContent = participant.timeFinished ? formatRacerTime(participant.timeFinished) : 'N/A';
 
-    // Show racer time
-    if (participant.timeFinished) {
-      finishTimeCell.textContent = formatRacerTime((participant.timeFinished));
-    } else {
-      finishTimeCell.textContent = 'N/A';
+    // If checkpoints, add times
+    if (raceDetails.checkpoints && raceDetails.checkpoints.length > 0) {
+      const sortedCheckpoints = [...raceDetails.checkpoints].sort((a, b) => a.order - b.order);
+      
+      const participantCheckpoints = {};
+      if (participant.checkpoints) {
+        for (const cp of participant.checkpoints) {
+          participantCheckpoints[cp.checkpointId] = cp;
+        }
+      }
+
+      for (const cp of sortedCheckpoints) {
+        const tdTemplate = document.querySelector('#race-table-checkpoint-time-template').content.cloneNode(true);
+        const td = tdTemplate.querySelector('td');
+        const checkpoint = participantCheckpoints[cp.checkpointId];
+
+        if (checkpoint && checkpoint.checkpointTimeFinished) {
+          td.textContent = formatRacerTime(checkpoint.checkpointTimeFinished);
+        } else {
+          td.textContent = '--:--';
+          td.style.color = '#bdc3c7';
+        }
+
+        rowElement.insertBefore(td, finishTimeCell);
+      }
     }
+
     tableBody.appendChild(row);
   }
 }
@@ -307,25 +349,22 @@ async function exportToCSV() {
     // Then get ALL participants
     const participants = await fetchAllParticipants(raceId);
     
-    if (!participants || participants.length === 0) {
-      alert('No participant data to export');
-      return;
-    }
+    if (!participants || participants.length === 0) return;
 
     // Create CSV content
     let csv = `Location:,${raceDetails.raceLocation}\n`;
     csv += `Start Time:,${new Date(raceDetails.timeStarted)}\n\n`;
     
     // Header row
-    csv += 'Bib Number,First Name,Last Name,Finish Time';
+    csv += 'Bib Number,First Name,Last Name';
     
     // Add checkpoint headers if available
     if (participants[0]?.checkpoints?.length > 0) {
-      participants[0].checkpoints.forEach(cp => {
+      for (const cp of participants[0].checkpoints) {
         csv += `,${cp.checkpointName}`;
-      });
+      }
     }
-    csv += '\n';
+    csv += ',Finish Time\n';
     
     // Participant rows
     for (const participant of participants) {
@@ -333,7 +372,19 @@ async function exportToCSV() {
         ? formatRacerTime(participant.timeFinished)
         : 'Pending';
       
-      csv += `"${participant.bibNumber}","${participant.firstName}","${participant.lastName}","${finishTime}"\n`;
+      csv += `"${participant.bibNumber}","${participant.firstName}","${participant.lastName}"`;
+      
+      // Add checkpoint times if available
+      if (participant.checkpoints?.length > 0) {
+        for (const cp of participant.checkpoints) {
+          const checkpointTime = cp.checkpointTimeFinished 
+            ? formatRacerTime(cp.checkpointTimeFinished)
+            : 'Pending';
+          csv += `,"${checkpointTime}"`;
+        }
+      }
+      
+      csv += `,"${finishTime}"\n`;
     }
 
     // Create and trigger download
@@ -348,7 +399,6 @@ async function exportToCSV() {
     link.click();
 
     document.body.removeChild(link);
-    
   } catch (error) {
     console.error('Export failed:', error);
   } finally {
@@ -447,7 +497,7 @@ async function handleInterestFormSubmission(event) {
  * @function showConfirmationMessage
  * @param {HTMLElement} element - The confirmation message element
  * @param {string} message - The message to display
- * @param {'success'|'error'} type - The type of message (determines styling)
+ * @param {'success'|'error'} type - The type of message
  * @returns {void}
  */
 function showConfirmationMessage(element, message, type) {

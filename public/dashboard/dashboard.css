@@ -215,7 +215,7 @@ input {
   background-color: #4CAF50;
 }
 
-#marshal-select {
+select {
   margin: 10px 0;
   padding: 8px;
   border-radius: 4px;

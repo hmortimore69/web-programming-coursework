@@ -174,7 +174,6 @@ class ConflictManager {
       });
 
       if (response.ok) {
-        this.showSuccess('Timestamp accepted successfully');
         await this.loadConflicts(); // Refresh data
       } else {
         throw new Error('Server error');

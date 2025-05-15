@@ -96,7 +96,7 @@ async function deleteRace(req, res) {
 
 async function updateRace(req, res) {
   try {
-    const { raceId, action, data, submittedBy } = req.body;
+    const { raceId, action, data, submittedBy, checkpoint } = req.body;
 
     const raceExists = await db.getRace(raceId);
 
@@ -115,7 +115,7 @@ async function updateRace(req, res) {
         await db.addParticipants(raceId, data);
         break;
       case 'submit-results':
-        await db.submitResults(raceId, data, submittedBy);
+        await db.submitResults(raceId, data, submittedBy, checkpoint);
         break;
       default:
         return res.status(400).send('Invalid action');
