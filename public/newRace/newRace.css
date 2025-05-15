@@ -36,7 +36,6 @@
 .checkpoint-details,
 .marshal-details,
 .participant-details {
-  display: grid;
   grid-template-columns: 150px 1fr;
   gap: 15px;
   align-items: center;
@@ -73,7 +72,6 @@ input{
   border-top: 1px solid #eee;
 }
 
-
 #add-checkpoint-button,
 #add-marshal-button,
 #add-participant-button {
@@ -85,14 +83,56 @@ input{
 .remove-marshal-button,
 .remove-participant-button {
   background-color: #e74c3c;
-  grid-column: 2;
-  justify-self: start;
+  grid-column: 3;
+  justify-self: end;
 }
 
 #checkpoint-list,
 #marshal-list,
 #participant-list {
   margin-bottom: 20px;
+}
+
+.details-list {
+  display: grid;
+  grid-template-columns: minmax(100px, auto) 1fr auto;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 15px;
+  padding: 15px;
+  background-color: #f9f9f9;
+  border-radius: 5px;
+  width: 100%;
+}
+
+.details-list label {
+  text-align: right;
+  font-weight: 500;
+  color: #34495e;
+  margin-right: 5px;
+  white-space: nowrap;
+}
+
+.details-list input {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  min-width: 0;
+}
+
+.details-list button {
+  margin-left: 10px;
+  white-space: nowrap;
+  grid-column: 3;
+  justify-self: end;
+}
+
+#race-details,
+.checkpoint-details,
+.marshal-details,
+.participant-details {
+  display: contents;
 }
 
 /* Responsive adjustments */

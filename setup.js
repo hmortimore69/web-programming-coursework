@@ -13,13 +13,9 @@ async function setupDatabase() {
       filename: DB_PATH,
       driver: sqlite3.Database
     });
-    console.log('Database connection established.');
 
     await db.exec(migrations);
-    console.log("Database SQL file applied successfully.");
-
     await db.close();
-    console.log("Database setup finished.");
   } catch (err) {
     console.error('Error during database setup:', err.message);
   }

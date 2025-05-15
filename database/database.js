@@ -4,16 +4,23 @@ import sqlite3 from 'sqlite3';
 const DB_PATH = './Database/database.sqlite';
 
 // Open database connection
-let db;
-(async () => {
-  db = await open({
-    filename: DB_PATH,
-    driver: sqlite3.Database
-  });
-  console.log('Database connection established.');
-})();
+const db = await open({
+  filename: DB_PATH,
+  driver: sqlite3.Database
+});
 
 // Database Queries
+
+/**
+ * Retrieves paginated race data with participant counts and pagination metadata.
+ * 
+ * @async
+ * @function getAllRaces
+ * @param {number} [page=1] - Current page number for pagination
+ * @param {number} [pageSize=10] - Number of races per page
+ * @returns {Promise<Object>} A promise that resolves to an object containing race data and pagination info
+ * @throws {Error} If there's an error during database operations (error is caught and logged)
+ */
 export async function getAllRaces(page = 1, pageSize = 10) {
   try {
     const offset = (page - 1) * pageSize;
@@ -57,6 +64,17 @@ export async function getAllRaces(page = 1, pageSize = 10) {
   }
 }
 
+/**
+ * Retrieves comprehensive race data including participants (with pagination), checkpoints, and marshals.
+ * 
+ * @async
+ * @function getRace
+ * @param {number|string} raceId - The ID of the race to fetch
+ * @param {number} [page=1] - Current page number for participant pagination
+ * @param {number} [pageSize=10] - Number of participants per page
+ * @returns {Promise<Object|null>} A promise that resolves to a race data object or null if race not found
+ * @throws {Error} If there's an error during database operations (error is caught and logged)
+ */
 export async function getRace(raceId, page = 1, pageSize = 10) {
   try {
     const offset = (page - 1) * pageSize;
@@ -140,6 +158,15 @@ export async function getRace(raceId, page = 1, pageSize = 10) {
   }
 }
 
+/**
+ * Retrieves all marshals assigned to a specific race.
+ * 
+ * @async
+ * @function getMarshals
+ * @param {number|string} raceId - The ID of the race to fetch marshals for
+ * @returns {Promise<Array<Object>>} A promise that resolves to an array of marshal objects, or empty array on error
+ * @throws {Error} If there's an error during database operation (error is caught and logged)
+ */
 export async function getMarshals(raceId) {
   try {
     const marshals = await db.all(`
@@ -159,6 +186,15 @@ export async function getMarshals(raceId) {
   }
 }
 
+/**
+ * Retrieves all checkpoints for a specific race.
+ * 
+ * @async
+ * @function getCheckpoints
+ * @param {number|string} raceId - The ID of the race to fetch checkpoints for
+ * @returns {Promise<Array<Object>>} A promise that resolves to an array of checkpoint objects, or empty array on error
+ * @throws {Error} If there's an error during database operation (error is caught and logged)
+ */
 export async function getCheckpoints(raceId) {
   try {
     const checkpoints = await db.all(`
@@ -179,6 +215,29 @@ export async function getCheckpoints(raceId) {
   }
 }
 
+/**
+ * Creates a new race along with its checkpoints, marshals, and participants.
+ *
+ * @async
+ * @function createNewRace
+ * @param {Object} req - The request object containing all race-related data.
+ * @param {Object} req.raceDetails - Race configuration details.
+ * @param {string} req.raceDetails.raceName - Name of the race.
+ * @param {string} req.raceDetails.raceLocation - Location of the race.
+ * @param {string} req.raceDetails.raceStartDate - Start date/time of the race in ISO format.
+ * @param {string} req.raceDetails.raceDuration - Duration of the race in 'HH:MM' format.
+ * @param {Array<Object>} [req.checkpoints] - Array of checkpoint objects.
+ * @param {string} req.checkpoints[].checkpointName - Name of the checkpoint.
+ * @param {number} req.checkpoints[].checkpointOrder - Sequence/order of the checkpoint.
+ * @param {Array<Object>} [req.marshals] - Array of marshal objects.
+ * @param {string} req.marshals[].firstName - Marshal's first name.
+ * @param {string} req.marshals[].lastName - Marshal's last name.
+ * @param {Array<Object>} [req.participants] - Array of participant objects.
+ * @param {string} req.participants[].firstName - Participant's first name.
+ * @param {string} req.participants[].lastName - Participant's last name.
+ * @returns {Promise<void>} A promise that resolves when the race and all associated data are successfully created.
+ * @throws {Error} If any database operation fails.
+ */
 export async function createNewRace(req) {
   let newRaceId = null;
 
@@ -230,6 +289,15 @@ export async function createNewRace(req) {
   }
 }
 
+/**
+ * Deletes a race and all its associated data (checkpoints, marshals, participants).
+ * 
+ * @async
+ * @function deleteRaceById
+ * @param {number|string} raceId - The ID of the race to delete
+ * @returns {Promise<boolean>} A promise that resolves to true if deletion was successful, undefined if error occurred
+ * @throws {Error} If any database operation fails (error is caught and logged)
+ */
 export async function deleteRaceById(raceId) {
   try {
     await db.run('DELETE FROM checkpoints WHERE race_id = ?', [raceId]);
@@ -242,16 +310,50 @@ export async function deleteRaceById(raceId) {
   }
 }
 
+/**
+ * Updates the start time for a specific race.
+ * 
+ * @async
+ * @function updateStartTime
+ * @param {number|string} raceId - The ID of the race to update
+ * @param {Object} data - Object containing the new start time
+ * @param {string} data.startTime - JSON string representing the new start time
+ * @returns {Promise<void>} A promise that resolves when the update is complete
+ * @throws {Error} If the database operation fails or JSON parsing fails
+ */
 export async function updateStartTime(raceId, data) {
   const timeStamp = JSON.parse(data.startTime);
   await db.run('UPDATE races SET time_started = ? WHERE race_id = ?', [timeStamp, raceId]);
 }
 
+/**
+ * Updates the finish time for a specific race.
+ * 
+ * @async
+ * @function updateFinishTime
+ * @param {number|string} raceId - The ID of the race to update
+ * @param {Object} data - Object containing the new finish time
+ * @param {string} data.finishTime - JSON string representing the new finish time
+ * @returns {Promise<void>} A promise that resolves when the update is complete
+ * @throws {Error} If the database operation fails or JSON parsing fails
+ */
 export async function updateFinishTime(raceId, data) {
   const timeStamp = JSON.parse(data.finishTime);
   await db.run('UPDATE races SET time_finished = ? WHERE race_id = ?', [timeStamp, raceId]);
 }
 
+/**
+ * Submits race results for multiple participants, handling both finish times and checkpoint times.
+ * 
+ * @async
+ * @function submitResults
+ * @param {number|string} raceId - The ID of the race
+ * @param {Array<Object>} data - Array of result submission objects
+ * @param {string} submittedBy - Identifier for who is submitting the results
+ * @param {string} checkpoint - The checkpoint name ('Finish' for finish line)
+ * @returns {Promise<void>} A promise that resolves when all submissions are complete
+ * @throws {Error} If any participant is not found or database operations fail
+ */
 export async function submitResults(raceId, data, submittedBy, checkpoint) {
   for (const submission of data) {
     const timeToSubmit = submission.converted ? submission.time : 
@@ -268,6 +370,21 @@ export async function submitResults(raceId, data, submittedBy, checkpoint) {
   }
 }
 
+/**
+ * Handles the submission of a single participant's time, managing conflicts and checkpoints.
+ * 
+ * @async
+ * @function submitParticipantTime
+ * @param {number|string} raceId - The ID of the race
+ * @param {number|string} bibNumber - The participant's bib number
+ * @param {number|string} timestamp - The time to submit (either as timestamp or Date string)
+ * @param {string} submittedBy - Identifier for who is submitting the results
+ * @param {string} checkpoint - The checkpoint name ('Finish' for finish line)
+ * @returns {Promise<void>} A promise that resolves when the submission is complete
+ * @throws {Error} If participant is not found or database operations fail
+ * 
+ * @private
+ */
 async function submitParticipantTime(raceId, bibNumber, timestamp, submittedBy, checkpoint) {
   // Convert timestamp to number if it isn't already
   const timeValue = typeof timestamp === 'number' ? timestamp : new Date(timestamp) - new Date(0);
@@ -344,6 +461,14 @@ async function submitParticipantTime(raceId, bibNumber, timestamp, submittedBy, 
   }
 }
 
+/**
+ * Retrieves all participants with timing conflicts for a specific race.
+ * 
+ * @async
+ * @function getConflicts
+ * @param {number|string} raceId - The ID of the race to fetch conflicts for
+ * @returns {Promise<Array<Object>>} A promise that resolves to an array of participant objects with conflicts
+ */
 export async function getConflicts(raceId) {
   return await db.all(`
     SELECT 
@@ -361,6 +486,17 @@ export async function getConflicts(raceId) {
   );
 }
 
+/**
+ * Resolves a timing conflict by accepting a specific time for a participant.
+ * 
+ * @async
+ * @function resolveConflict
+ * @param {number|string} raceId - The ID of the race
+ * @param {number|string} bibNumber - The participant's bib number
+ * @param {string} acceptedTime - The time to accept as official finish time
+ * @returns {Promise<void>} A promise that resolves when the update is complete
+ * @throws {Error} If there's an error during database operation
+ */
 export async function resolveConflict(raceId, bibNumber, acceptedTime) {
   await db.run(`
     UPDATE participants
@@ -373,6 +509,17 @@ export async function resolveConflict(raceId, bibNumber, acceptedTime) {
   );
 }
 
+/**
+ * Rejects a proposed time for a participant and updates their pending times.
+ * 
+ * @async
+ * @function rejectConflict
+ * @param {number|string} raceId - The ID of the race
+ * @param {number|string} bibNumber - The participant's bib number
+ * @param {string} rejectedTime - The time to reject
+ * @returns {Promise<Object>} An object with success status and count of remaining conflicts
+ * @throws {Error} If participant is not found or database operation fails
+ */
 export async function rejectConflict(raceId, bibNumber, rejectedTime) {
   try {
     const participant = await db.get(`
@@ -415,6 +562,17 @@ export async function rejectConflict(raceId, bibNumber, rejectedTime) {
   }
 }
 
+/**
+ * Registers a participant's interest in a race.
+ * 
+ * @async
+ * @function registerParticipantInterest
+ * @param {number|string} raceId - The ID of the race
+ * @param {string} firstName - The participant's first name
+ * @param {string} lastName - The participant's last name
+ * @returns {Promise<void>} A promise that resolves when the registration is complete
+ * @throws {Error} If there's an error during database operation
+ */
 export async function registerParticipantInterest(raceId, firstName, lastName) {
   await db.run(
     'INSERT INTO race_interests (race_id, first_name, last_name) VALUES (?, ?, ?)',
@@ -422,6 +580,14 @@ export async function registerParticipantInterest(raceId, firstName, lastName) {
   );
 }
 
+/**
+ * Retrieves all pending participant interest requests for a race.
+ * 
+ * @async
+ * @function getPendingParticipants
+ * @param {number|string} raceId - The ID of the race
+ * @returns {Promise<Array<Object>>} A promise that resolves to an array of pending participants
+ */
 export async function getPendingParticipants(raceId) {
   try {
     const participants = await db.all(`
@@ -442,6 +608,17 @@ export async function getPendingParticipants(raceId) {
   }
 }
 
+/**
+ * Approves or rejects a participant's interest request.
+ * 
+ * @async
+ * @function updateParticipantStatus
+ * @param {number|string} raceId - The ID of the race
+ * @param {number|string} interestId - The ID of the interest record
+ * @param {'approve'|'reject'} action - The action to take
+ * @returns {Promise<boolean>} A promise that resolves to true if successful
+ * @throws {Error} If there's an error during database operation
+ */
 export async function updateParticipantStatus(raceId, interestId, action) {
   try {
     if (action === 'approve') {
@@ -473,6 +650,14 @@ export async function updateParticipantStatus(raceId, interestId, action) {
   }
 }
 
+/**
+ * Retrieves all participants for a specific race along with checkpoint data. (Excludes pagination)
+ * @async
+ * @function getAllParticipantsForRace
+ * @param {number|string} raceId - The ID of the race to fetch participants for
+ * @returns {Promise<Array<Object>>} A promise that resolves to an array of participant objects
+ * @throws {Error} If there's an error during database operations
+ */
 export async function getAllParticipantsForRace(raceId) {
   try {
     const participants = await db.all(`

@@ -7,6 +7,7 @@ In my web application, key features are encouraged wherever I could place them. 
 - Offline Local Storage
 - New Race
 - User Roles/"Auth"
+- Checkpoints
 
 The authentication isn't authentication, but rather a dropdown in the main index page allowing you to change your viewing experience. Completing key features encumbered a lot of development as there were a lot of idiosyncrasies that I didn't expect to be there until I encountered them.
 
@@ -81,6 +82,13 @@ This zone is an administrator only area that allows the admin to delete the race
 
 ### CSV Exports
 CSV exports can be made by the race administrators from the race details page. This will download a file of al participants (excluding pagination limitation).
+
+### Checkpoints
+Prior to actual implementation, I had encounted for checkpoints early in my database design. There are two tables called checkpoints and checkpoint_times. These use foreign keys to the races and participants tables to allow me to record times for them. I added data from checkpoints into the root of the storedRace object, and checkpoints_times were added on a per-participant basis inside each participant object.
+
+The race display page will render a table with default headers: Bib, Name, and Finish. If checkpoints are present in the race, then the code will add new columns and headers for each checkpoint. The CSV export also accounts for this.
+
+The admin dashboard adds each checkpoint (in order) to the the dropdown alongside marshals. Then when going to submit timestamps from the staging area, you can choose what checkpoint the marshal is it.
 
 ## AI
 My use of AI in this project was to instigate further personal development and research topics/ideas to further improve my code and approach. By and large, the whole experience was good, and provided me with a good range of new ideas and options to take with my code. 
