@@ -4,9 +4,9 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="stylesheet" href="../../util/nav.css" />
-    <link rel="stylesheet" href="/newRace/newRace.css" />
+    <link rel="stylesheet" href="./race/editRace/editRace.css" />
 
-    <title>PJC | Create Race</title>
+    <title>PJC | Edit Race</title>
   </head>
   <body>
     <nav>
@@ -18,7 +18,7 @@
     </nav>
     
     <main>
-      <h1>Race Setup</h1>
+      <h1>Edit Race</h1>
       <div class="progress-tabs">
         <div class="progress-tab active" data-step="0">Race Details</div>
         <div class="progress-tab optional" data-step="1">Checkpoints (Optional)</div>
@@ -32,10 +32,6 @@
           <h3>Race Details</h3>
           
           <div id="race-details">
-            <label for="race-name">Race Name:</label>
-            <input id="race-name" type="text" name="race-name" placeholder="My new race" required>
-            <br><br>
-            
             <label for="race-start-date">Start Date:</label>
             <input id="race-start-date" type="datetime-local" name="race-start-date-time" required>
             <br><br>
@@ -103,7 +99,7 @@
                   
           <div class="button-group">
             <button class="previous-step">PREVIOUS</button>
-            <button id="submit-button">SUBMIT RACE</button>
+            <button id="submit-button">SUBMIT EDITS</button>
           </div>
         </div>
 
@@ -150,6 +146,6 @@
       </div>
     </template>
 
-    <script src="newRace/newRace.js"></script>
+    <script src="./race/editRace/editRace.js"></script>
   </body>
 </html>

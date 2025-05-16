@@ -1,13 +1,12 @@
 import express from 'express';
 import * as db from './database/database.js';
-import * as url from 'url';
+import { fileURLToPath } from 'url';
 
 const app = express();
 const port = 8080;
-const __dirname = url.fileURLToPath(new URL('.', import.meta.url));
+const __dirname = fileURLToPath(new URL('.', import.meta.url));
 
-app.use(express.static(`${__dirname}/public`));
-app.use('/static', express.static(`${__dirname}/static`));
+app.use(express.static(`${__dirname}/public`, { extensions: ['html'] }));
 app.use(express.json());
 
 // API Endpoints
@@ -43,6 +42,9 @@ app.get('/dashboard', (req, res) => {
 app.get('/new-race', (req, res) => {
   res.sendFile(`${__dirname}/public/newRace/newRace.html`);
 });
+app.get('/edit-race', (req, res) => {
+  res.sendFile(`${__dirname}/public/race/editRace/editRace.html`);
+})
 
 async function getRaces(req, res) {
   const { page = 1, pageSize = 10 } = req.query;
@@ -116,6 +118,9 @@ async function updateRace(req, res) {
         break;
       case 'submit-results':
         await db.submitResults(raceId, data, submittedBy, checkpoint);
+        break;
+      case 'edit-race':
+        await db.updateRace(raceId, data);
         break;
       default:
         return res.status(400).send('Invalid action');

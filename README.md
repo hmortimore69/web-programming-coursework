@@ -90,6 +90,15 @@ The race display page will render a table with default headers: Bib, Name, and F
 
 The admin dashboard adds each checkpoint (in order) to the the dropdown alongside marshals. Then when going to submit timestamps from the staging area, you can choose what checkpoint the marshal is it.
 
+### Edit Race Page
+Administrators are shown an edit race button on the live race page, allowing them to go through the same flow as creating a race, but for upserting. This allows them to modify race details, participants, checkpoints, and marshals for the race.
+
+The html file for this is a replica of the newRace file, however it has grammatical tweaks to be adjusted for race editing. When you load the page, it will load the storedRace localStorage into the form flow, showing you the data that is already entered.
+
+The database backend for this is different, however given additional time I would redesign the create race and update race functions to work together. This would be done as I feel that, since the race editing is technically updating as well as creating new data, it would be easier to check for existing IDs in the create race and then run an update on those if they exist - otherwise create a new record.
+
+Furthermore, in relation to the database, I had to also delete records when they were deleted via this edit page. For example, removing a participant and submitting would remove them from the database as well. This is handled thanks to a helper function I designed that takes in 4 parameters.
+
 ## AI
 My use of AI in this project was to instigate further personal development and research topics/ideas to further improve my code and approach. By and large, the whole experience was good, and provided me with a good range of new ideas and options to take with my code. 
 

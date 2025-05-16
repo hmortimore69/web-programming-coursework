@@ -584,6 +584,14 @@ document.querySelector('#dashboard-button').addEventListener('click', function (
 document.querySelector('#export-csv-button')?.addEventListener('click', exportToCSV);
 
 /**
+ * Edit race button click handler.
+ * @event
+ */
+document.querySelector('#edit-race-button').addEventListener('click', function () {
+  window.location.href = '/edit-race';
+});
+
+/**
  * Interest form submission handler.
  * @event
  */

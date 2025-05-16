@@ -693,3 +693,153 @@ export async function getAllParticipantsForRace(raceId) {
     throw error;
   }
 }
+
+/**
+ * Updates race details and associated entities (checkpoints, marshals, and participants) in the database.
+ * 
+ * - Updates existing records if IDs are provided.
+ * - Inserts new records if IDs are missing.
+ * - Automatically assigns the next available `bib_number` to new participants.
+ *
+ * @async
+ * @function updateRace
+ * @param {number} raceId - The ID of the race to update.
+ * @param {Object} data - The data object containing race updates.
+ * @param {Object} [data.raceDetails] - Race metadata including location, start time, and duration.
+ * @param {string} data.raceDetails.raceLocation - The location of the race.
+ * @param {string} data.raceDetails.scheduledStartTime - The ISO string representing the scheduled start time.
+ * @param {string} data.raceDetails.scheduledDuration - The scheduled duration as a string (e.g., "01:30").
+ * @param {Array<Object>} data.checkpoints - Array of checkpoint data.
+ * @param {number} [data.checkpoints[].checkpointId] - ID of the checkpoint (if updating).
+ * @param {string} data.checkpoints[].checkpointName - Name of the checkpoint.
+ * @param {number} data.checkpoints[].checkpointOrder - Order of the checkpoint in the race.
+ * @param {Array<Object>} data.marshals - Array of marshal data.
+ * @param {number} [data.marshals[].marshalId] - ID of the marshal (if updating).
+ * @param {string} data.marshals[].firstName - First name of the marshal.
+ * @param {string} data.marshals[].lastName - Last name of the marshal.
+ * @param {Array<Object>} data.participants - Array of participant data.
+ * @param {number} [data.participants[].participantId] - ID of the participant (if updating).
+ * @param {string} data.participants[].firstName - First name of the participant.
+ * @param {string} data.participants[].lastName - Last name of the participant.
+ * 
+ * @returns {Promise<void>} Resolves when all updates and inserts are complete.
+ */
+export async function updateRace(raceId, data) {
+  if (data.raceDetails) {
+    const raceLocation = data.raceDetails.raceLocation;
+
+    const startDateString = data.raceDetails.scheduledStartTime;
+    const startDate = new Date(startDateString);
+    const scheduledStartTimestamp = startDate.getTime();
+
+    const durationString = data.raceDetails.scheduledDuration;
+    const [hours, minutes] = durationString.split(':').map(Number);
+    const scheduledDuration = (hours * 3600 + minutes * 60) * 1000;
+
+    await db.run(
+      `UPDATE races
+       SET race_location = ?, scheduled_start_time = ?, scheduled_duration = ?
+       WHERE race_id = ?`,
+      [raceLocation, scheduledStartTimestamp, scheduledDuration, raceId]
+    );
+  }
+
+  if (data.checkpoints.length > 0) {
+    for (const checkpoint of data.checkpoints) {
+      if (checkpoint.checkpointId) {
+        // Update if checkpointId exists
+        await db.run(`
+          UPDATE checkpoints
+           SET checkpoint_name = ?, checkpoint_order = ?
+           WHERE checkpoint_id = ?`,
+          [checkpoint.checkpointName, checkpoint.checkpointOrder, checkpoint.checkpointId]
+        );
+
+        await removeRaceDetails({
+          table: 'checkpoints',
+          idColumn: 'checkpoint_id',
+          raceId,
+          updatedIds: data.checkpoints.filter(c => c.checkpointId).map(c => c.checkpointId),
+        });
+      } else {
+        // Insert if checkpointId is missing
+        await db.run(`
+          INSERT INTO checkpoints (race_id, checkpoint_name, checkpoint_order)
+           VALUES (?, ?, ?)`,
+          [raceId, checkpoint.checkpointName, checkpoint.checkpointOrder]
+        );
+      }
+    }
+  }
+
+  if (data.marshals.length > 0) {
+    for (const marshal of data.marshals) {
+      if (marshal.marshalId) {
+        // Update if marshalId exists
+        await db.run(
+          `UPDATE marshals 
+           SET first_name = ?, last_name = ?
+           WHERE marshal_id = ?`,
+          [marshal.firstName, marshal.lastName, marshal.marshalId]
+        );
+
+        await removeRaceDetails({
+          table: 'marshals',
+          idColumn: 'marshal_id',
+          raceId,
+          updatedIds: data.marshals.filter(m => m.marshalId).map(m => m.marshalId),
+        });
+      } else {
+        // Insert if marshalId is missing
+        await db.run(
+          `INSERT INTO marshals (race_id, first_name, last_name)
+           VALUES (?, ?, ?)`,
+           [raceId, marshal.firstName, marshal.lastName]
+        );
+      }
+    }
+  }
+
+  if (data.participants.length > 0) {
+    for (const participant of data.participants) {
+      if (participant.participantId) {
+        // Update existing participant
+        await db.run(
+          `UPDATE participants
+           SET first_name = ?, last_name = ?
+           WHERE participant_id = ?`,
+          [participant.firstName, participant.lastName, participant.participantId]
+        );
+
+        await removeRaceDetails({
+          table: 'participants',
+          idColumn: 'participant_id',
+          raceId,
+          updatedIds: data.participants.filter(p => p.participantId).map(p => p.participantId),
+        });
+      } else {
+        // Insert new participant
+        await db.run(
+          `INSERT INTO participants (race_id, first_name, last_name, bib_number)
+           VALUES (?, ?, ?, COALESCE((SELECT MAX(bib_number) + 1 FROM participants WHERE race_id = ?), 1))`,
+           [raceId, participant.firstName, participant.lastName, raceId]
+        );
+      }
+    }
+  }
+}
+
+async function removeRaceDetails({ table, idColumn, raceId, updatedIds }) {
+  const updatedIdsAsIntegers = updatedIds.map(id => parseInt(id, 10));
+
+  const existing = await db.all(
+    `SELECT ${idColumn} FROM ${table} WHERE race_id = ?`,
+    [raceId]
+  );
+  const existingIds = existing.map(row => row[idColumn]);
+  const toDelete = existingIds.filter(id => !updatedIdsAsIntegers.includes(id));
+
+  for (const id of toDelete) {
+    await db.run(`DELETE FROM ${table} WHERE ${idColumn} = ?`, [id]);
+  }
+}
